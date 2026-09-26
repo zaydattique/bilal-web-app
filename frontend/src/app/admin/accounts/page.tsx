@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import api from '@/lib/api';
@@ -35,9 +36,14 @@ export default function AccountsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Installment Accounts</h1>
-        <p className="text-sm text-gray-500">{accounts.length} accounts</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Installment Accounts</h1>
+          <p className="text-sm text-gray-500">{accounts.length} accounts</p>
+        </div>
+        <Link href="/admin/accounts/new" className="btn-primary text-sm">
+          + New Account
+        </Link>
       </div>
 
       <div className="card overflow-x-auto p-0">
@@ -76,7 +82,10 @@ export default function AccountsPage() {
             {accounts.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                  No accounts yet. Create via API after adding a customer.
+                  No accounts yet.{' '}
+                  <Link href="/admin/accounts/new" className="underline" style={{ color: 'var(--color-primary)' }}>
+                    Create one
+                  </Link>
                 </td>
               </tr>
             )}

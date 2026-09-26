@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import api from '@/lib/api';
@@ -36,9 +37,14 @@ export default function PaymentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Payments</h1>
-        <p className="text-sm text-gray-500">{payments.length} payments</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Payments</h1>
+          <p className="text-sm text-gray-500">{payments.length} payments</p>
+        </div>
+        <Link href="/admin/payments/new" className="btn-primary text-sm">
+          + Record Payment
+        </Link>
       </div>
 
       <div className="card overflow-x-auto p-0">
@@ -75,7 +81,10 @@ export default function PaymentsPage() {
             {payments.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                  No payments recorded yet.
+                  No payments yet.{' '}
+                  <Link href="/admin/payments/new" className="underline" style={{ color: 'var(--color-primary)' }}>
+                    Record one
+                  </Link>
                 </td>
               </tr>
             )}
