@@ -20,11 +20,13 @@ export default function NewProductPage() {
   const [form, setForm] = useState({
     name: '',
     description: '',
+    fullDescription: '',
     price: '',
     discountPrice: '',
     categoryId: '',
     inventory: '0',
     sku: '',
+    images: '',
     featured: false,
     isActive: true,
   });
@@ -43,16 +45,23 @@ export default function NewProductPage() {
     setSaving(true);
     setError('');
     try {
+      const images = form.images
+        .split(/[\n,]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       await api.post(
         '/api/products',
         {
           name: form.name,
-          description: form.description,
+          description: form.description || undefined,
+          fullDescription: form.fullDescription || undefined,
           price: Number(form.price),
           discountPrice: form.discountPrice ? Number(form.discountPrice) : undefined,
           categoryId: form.categoryId || undefined,
           inventory: Number(form.inventory) || 0,
           sku: form.sku || undefined,
+          images,
           featured: form.featured,
           isActive: form.isActive,
         },
@@ -71,7 +80,9 @@ export default function NewProductPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">New Product</h1>
-          <p className="text-sm text-gray-500">Add a product to the catalog</p>
+          <p className="text-sm text-gray-500">
+            Saved to the database — storefront loads it from the API (not hardcoded).
+          </p>
         </div>
         <Link href="/admin/products" className="btn-secondary text-sm">
           Back
@@ -88,40 +99,53 @@ export default function NewProductPage() {
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="e.g. Samsung Galaxy A55"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Description</label>
-          <textarea
-            className="input min-h-[80px]"
+          <label className="mb-1 block text-sm font-medium">Short description</label>
+          <input
+            className="input"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
+            placeholder="One-line summary for cards"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">Full description</label>
+          <textarea
+            className="input min-h-[100px]"
+            value={form.fullDescription}
+            onChange={(e) => setForm({ ...form, fullDescription: e.target.value })}
+            placeholder="Longer detail shown on product page"
           />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium">Price *</label>
+            <label className="mb-1 block text-sm font-medium">Price (PKR) *</label>
             <input
               className="input"
               type="number"
               min={0}
-              step="0.01"
+              step="1"
               required
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Discount Price</label>
+            <label className="mb-1 block text-sm font-medium">Discount / sale price</label>
             <input
               className="input"
               type="number"
               min={0}
-              step="0.01"
+              step="1"
               value={form.discountPrice}
               onChange={(e) => setForm({ ...form, discountPrice: e.target.value })}
+              placeholder="Optional"
             />
           </div>
         </div>
@@ -150,6 +174,19 @@ export default function NewProductPage() {
               onChange={(e) => setForm({ ...form, sku: e.target.value })}
             />
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">Image URLs</label>
+          <textarea
+            className="input min-h-[72px]"
+            value={form.images}
+            onChange={(e) => setForm({ ...form, images: e.target.value })}
+            placeholder="One URL per line or comma-separated"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Example: https://picsum.photos/seed/demo1/800/600
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
