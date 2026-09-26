@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { CustomerAuthProvider } from '@/context/CustomerAuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata: Metadata = {
@@ -13,7 +14,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen antialiased">
         <AuthProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <CustomerAuthProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </CustomerAuthProvider>
         </AuthProvider>
       </body>
     </html>
