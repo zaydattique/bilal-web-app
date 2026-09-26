@@ -10,6 +10,7 @@ export interface ProductCardData {
   slug: string;
   description?: string;
   price: number;
+  discountPrice?: number;
   salePrice?: number;
   images?: string[];
   featured?: boolean;
@@ -20,14 +21,16 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
   const { business } = useTheme();
   const symbol = business?.settings?.currencySymbol || 'PKR';
   const image = product.images?.[0];
+  const sale = product.discountPrice ?? product.salePrice;
   const displayPrice =
-    product.salePrice != null && product.salePrice < product.price
-      ? product.salePrice
-      : product.price;
-  const hasDiscount = product.salePrice != null && product.salePrice < product.price;
+    sale != null && sale < product.price ? sale : product.price;
+  const hasDiscount = sale != null && sale < product.price;
 
   return (
-    <Link href={`/products/${product.slug}`} className="group card-hover flex flex-col overflow-hidden p-0">
+    <Link
+      href={`/products/${product.slug}`}
+      className="group card-hover flex flex-col overflow-hidden p-0"
+    >
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
