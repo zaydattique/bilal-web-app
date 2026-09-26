@@ -1,87 +1,95 @@
 # Scalable B2B Installment Sales Platform
 
-White-label, multi-tenant installment sales platform. Business name, branding colors, and settings are editable from the admin panel.
+White-label multi-tenant installment sales platform.
 
-**Status: Phase 1 complete** (code on GitHub — not deployed live yet)
+**Repo:** https://github.com/zaydattique/bilal-web-app  
+**Status:** Backend complete (Phase 1 + Phase 2 APIs). Frontend Phase 1 done. Not deployed live.
 
-Repo: https://github.com/zaydattique/bilal-web-app
+## Backend status — COMPLETE
 
-## What's included
+| Module | Endpoints | Status |
+|--------|-----------|--------|
+| Auth (admin) | login, me, change-password | Done |
+| Auth (customer) | login (OTP), verify-otp, me | Done |
+| Business config | get, update, public by slug | Done |
+| Admin users | CRUD + login history | Done |
+| Categories | list, get, create, update, soft-delete | Done |
+| Products | list, get, create, update, soft-delete | Done |
+| Customers | CRUD, accounts, payments, soft-delete | Done |
+| Accounts | list, get, create, plan, due-list, status, close | Done |
+| Payments | list, get, record (FIFO allocation) | Done |
+| Dashboard | KPI summary | Done |
+| Reports | collections, customers, products, due-list, defaults | Done |
+| Audit log | list + filters | Done |
+| Customer portal | my accounts, account detail, payments, dues | Done |
+| Seed | demo business + admin + products | Done |
 
-### Backend (Express + MongoDB)
-- JWT admin auth
-- Business config (name, branding, contact, settings)
-- Categories & products
-- Customers (CNIC, guarantor)
-- Installment accounts with **flexible schedules** (any dates/amounts)
-- Payments with FIFO allocation to dues
-- Dashboard KPIs + audit logging
-- Seed script with demo data
+### Models
+Business, Admin, Category, Product, Customer, Account, InstallmentPlan, Payment, Lead, AuditLog
 
-### Frontend (Next.js 14 + Tailwind)
-- Dynamic theme from business branding (CSS variables)
-- Public home + product catalog
-- Admin login
-- Dashboard (collections, outstanding, overdue, upcoming dues)
-- **CRUD forms:** products, categories, customers, accounts, payments
-- Settings: business name, colors, contact, installment defaults
+### Seed credentials
+- Email: `admin@bilalelectronics.pk`
+- Password: `Admin@123`
+- Slug: `bilal-electronics`
 
-## Admin flows
+## Frontend status
+- Phase 1 admin UI + forms: done
+- Customer portal UI: not yet
+- Reports UI pages: not yet
 
-1. Login → Dashboard
-2. Settings → set colors / business name
-3. Categories → Products
-4. Customers → New Account (build installment plan)
-5. Record Payment → auto-allocates to oldest dues
+## API map (quick)
 
-## Default seed credentials
+```
+POST   /api/auth/admin/login
+GET    /api/auth/me
+POST   /api/auth/customer/login          { phoneNumber, cnic, businessSlug }
+POST   /api/auth/customer/verify-otp     { customerId, otp }
+GET    /api/auth/customer/me
 
-After `npm run seed`:
+GET/PUT /api/admin/business
+GET     /api/admin/business/public/:slug
 
-| Field | Value |
-|-------|--------|
-| Email | `admin@bilalelectronics.pk` |
-| Password | `Admin@123` |
-| Business slug | `bilal-electronics` |
+GET/POST/PUT/DELETE /api/admin/users
+GET /api/admin/users/:id/login-history
 
-## Run (when you're ready)
+GET/POST/PUT/DELETE /api/categories
+GET/POST/PUT/DELETE /api/products
 
-```bash
-git clone https://github.com/zaydattique/bilal-web-app.git
-cd bilal-web-app
+GET/POST/PUT/DELETE /api/admin/customers
+GET /api/admin/customers/:id/accounts
+GET /api/admin/customers/:id/payments
 
-docker compose up -d mongodb   # or use MongoDB Atlas URI in .env
+GET/POST /api/admin/accounts
+GET  /api/admin/accounts/:id
+GET  /api/admin/accounts/:id/plan
+GET  /api/admin/accounts/:id/plan/due-list
+PATCH /api/admin/accounts/:id/status
+POST  /api/admin/accounts/:id/close
 
-cd backend && cp .env.example .env && npm install && npm run seed && npm run dev
-# → http://localhost:5000
+GET/POST /api/admin/payments
+GET /api/admin/payments/:id
 
-cd frontend && cp .env.example .env.local && npm install && npm run dev
-# → http://localhost:3000
-# Admin: http://localhost:3000/admin/login
+GET /api/admin/dashboard/summary
+GET /api/admin/reports/collections
+GET /api/admin/reports/customers
+GET /api/admin/reports/products
+GET /api/admin/reports/due-list?filter=overdue|upcoming|all
+GET /api/admin/reports/defaults
+GET /api/admin/audit-log
+
+GET /api/customer/accounts
+GET /api/customer/accounts/:id
+GET /api/customer/payments
+GET /api/customer/dues
 ```
 
-## API map
-
-| Area | Path |
-|------|------|
-| Auth | `POST /api/auth/admin/login` |
-| Business | `GET/PUT /api/admin/business` |
-| Public theme | `GET /api/admin/business/public/:slug` |
-| Categories | `/api/categories` |
-| Products | `/api/products` |
-| Customers | `/api/admin/customers` |
-| Accounts | `/api/admin/accounts` |
-| Payments | `/api/admin/payments` |
-| Dashboard | `GET /api/admin/dashboard/summary` |
-
-## Not in Phase 1
-
-- Live hosting / deployment
-- Customer self-service portal
+## Not built yet
+- Live hosting
+- Real SMS OTP (demo returns OTP in JSON when NODE_ENV ≠ production)
+- Email notifications
+- 2FA for admin
 - Image upload to S3
-- SMS / WhatsApp / online payment gateways
-- Bulk CSV import
+- Frontend customer portal & report charts
 
 ## License
-
 Private / Proprietary
