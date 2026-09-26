@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   FolderTree,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -23,6 +24,7 @@ const nav = [
   { href: '/admin/customers', label: 'Customers', icon: Users },
   { href: '/admin/accounts', label: 'Accounts', icon: CreditCard },
   { href: '/admin/payments', label: 'Payments', icon: Wallet },
+  { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -50,7 +52,8 @@ export default function AdminSidebar() {
 
       <nav className="flex-1 space-y-1 p-3">
         {nav.map((item) => {
-          const active = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+          const active =
+            pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
           const Icon = item.icon;
           return (
             <Link
