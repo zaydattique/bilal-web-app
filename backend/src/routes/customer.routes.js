@@ -1,5 +1,7 @@
 import express from 'express';
 import Customer from '../models/Customer.js';
+import Account from '../models/Account.js';
+import Payment from '../models/Payment.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 import { logAction } from '../utils/audit.js';
 
@@ -55,6 +57,36 @@ router.get('/:id', protectAdmin, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Customer not found' });
     }
     res.json({ success: true, customer });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Customer's accounts (admin view)
+router.get('/:id/accounts', protectAdmin, async (req, res) => {
+  try {
+    const accounts = await Account.find({
+      customerId: req.params.id,
+      businessId: req.businessId,
+    })
+      .populate('installmentPlanId')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, accounts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Customer's payments (admin view)
+router.get('/:id/payments', protectAdmin, async (req, res) => {
+  try {
+    const payments = await Payment.find({
+      customerId: req.params.id,
+      businessId: req.businessId,
+    })
+      .populate('accountId', 'accountNumber')
+      .sort({ paymentDate: -1 });
+    res.json({ success: true, payments });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -162,6 +194,35 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'),
     });
 
     res.json({ success: true, customer });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Soft deactivate
+router.delete('/:id', protectAdmin, requireRole('super_admin', 'admin'), async (req, res) => {
+  try {
+    const customer = await Customer.findOne({
+      _id: req.params.id,
+      businessId: req.businessId,
+    });
+    if (!customer) {
+      return res.status(404).json({ success: false, message: 'Customer not found' });
+    }
+    customer.status = 'inactive';
+    await customer.save();
+
+    await logAction({
+      businessId: req.businessId,
+      adminId: req.admin._id,
+      action: 'delete',
+      entityType: 'customer',
+      entityId: customer._id,
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    res.json({ success: true, message: 'Customer deactivated' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

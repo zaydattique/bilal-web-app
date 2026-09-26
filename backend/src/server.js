@@ -20,6 +20,7 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import adminUserRoutes from './routes/adminUser.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import reportRoutes from './routes/report.routes.js';
+import customerPortalRoutes from './routes/customerPortal.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,6 +64,7 @@ app.use('/api/admin/customers', customerRoutes);
 app.use('/api/admin/accounts', accountRoutes);
 app.use('/api/admin/payments', paymentRoutes);
 app.use('/api/admin/dashboard', dashboardRoutes);
+app.use('/api/customer', customerPortalRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

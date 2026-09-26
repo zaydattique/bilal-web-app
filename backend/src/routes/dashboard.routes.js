@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Account from '../models/Account.js';
 import Payment from '../models/Payment.js';
 import Customer from '../models/Customer.js';
@@ -10,7 +11,7 @@ const router = express.Router();
 
 router.get('/summary', protectAdmin, async (req, res) => {
   try {
-    const businessId = req.businessId;
+    const businessId = new mongoose.Types.ObjectId(req.businessId);
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -29,7 +30,7 @@ router.get('/summary', protectAdmin, async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            businessId: businessId,
+            businessId,
             status: 'confirmed',
             paymentDate: { $gte: startOfMonth },
           },
@@ -39,7 +40,7 @@ router.get('/summary', protectAdmin, async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            businessId: businessId,
+            businessId,
             status: 'confirmed',
             paymentDate: { $gte: startOfToday },
           },
@@ -59,20 +60,17 @@ router.get('/summary', protectAdmin, async (req, res) => {
       ]),
     ]);
 
-    // Outstanding receivable
     const outstanding = await Account.aggregate([
       { $match: { businessId, status: 'active' } },
       { $group: { _id: null, total: { $sum: '$remainingAmount' } } },
     ]);
 
-    // Recent payments
     const recentPayments = await Payment.find({ businessId, status: 'confirmed' })
       .populate('customerId', 'firstName lastName')
       .populate('accountId', 'accountNumber')
       .sort({ paymentDate: -1 })
       .limit(10);
 
-    // Upcoming due (next 7 days)
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const upcoming = await InstallmentPlan.aggregate([
       { $match: { businessId } },
