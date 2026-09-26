@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -44,7 +45,7 @@ export default function CustomersPage() {
           <h1 className="text-2xl font-bold">Customers</h1>
           <p className="text-sm text-gray-500">{customers.length} customers</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <input
             className="input w-56"
             placeholder="Search name, phone, CNIC…"
@@ -55,6 +56,9 @@ export default function CustomersPage() {
           <button className="btn-secondary" onClick={load}>
             Search
           </button>
+          <Link href="/admin/customers/new" className="btn-primary text-sm">
+            + Add Customer
+          </Link>
         </div>
       </div>
 
@@ -93,7 +97,10 @@ export default function CustomersPage() {
               {customers.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                    No customers yet.
+                    No customers yet.{' '}
+                    <Link href="/admin/customers/new" className="underline" style={{ color: 'var(--color-primary)' }}>
+                      Add one
+                    </Link>
                   </td>
                 </tr>
               )}

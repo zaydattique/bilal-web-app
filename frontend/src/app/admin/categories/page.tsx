@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -31,9 +32,14 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Categories</h1>
-        <p className="text-sm text-gray-500">{categories.length} categories</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Categories</h1>
+          <p className="text-sm text-gray-500">{categories.length} categories</p>
+        </div>
+        <Link href="/admin/categories/new" className="btn-primary text-sm">
+          + Add Category
+        </Link>
       </div>
 
       <div className="card overflow-x-auto p-0">
@@ -66,7 +72,10 @@ export default function CategoriesPage() {
             {categories.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
-                  No categories yet.
+                  No categories yet.{' '}
+                  <Link href="/admin/categories/new" className="underline" style={{ color: 'var(--color-primary)' }}>
+                    Add one
+                  </Link>
                 </td>
               </tr>
             )}

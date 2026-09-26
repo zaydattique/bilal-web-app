@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import api from '@/lib/api';
@@ -43,6 +44,9 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-bold">Products</h1>
           <p className="text-sm text-gray-500">{products.length} products</p>
         </div>
+        <Link href="/admin/products/new" className="btn-primary text-sm">
+          + Add Product
+        </Link>
       </div>
 
       <div className="card overflow-x-auto p-0">
@@ -82,7 +86,10 @@ export default function ProductsPage() {
             {products.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                  No products yet. Run seed or create via API.
+                  No products yet.{' '}
+                  <Link href="/admin/products/new" className="text-primary underline">
+                    Add one
+                  </Link>
                 </td>
               </tr>
             )}
