@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
+import { mongoSanitize, rejectDangerousPayload, blockPathTraversal } from './middleware/security.js';
 
 import authRoutes from './routes/auth.routes.js';
 import businessRoutes from './routes/business.routes.js';
@@ -21,6 +22,9 @@ import adminUserRoutes from './routes/adminUser.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import customerPortalRoutes from './routes/customerPortal.routes.js';
+import leadRoutes from './routes/lead.routes.js';
+import adminLeadRoutes from './routes/adminLead.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,23 +33,59 @@ connectDB();
 
 const app = express();
 
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credentials: true,
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false,
+    referrerPolicy: { policy: 'no-referrer' },
   })
 );
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 600,
+  })
+);
+app.use(express.json({ limit: '256kb' }));
+app.use(express.urlencoded({ extended: true, limit: '256kb' }));
+app.use(blockPathTraversal);
+app.use(mongoSanitize);
+app.use(rejectDangerousPayload);
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { success: false, message: 'Too many requests' },
 });
 app.use('/api/', limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many auth attempts. Try again later.' },
+});
+app.use('/api/auth/admin/login', authLimiter);
+app.use('/api/auth/customer/login', authLimiter);
+app.use('/api/auth/customer/verify-otp', authLimiter);
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
@@ -65,11 +105,15 @@ app.use('/api/admin/accounts', accountRoutes);
 app.use('/api/admin/payments', paymentRoutes);
 app.use('/api/admin/dashboard', dashboardRoutes);
 app.use('/api/customer', customerPortalRoutes);
+app.use('/api/leads', leadRoutes);
+app.use('/api/admin/leads', adminLeadRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/admin/analytics', analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
 });
