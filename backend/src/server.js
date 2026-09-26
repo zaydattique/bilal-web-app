@@ -17,6 +17,9 @@ import customerRoutes from './routes/customer.routes.js';
 import accountRoutes from './routes/account.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
+import adminUserRoutes from './routes/adminUser.routes.js';
+import auditRoutes from './routes/audit.routes.js';
+import reportRoutes from './routes/report.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,6 +54,9 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/business', businessRoutes);
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/audit-log', auditRoutes);
+app.use('/api/admin/reports', reportRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/admin/customers', customerRoutes);

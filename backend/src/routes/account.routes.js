@@ -60,6 +60,76 @@ router.get('/:id', protectAdmin, async (req, res) => {
   }
 });
 
+// Get installment plan for an account
+router.get('/:id/plan', protectAdmin, async (req, res) => {
+  try {
+    const account = await Account.findOne({
+      _id: req.params.id,
+      businessId: req.businessId,
+    });
+    if (!account) {
+      return res.status(404).json({ success: false, message: 'Account not found' });
+    }
+
+    const plan = await InstallmentPlan.findOne({
+      accountId: account._id,
+      businessId: req.businessId,
+    });
+    if (!plan) {
+      return res.status(404).json({ success: false, message: 'Plan not found' });
+    }
+
+    // Mark overdue on the fly
+    const now = new Date();
+    let dirty = false;
+    for (const inst of plan.installments) {
+      if (
+        (inst.status === 'pending' || inst.status === 'partial') &&
+        inst.dueDate < now &&
+        (inst.paidAmount || 0) < inst.dueAmount
+      ) {
+        inst.status = 'overdue';
+        dirty = true;
+      }
+    }
+    if (dirty) await plan.save();
+
+    res.json({ success: true, plan, account });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Due list for one account
+router.get('/:id/plan/due-list', protectAdmin, async (req, res) => {
+  try {
+    const plan = await InstallmentPlan.findOne({
+      accountId: req.params.id,
+      businessId: req.businessId,
+    });
+    if (!plan) {
+      return res.status(404).json({ success: false, message: 'Plan not found' });
+    }
+
+    const now = new Date();
+    const dues = plan.installments
+      .filter((i) => i.status !== 'paid')
+      .map((i) => ({
+        installmentNumber: i.installmentNumber,
+        dueDate: i.dueDate,
+        dueAmount: i.dueAmount,
+        paidAmount: i.paidAmount || 0,
+        remaining: i.dueAmount - (i.paidAmount || 0),
+        status: i.dueDate < now && i.status !== 'paid' ? 'overdue' : i.status,
+      }))
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+    res.json({ success: true, dues });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const { customerId, totalAmount, downPayment = 0, installments } = req.body;
@@ -170,6 +240,28 @@ router.patch('/:id/status', protectAdmin, requireRole('super_admin', 'admin', 'm
       userAgent: req.get('user-agent'),
     });
 
+    res.json({ success: true, account });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Close completed account
+router.post('/:id/close', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
+  try {
+    const account = await Account.findOne({ _id: req.params.id, businessId: req.businessId });
+    if (!account) {
+      return res.status(404).json({ success: false, message: 'Account not found' });
+    }
+    if (account.remainingAmount > 0 && account.status !== 'paid') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot close account with remaining balance',
+      });
+    }
+    account.status = 'closed';
+    account.closedDate = new Date();
+    await account.save();
     res.json({ success: true, account });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
