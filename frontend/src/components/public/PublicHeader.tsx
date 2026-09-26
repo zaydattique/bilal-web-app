@@ -26,7 +26,7 @@ export default function PublicHeader() {
   }, [pathname]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 6);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -43,35 +43,39 @@ export default function PublicHeader() {
 
   return (
     <>
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 sm:px-4 sm:pt-4">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-4 sm:pt-4">
         <header
           className={clsx(
-            'pointer-events-auto flex w-full max-w-3xl items-center gap-2 rounded-full border px-2 py-1.5 transition-all duration-300 sm:gap-3 sm:px-3 sm:py-2',
+            'pointer-events-auto flex w-full max-w-[34rem] items-center gap-1 rounded-full border px-1.5 py-1.5 transition-all duration-300 sm:gap-2 sm:px-2.5 sm:py-2',
             scrolled
-              ? 'border-white/20 bg-white/80 shadow-[0_8px_40px_rgba(15,23,42,0.12)] backdrop-blur-2xl'
-              : 'border-white/30 bg-white/70 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl'
+              ? 'border-black/[0.06] bg-white/75 shadow-[0_8px_40px_rgba(15,23,42,0.14)] backdrop-blur-2xl'
+              : 'border-black/[0.08] bg-white/65 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl'
           )}
+          style={{ WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
         >
-          <Link href="/" className="flex min-w-0 flex-1 items-center gap-2 pl-1 sm:pl-1.5">
+          <Link
+            href="/"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-full py-0.5 pl-1 pr-2 active:opacity-80"
+          >
             {business?.logo?.url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={business.logo.url}
                 alt={business.logo.altText || business.businessName}
-                className="h-8 w-auto max-w-[100px] object-contain sm:h-9"
+                className="h-8 w-auto max-w-[88px] object-contain sm:h-9 sm:max-w-[110px]"
               />
             ) : (
               <div
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white sm:h-9 sm:w-9 sm:text-sm"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm sm:h-9 sm:w-9 sm:text-sm"
                 style={{
                   background:
-                    'linear-gradient(145deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 65%, #000))',
+                    'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 88%, white), var(--color-primary))',
                 }}
               >
                 {(business?.businessName || 'B')[0]}
               </div>
             )}
-            <span className="truncate text-[13px] font-semibold tracking-tight text-slate-900 sm:text-sm">
+            <span className="truncate text-[13px] font-semibold tracking-tight text-slate-900 sm:text-[14px]">
               {business?.businessName || 'Installment Store'}
             </span>
           </Link>
@@ -87,10 +91,10 @@ export default function PublicHeader() {
                   key={l.href}
                   href={l.href}
                   className={clsx(
-                    'rounded-full px-3 py-1.5 text-[13px] font-medium transition',
+                    'rounded-full px-3.5 py-1.5 text-[13px] font-medium transition active:scale-95',
                     active
-                      ? 'bg-slate-900 text-white'
-                      : 'text-slate-600 hover:bg-black/5 hover:text-slate-900'
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-black/[0.04] hover:text-slate-900'
                   )}
                 >
                   {l.label}
@@ -99,11 +103,11 @@ export default function PublicHeader() {
             })}
           </nav>
 
-          <div className="flex items-center gap-0.5">
+          <div className="flex shrink-0 items-center gap-0.5">
             {phone && (
               <a
                 href={`tel:${phone.replace(/\s/g, '')}`}
-                className="hidden rounded-full p-2 text-slate-600 transition hover:bg-black/5 lg:inline-flex"
+                className="hidden h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-black/[0.05] active:scale-95 lg:inline-flex"
                 aria-label="Call"
               >
                 <Phone size={18} strokeWidth={1.75} />
@@ -112,13 +116,13 @@ export default function PublicHeader() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="relative rounded-full p-2 text-slate-700 transition hover:bg-black/5"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-800 transition hover:bg-black/[0.05] active:scale-95"
               aria-label="Cart"
             >
               <ShoppingBag size={18} strokeWidth={1.75} />
               {totalItems > 0 && (
                 <span
-                  className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-0.5 text-[10px] font-bold text-white"
+                  className="absolute right-1 top-1 flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-0.5 text-[10px] font-bold text-white"
                   style={{ background: 'var(--color-primary)' }}
                 >
                   {totalItems}
@@ -127,43 +131,56 @@ export default function PublicHeader() {
             </button>
             <button
               type="button"
-              className="rounded-full p-2 text-slate-700 transition hover:bg-black/5 md:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-800 transition hover:bg-black/[0.05] active:scale-95 md:hidden"
               aria-label={menuOpen ? 'Close' : 'Menu'}
               onClick={() => setMenuOpen((v) => !v)}
             >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              {menuOpen ? <X size={20} strokeWidth={1.75} /> : <Menu size={20} strokeWidth={1.75} />}
             </button>
           </div>
         </header>
       </div>
 
-      <div className="h-16 sm:h-[4.25rem]" />
+      <div className="h-[4.25rem] sm:h-[4.75rem]" />
 
       {menuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
             aria-label="Close menu"
             onClick={() => setMenuOpen(false)}
           />
-          <div className="absolute inset-x-3 top-[4.5rem] overflow-hidden rounded-3xl border border-white/40 bg-white/95 p-2 shadow-2xl backdrop-blur-2xl">
-            {links.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="block rounded-2xl px-4 py-3.5 text-base font-medium text-slate-800 hover:bg-slate-50"
-                onClick={() => setMenuOpen(false)}
-              >
-                {l.label}
-              </Link>
-            ))}
+          <div
+            className="absolute inset-x-3 top-[4.75rem] overflow-hidden rounded-[22px] border border-black/[0.06] bg-white/90 p-2 shadow-[0_20px_60px_rgba(15,23,42,0.2)]"
+            style={{ WebkitBackdropFilter: 'blur(28px) saturate(180%)' }}
+          >
+            {links.map((l) => {
+              const active =
+                l.href === '/'
+                  ? pathname === '/'
+                  : pathname.startsWith(l.href.split('#')[0]) && l.href !== '/';
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={clsx(
+                    'flex min-h-[48px] items-center rounded-2xl px-4 text-[16px] font-medium transition active:scale-[0.99]',
+                    active ? 'bg-slate-900 text-white' : 'text-slate-800 active:bg-black/[0.04]'
+                  )}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
             {phone && (
               <a
                 href={`tel:${phone.replace(/\s/g, '')}`}
-                className="flex items-center gap-2 rounded-2xl px-4 py-3.5 text-base font-medium text-slate-800 hover:bg-slate-50"
+                className="flex min-h-[48px] items-center gap-2.5 rounded-2xl px-4 text-[16px] font-medium text-slate-800 active:bg-black/[0.04]"
               >
-                <Phone size={18} /> Call shop
+                <Phone size={18} strokeWidth={1.75} />
+                Call shop
               </a>
             )}
           </div>
