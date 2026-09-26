@@ -6,7 +6,6 @@ import { logAction } from '../utils/audit.js';
 
 const router = express.Router();
 
-// List categories (public for catalog + admin)
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const filter = {};
@@ -14,8 +13,7 @@ router.get('/', optionalAuth, async (req, res) => {
       filter.businessId = req.businessId;
     } else if (req.query.businessId) {
       filter.businessId = req.query.businessId;
-    } else if (req.query.slug) {
-      // resolve via business slug in query later if needed
+    } else {
       return res.status(400).json({ success: false, message: 'businessId or auth required' });
     }
 
@@ -28,7 +26,6 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// Get single category
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -41,8 +38,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-// Create category
-router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager'), async (req, res) => {
+router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const { name, description, imageUrl, order, customFields, isActive } = req.body;
     if (!name) {
@@ -82,8 +78,7 @@ router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager'), async (
   }
 });
 
-// Update category
-router.put('/:id', protectAdmin, requireRole('owner', 'admin', 'manager'), async (req, res) => {
+router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const category = await Category.findOne({ _id: req.params.id, businessId: req.businessId });
     if (!category) {
@@ -119,8 +114,7 @@ router.put('/:id', protectAdmin, requireRole('owner', 'admin', 'manager'), async
   }
 });
 
-// Delete (soft via isActive)
-router.delete('/:id', protectAdmin, requireRole('owner', 'admin'), async (req, res) => {
+router.delete('/:id', protectAdmin, requireRole('super_admin', 'admin'), async (req, res) => {
   try {
     const category = await Category.findOne({ _id: req.params.id, businessId: req.businessId });
     if (!category) {

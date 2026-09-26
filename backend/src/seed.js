@@ -53,13 +53,13 @@ const seed = async () => {
   });
 
   console.log('Creating admin user...');
-  const admin = await Admin.create({
+  await Admin.create({
     businessId: business._id,
     email: 'admin@bilalelectronics.pk',
     password: 'Admin@123',
     firstName: 'Bilal',
     lastName: 'Ahmed',
-    role: 'owner',
+    role: 'admin',
     status: 'active',
   });
 

@@ -5,13 +5,11 @@ import { logAction } from '../utils/audit.js';
 
 const router = express.Router();
 
-// Generate next account number for a business
 const nextAccountNumber = async (businessId) => {
   const count = await Customer.countDocuments({ businessId });
   return `CUS-${String(count + 1).padStart(5, '0')}`;
 };
 
-// List customers
 router.get('/', protectAdmin, async (req, res) => {
   try {
     const filter = { businessId: req.businessId };
@@ -47,7 +45,6 @@ router.get('/', protectAdmin, async (req, res) => {
   }
 });
 
-// Get single customer
 router.get('/:id', protectAdmin, async (req, res) => {
   try {
     const customer = await Customer.findOne({
@@ -63,8 +60,7 @@ router.get('/:id', protectAdmin, async (req, res) => {
   }
 });
 
-// Create customer
-router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'sales'), async (req, res) => {
+router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const {
       firstName,
@@ -126,8 +122,7 @@ router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'sales')
   }
 });
 
-// Update customer
-router.put('/:id', protectAdmin, requireRole('owner', 'admin', 'manager'), async (req, res) => {
+router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const customer = await Customer.findOne({
       _id: req.params.id,

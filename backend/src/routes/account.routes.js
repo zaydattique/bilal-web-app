@@ -12,7 +12,6 @@ const nextAccountNumber = async (businessId) => {
   return `ACC-${String(count + 1).padStart(5, '0')}`;
 };
 
-// List accounts
 router.get('/', protectAdmin, async (req, res) => {
   try {
     const filter = { businessId: req.businessId };
@@ -43,7 +42,6 @@ router.get('/', protectAdmin, async (req, res) => {
   }
 });
 
-// Get single account with plan
 router.get('/:id', protectAdmin, async (req, res) => {
   try {
     const account = await Account.findOne({
@@ -62,14 +60,7 @@ router.get('/:id', protectAdmin, async (req, res) => {
   }
 });
 
-/**
- * Create installment account
- * Body: {
- *   customerId, totalAmount, downPayment,
- *   installments: [{ dueDate, dueAmount }]  // flexible schedule
- * }
- */
-router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'sales'), async (req, res) => {
+router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const { customerId, totalAmount, downPayment = 0, installments } = req.body;
 
@@ -152,8 +143,7 @@ router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'sales')
   }
 });
 
-// Update account status
-router.patch('/:id/status', protectAdmin, requireRole('owner', 'admin', 'manager'), async (req, res) => {
+router.patch('/:id/status', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const { status } = req.body;
     if (!['active', 'paid', 'defaulted', 'closed'].includes(status)) {

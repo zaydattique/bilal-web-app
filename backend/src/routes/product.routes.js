@@ -6,7 +6,6 @@ import { logAction } from '../utils/audit.js';
 
 const router = express.Router();
 
-// List products (public catalog + admin)
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const filter = {};
@@ -52,7 +51,6 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// Get by slug or id
 router.get('/:idOrSlug', optionalAuth, async (req, res) => {
   try {
     const filter = {};
@@ -73,8 +71,7 @@ router.get('/:idOrSlug', optionalAuth, async (req, res) => {
   }
 });
 
-// Create product
-router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager'), async (req, res) => {
+router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const {
       name,
@@ -142,8 +139,7 @@ router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager'), async (
   }
 });
 
-// Update product
-router.put('/:id', protectAdmin, requireRole('owner', 'admin', 'manager'), async (req, res) => {
+router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const product = await Product.findOne({ _id: req.params.id, businessId: req.businessId });
     if (!product) {
@@ -193,8 +189,7 @@ router.put('/:id', protectAdmin, requireRole('owner', 'admin', 'manager'), async
   }
 });
 
-// Soft delete
-router.delete('/:id', protectAdmin, requireRole('owner', 'admin'), async (req, res) => {
+router.delete('/:id', protectAdmin, requireRole('super_admin', 'admin'), async (req, res) => {
   try {
     const product = await Product.findOne({ _id: req.params.id, businessId: req.businessId });
     if (!product) {

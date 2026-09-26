@@ -35,8 +35,8 @@ router.get('/public/:slug', async (req, res) => {
   }
 });
 
-// Update business config (owner/admin only)
-router.put('/', protectAdmin, requireRole('owner', 'admin'), async (req, res) => {
+// Update business config (admin+)
+router.put('/', protectAdmin, requireRole('super_admin', 'admin'), async (req, res) => {
   try {
     const business = await Business.findById(req.businessId);
     if (!business) {
@@ -69,7 +69,6 @@ router.put('/', protectAdmin, requireRole('owner', 'admin'), async (req, res) =>
       }
     }
 
-    // Handle slug change carefully
     if (req.body.businessSlug) {
       const newSlug = slugify(req.body.businessSlug, { lower: true, strict: true });
       if (newSlug !== business.businessSlug) {

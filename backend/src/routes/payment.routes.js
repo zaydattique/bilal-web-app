@@ -9,7 +9,6 @@ import { logAction } from '../utils/audit.js';
 
 const router = express.Router();
 
-// List payments
 router.get('/', protectAdmin, async (req, res) => {
   try {
     const filter = { businessId: req.businessId };
@@ -41,7 +40,6 @@ router.get('/', protectAdmin, async (req, res) => {
   }
 });
 
-// Get single payment
 router.get('/:id', protectAdmin, async (req, res) => {
   try {
     const payment = await Payment.findOne({
@@ -60,11 +58,7 @@ router.get('/:id', protectAdmin, async (req, res) => {
   }
 });
 
-/**
- * Record a payment and allocate to installments (FIFO by due date)
- * Body: { accountId, paymentAmount, paymentMethod, referenceNumber, notes, receivedBy }
- */
-router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'cashier'), async (req, res) => {
+router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
   try {
     const {
       accountId,
@@ -96,7 +90,6 @@ router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'cashier
       return res.status(400).json({ success: false, message: 'Installment plan not found' });
     }
 
-    // Allocate payment FIFO to pending/partial/overdue installments
     let remaining = Number(paymentAmount);
     const allocationDetails = [];
     const sorted = [...plan.installments].sort(
@@ -127,14 +120,12 @@ router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'cashier
       });
     }
 
-    // Update plan totals
     const totalPaidOnPlan = plan.installments.reduce((s, i) => s + (i.paidAmount || 0), 0);
     plan.totalPaid = totalPaidOnPlan + (account.downPayment || 0);
     plan.remainingAmount = Math.max(0, plan.remainingAmount - Number(paymentAmount) + remaining);
     plan.remainingInstallments = plan.installments.filter((i) => i.status !== 'paid').length;
     await plan.save();
 
-    // Update account
     account.remainingAmount = Math.max(0, account.remainingAmount - Number(paymentAmount) + remaining);
     if (account.remainingAmount <= 0) {
       account.status = 'paid';
@@ -142,7 +133,6 @@ router.post('/', protectAdmin, requireRole('owner', 'admin', 'manager', 'cashier
     }
     await account.save();
 
-    // Update customer totals
     const customer = await Customer.findById(account.customerId);
     if (customer) {
       customer.totalDue = Math.max(0, (customer.totalDue || 0) - Number(paymentAmount) + remaining);
