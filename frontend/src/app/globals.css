@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #e74c3c;
+  --color-secondary: #3498db;
+  --color-accent: #2ecc71;
+  --color-text-dark: #2c3e50;
+  --color-text-light: #ecf0f1;
+  --color-background: #ffffff;
+  --color-border: #bdc3c7;
+  --font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--color-text-dark);
+  background: var(--color-background);
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50;
+    background-color: var(--color-primary);
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-gray-50;
+    border-color: var(--color-border);
+    color: var(--color-text-dark);
+  }
+  .card {
+    @apply rounded-xl border bg-white p-5 shadow-sm;
+    border-color: var(--color-border);
+  }
+  .input {
+    @apply w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2;
+    border-color: var(--color-border);
+  }
+  .input:focus {
+    --tw-ring-color: var(--color-primary);
+  }
+}
