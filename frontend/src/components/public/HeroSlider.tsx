@@ -7,19 +7,22 @@ import { useTheme } from '@/context/ThemeContext';
 const SLIDES = [
   {
     title: 'Own it now. Pay monthly.',
-    subtitle: 'Transparent installment plans on mobiles, LEDs, fridges & more — for families in Lahore.',
+    subtitle:
+      'Transparent installment plans on mobiles, LEDs, fridges & more — for families in Lahore.',
     cta: 'Browse products',
     href: '/products',
   },
   {
     title: 'Clear monthly amounts',
-    subtitle: 'Calculate your plan online, then finalize at the shop with CNIC. No credit-card maze.',
+    subtitle:
+      'Calculate your plan online, then finalize at the shop with CNIC. No credit-card maze.',
     cta: 'See how it works',
-    href: '/products',
+    href: '/#how-it-works',
   },
   {
     title: 'Kot Khawaja Saeed & beyond',
-    subtitle: 'Local trust, fixed installments, and a team that answers your questions before you commit.',
+    subtitle:
+      'Local trust, fixed installments, and a team that answers your questions before you commit.',
     cta: 'View catalogue',
     href: '/products',
   },
@@ -74,7 +77,7 @@ export default function HeroSlider() {
           </Link>
           <Link
             href="/products"
-            className="inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-white/20 bg-white/5 px-6 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/25 bg-white/12 px-6 text-[15px] font-semibold text-white backdrop-blur-xl transition hover:bg-white/18 active:scale-[0.97]"
           >
             Installment calculator
           </Link>
