@@ -20,8 +20,8 @@
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
   --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
-  --radius: 14px;
-  --radius-sm: 10px;
+  --radius: 20px;
+  --radius-sm: 14px;
   --header-h: 64px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -59,93 +59,113 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200;
-    background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 75%, #000));
-    border-radius: var(--radius-sm);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 4px 12px color-mix(in srgb, var(--color-primary) 35%, transparent);
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 px-6 py-2.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-200 active:scale-[0.97];
+    border-radius: 9999px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 92%, white), var(--color-primary));
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.2) inset,
+      0 4px 14px color-mix(in srgb, var(--color-primary) 40%, transparent),
+      0 1px 2px rgba(0, 0, 0, 0.08);
   }
   .btn-primary:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 20px color-mix(in srgb, var(--color-primary) 40%, transparent);
-    filter: brightness(1.05);
+    filter: brightness(1.06);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.25) inset,
+      0 8px 24px color-mix(in srgb, var(--color-primary) 45%, transparent);
   }
   .btn-primary:active:not(:disabled) {
-    transform: translateY(0);
+    filter: brightness(0.98);
   }
   .btn-primary:disabled {
-    @apply cursor-not-allowed opacity-50;
+    @apply cursor-not-allowed opacity-45;
     box-shadow: none;
   }
+
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all duration-200;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border-strong);
-    background: var(--color-surface);
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 px-6 py-2.5 text-[15px] font-semibold tracking-tight transition-all duration-200 active:scale-[0.97];
+    border-radius: 9999px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.85);
     color: var(--color-text-dark);
-    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06);
   }
   .btn-secondary:hover:not(:disabled) {
-    background: #f8fafc;
-    border-color: var(--color-text-muted);
+    background: #fff;
+    border-color: rgba(15, 23, 42, 0.14);
   }
+
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition;
+    @apply inline-flex min-h-[40px] min-w-[40px] items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition active:scale-95;
     color: var(--color-text-dark);
   }
   .btn-ghost:hover {
-    background: rgba(15, 23, 42, 0.04);
+    background: rgba(15, 23, 42, 0.06);
   }
+
   .card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 20px;
     padding: 1.25rem;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 28px rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
+
   .card-hover {
     @apply card transition-all duration-300;
   }
   .card-hover:hover {
-    box-shadow: var(--shadow-md);
-    border-color: color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 16px 40px rgba(15, 23, 42, 0.08);
+    border-color: color-mix(in srgb, var(--color-primary) 18%, transparent);
     transform: translateY(-2px);
   }
+
   .input {
-    @apply w-full px-3.5 py-2.5 text-sm outline-none transition;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    background: #fff;
+    @apply w-full px-4 py-3 text-[15px] outline-none transition;
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    background: rgba(248, 250, 252, 0.9);
     color: var(--color-text-dark);
   }
   .input:hover {
-    border-color: var(--color-border-strong);
+    border-color: rgba(15, 23, 42, 0.16);
   }
   .input:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
+    background: #fff;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent);
   }
   .input::placeholder {
     color: #94a3b8;
   }
+
   .label {
     @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider;
     color: var(--color-text-muted);
   }
+
   .section-title {
     font-family: var(--font-display);
     @apply text-3xl font-normal tracking-tight sm:text-4xl;
     color: var(--color-text-dark);
   }
+
   .eyebrow {
     @apply text-xs font-semibold uppercase tracking-[0.14em];
     color: var(--color-primary);
   }
+
   .container-page {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
+
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
+
   .admin-table {
     @apply w-full text-left text-sm;
   }
