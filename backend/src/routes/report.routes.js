@@ -92,14 +92,14 @@ router.get('/products', protectAdmin, async (req, res, next) => {
     const products = await Product.find({ businessId: req.businessId })
       .populate('categoryId', 'name')
       .sort({ inventory: 1 })
-      .select('name sku price inventory isActive featured categoryId');
+      .select('name sku cashPrice inventory status featured categoryId');
 
-    const lowStock = products.filter((p) => p.isActive && p.inventory <= 5);
+    const lowStock = products.filter((p) => ['published','scheduled'].includes(p.status) && p.inventory <= 5);
 
     res.json({
       success: true,
       totalProducts: products.length,
-      activeProducts: products.filter((p) => p.isActive).length,
+      publishedProducts: products.filter((p) => p.status === 'published').length,
       lowStock,
       products,
     });
