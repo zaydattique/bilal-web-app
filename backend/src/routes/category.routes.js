@@ -235,7 +235,18 @@ router.get('/:idOrSlug', optionalAuth, async (req, res, next) => {
     if (/^[0-9a-f]{24}$/.test(value)) filter._id = requireObjectId(value, 'category id');
     else filter.slug = value;
 
-    const category = await populate(Category.findOne(filter));
+    let category = await populate(Category.findOne(filter));
+    if (!category && !req.admin && !/^[0-9a-f]{24}$/.test(value)) {
+      category = await populate(Category.findOne({
+        businessId,
+        historicalSlugs: value,
+        status: 'published',
+      }));
+      if (category) {
+        res.set('Location', `/categories/${category.slug}`);
+        return res.status(301).end();
+      }
+    }
     if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
 
     res.json({ success: true, category });
@@ -246,6 +257,11 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
   try {
     assertAllowedFields(req.body, FIELDS);
     const data = await buildData(req.body, req.businessId);
+    const reservedSlug = await Category.exists({
+      businessId: req.businessId,
+      historicalSlugs: data.slug,
+    });
+    if (reservedSlug) throw error('Category slug is reserved by a previous category URL', 409);
 
     const category = await Category.create({ businessId: req.businessId, ...data });
 
@@ -274,14 +290,34 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'),
     if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
 
     const data = await buildData(req.body, req.businessId, category);
+    const reservedSlug = await Category.exists({
+      businessId: req.businessId,
+      historicalSlugs: data.slug,
+      _id: { $ne: id },
+    });
+    if (reservedSlug) throw error('Category slug is reserved by a previous category URL', 409);
     if (data.slug !== category.slug) {
-      const duplicate = await Category.exists({ businessId: req.businessId, slug: data.slug, _id: { $ne: id } });
-      if (duplicate) throw error('Category slug already exists', 409);
+      const duplicate = await Category.exists({
+        businessId: req.businessId,
+        $or: [
+          { slug: data.slug },
+          { historicalSlugs: data.slug },
+        ],
+        _id: { $ne: id },
+      });
+      if (duplicate) throw error('Category slug is already in use or reserved by a previous category URL', 409);
     }
 
     if (req.body.customFields !== undefined) {
       const fieldsChanged = JSON.stringify(data.customFields) !== JSON.stringify(category.customFields || []);
       if (fieldsChanged) await validateProductsAgainstFields(req.businessId, id, data.customFields);
+    }
+
+    if (data.slug !== category.slug) {
+      const historicalSlugs = new Set(category.historicalSlugs || []);
+      historicalSlugs.add(category.slug);
+      historicalSlugs.delete(data.slug);
+      category.historicalSlugs = [...historicalSlugs];
     }
 
     Object.assign(category, data);

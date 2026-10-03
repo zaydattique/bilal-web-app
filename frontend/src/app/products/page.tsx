@@ -32,10 +32,35 @@ async function getCatalogue(businessId: string) {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
+  const businessId = await getBusinessId();
+  if (!businessId) return {};
+
+  const base = apiBase();
+  const slug = businessSlug();
+  if (!base || !slug) return {};
+
+  const response = await fetch(
+    `${base}/api/admin/business/public/${encodeURIComponent(slug)}`,
+    { cache: 'no-store' }
+  );
+  if (!response.ok) return {};
+
+  const business = (await response.json()).business;
+  const title = 'Products';
+  const description = business?.seo?.metaDescription || business?.content?.description || 'Browse the published product catalogue.';
+
   return {
-    title: 'Products',
-    description: 'Browse the published product catalogue.',
+    title,
+    description,
     alternates: { canonical: '/products' },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      ...(business?.seo?.ogImage?.publicUrl
+        ? { images: [{ url: business.seo.ogImage.publicUrl, alt: business.seo.ogImage.altText || title }] }
+        : {}),
+    },
     robots: { index: true, follow: true },
   };
 }

@@ -14,6 +14,7 @@ const categorySchema = new mongoose.Schema({
   businessId: { type: mongoose.Schema.Types.ObjectId, ref: 'Business', required: true, index: true },
   name: { type: String, required: true, trim: true, maxlength: 120 },
   slug: { type: String, required: true, lowercase: true, trim: true, maxlength: 160 },
+  historicalSlugs: { type: [String], default: [] },
   description: { type: String, trim: true, maxlength: 2000, default: '' },
   image: { type: mongoose.Schema.Types.ObjectId, ref: 'Media', default: null },
   order: { type: Number, min: 0, max: 100000, default: 0 },

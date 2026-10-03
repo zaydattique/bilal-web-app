@@ -35,10 +35,14 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
    description:product.seo?.description||product.shortDescription||product.description,
    alternates:{canonical:`/products/${product.slug}`},
    openGraph:{
+     type:'website',
      title:product.seo?.title||product.name,
      description:product.seo?.description||product.shortDescription||product.description,
-     images:product.media?.[0]?.publicUrl?[{url:product.media[0].publicUrl,alt:product.media[0].altText||product.name}]:[],
+     images:product.media?.[0]?.publicUrl
+       ? [{url:product.media[0].publicUrl,alt:product.media[0].altText||product.name}]
+       : [],
    },
+   robots:{index:true,follow:true},
  };
 }
 
