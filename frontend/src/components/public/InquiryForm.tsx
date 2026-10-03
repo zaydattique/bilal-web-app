@@ -28,7 +28,12 @@ export default function InquiryForm({
   const [downPct, setDownPct] = useState(preferredDownPayment ?? 20);
   const maxMonths = business?.settings?.maxInstallments ?? 24;
   const tenureOptions = TENURE_OPTIONS.filter((months) => months <= maxMonths);
-  const [months, setMonths] = useState(preferredMonths ?? (tenureOptions.includes(12 as never) ? 12 : tenureOptions[0] || 6));
+  const defaultTenure = preferredMonths && tenureOptions.includes(preferredMonths as (typeof TENURE_OPTIONS)[number])
+    ? preferredMonths
+    : tenureOptions.includes(12)
+      ? 12
+      : tenureOptions[0] || 6;
+  const [months, setMonths] = useState(defaultTenure);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
