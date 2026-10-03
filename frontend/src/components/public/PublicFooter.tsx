@@ -13,10 +13,9 @@ export default function PublicFooter() {
       <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
           <p className="font-display text-2xl text-white">{business?.businessName || 'Installment Store'}</p>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-400">
-            Electronics & home appliances on clear monthly installment plans. Serving Kot Khawaja
-            Saeed and greater Lahore.
-          </p>
+          {business?.content?.footerText && (
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-400">{business.content.footerText}</p>
+          )}
         </div>
 
         <div>
@@ -27,11 +26,11 @@ export default function PublicFooter() {
                 All products
               </Link>
             </li>
-            <li>
-              <Link href="/privacy" className="transition hover:text-white">
-                Privacy & cookies
-              </Link>
-            </li>
+            {business?.policies?.privacyUrl && (
+              <li>
+                <a href={business.policies.privacyUrl} className="transition hover:text-white">Privacy policy</a>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -59,10 +58,12 @@ export default function PublicFooter() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-white/70">How plans work</p>
-          <p className="mt-4 text-sm leading-relaxed text-slate-400">
-            Choose a product, review monthly amounts online, then complete verification at the shop
-            with CNIC — transparent fixed installments, no surprises.
-          </p>
+          {business?.content?.serviceArea && (
+            <p className="mt-4 text-sm leading-relaxed text-slate-400">{business.content.serviceArea}</p>
+          )}
+          {business?.content?.hours && (
+            <p className="mt-2 text-sm leading-relaxed text-slate-400">{business.content.hours}</p>
+          )}
         </div>
       </div>
 
@@ -71,7 +72,7 @@ export default function PublicFooter() {
           <span>
             © {year} {business?.businessName || 'Store'}. All rights reserved.
           </span>
-          <span>Built for local families · PKR installments</span>
+          <span>{business?.settings?.currencyCode || business?.settings?.currencySymbol || ''}</span>
         </div>
       </div>
     </footer>
