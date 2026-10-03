@@ -7,7 +7,7 @@ import { protectCustomer } from '../middleware/auth.js';
 const router = express.Router();
 
 // My accounts
-router.get('/accounts', protectCustomer, async (req, res) => {
+router.get('/accounts', protectCustomer, async (req, res, next) => {
   try {
     const accounts = await Account.find({
       customerId: req.customer._id,
@@ -18,12 +18,12 @@ router.get('/accounts', protectCustomer, async (req, res) => {
 
     res.json({ success: true, accounts });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // Single account + schedule
-router.get('/accounts/:id', protectCustomer, async (req, res) => {
+router.get('/accounts/:id', protectCustomer, async (req, res, next) => {
   try {
     const account = await Account.findOne({
       _id: req.params.id,
@@ -37,12 +37,12 @@ router.get('/accounts/:id', protectCustomer, async (req, res) => {
 
     res.json({ success: true, account });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // Payment history
-router.get('/payments', protectCustomer, async (req, res) => {
+router.get('/payments', protectCustomer, async (req, res, next) => {
   try {
     const payments = await Payment.find({
       customerId: req.customer._id,
@@ -55,12 +55,12 @@ router.get('/payments', protectCustomer, async (req, res) => {
 
     res.json({ success: true, payments });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // Upcoming dues across all accounts
-router.get('/dues', protectCustomer, async (req, res) => {
+router.get('/dues', protectCustomer, async (req, res, next) => {
   try {
     const accounts = await Account.find({
       customerId: req.customer._id,
@@ -94,7 +94,7 @@ router.get('/dues', protectCustomer, async (req, res) => {
 
     res.json({ success: true, dues });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 

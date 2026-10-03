@@ -12,7 +12,7 @@ const router = express.Router();
 const oid = (id) => new mongoose.Types.ObjectId(id);
 
 // Daily/monthly collections trend
-router.get('/collections', protectAdmin, async (req, res) => {
+router.get('/collections', protectAdmin, async (req, res, next) => {
   try {
     const businessId = oid(req.businessId);
     const days = Math.min(90, parseInt(req.query.days) || 30);
@@ -52,12 +52,12 @@ router.get('/collections', protectAdmin, async (req, res) => {
 
     res.json({ success: true, days, totalCollected, trend });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // Customer report
-router.get('/customers', protectAdmin, async (req, res) => {
+router.get('/customers', protectAdmin, async (req, res, next) => {
   try {
     const businessId = req.businessId;
 
@@ -82,12 +82,12 @@ router.get('/customers', protectAdmin, async (req, res) => {
       recentCustomers: recent,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // Product report
-router.get('/products', protectAdmin, async (req, res) => {
+router.get('/products', protectAdmin, async (req, res, next) => {
   try {
     const products = await Product.find({ businessId: req.businessId })
       .populate('categoryId', 'name')
@@ -104,12 +104,12 @@ router.get('/products', protectAdmin, async (req, res) => {
       products,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // Due list — upcoming and overdue
-router.get('/due-list', protectAdmin, async (req, res) => {
+router.get('/due-list', protectAdmin, async (req, res, next) => {
   try {
     const businessId = oid(req.businessId);
     const now = new Date();
@@ -181,12 +181,12 @@ router.get('/due-list', protectAdmin, async (req, res) => {
 
     res.json({ success: true, filter, totalDue, count: dues.length, dues });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // Defaults / aging report
-router.get('/defaults', protectAdmin, async (req, res) => {
+router.get('/defaults', protectAdmin, async (req, res, next) => {
   try {
     const businessId = oid(req.businessId);
     const now = new Date();
@@ -237,7 +237,7 @@ router.get('/defaults', protectAdmin, async (req, res) => {
 
     res.json({ success: true, aging, defaultedAccounts });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 

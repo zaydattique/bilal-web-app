@@ -9,7 +9,7 @@ import { protectAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/summary', protectAdmin, async (req, res) => {
+router.get('/summary', protectAdmin, async (req, res, next) => {
   try {
     const businessId = new mongoose.Types.ObjectId(req.businessId);
     const now = new Date();
@@ -133,7 +133,7 @@ router.get('/summary', protectAdmin, async (req, res) => {
       upcomingDues: upcoming,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
