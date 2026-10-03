@@ -53,6 +53,9 @@ const paymentSchema = new mongoose.Schema(
 paymentSchema.index({ accountId: 1, businessId: 1 });
 paymentSchema.index({ customerId: 1, businessId: 1 });
 paymentSchema.index({ paymentDate: -1, businessId: 1 });
-paymentSchema.index({ businessId: 1, idempotencyKey: 1 }, { unique: true });
+paymentSchema.index(
+  { businessId: 1, idempotencyKey: 1 },
+  { unique: true, partialFilterExpression: { idempotencyKey: { $type: 'string' } } }
+);
 
 export default mongoose.model('Payment', paymentSchema);
