@@ -1,7 +1,7 @@
-# Project Completion Report — Through Phase 8
+# Project Completion Report — Through Phase 9
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 8 — Analytics  
+**Current phase:** Phase 9 — SEO Foundation  
 **Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
 ## Completed
@@ -106,3 +106,17 @@ Source-level security review and GitHub diff inspection were completed. Runtime 
 
 ### Phase 8 verification limitation
 Source-level review and GitHub diff inspection were completed. Runtime Node/Next build, MongoDB TTL/index creation, real event ingestion, aggregation correctness and browser consent/navigation tests were not run because this environment does not have the project's runtime/database credentials. Production geo headers must also be configured only behind the actual trusted reverse proxy; Express documents that forwarded headers are unsafe to trust when proxy configuration does not match the deployment topology.
+
+### Phase 9 — SEO Foundation
+- Converted the public homepage to a server route that fetches CMS business data and published featured products/categories before rendering, while retaining interactive client components for cart/navigation behavior.
+- Converted the public product catalogue route to server-render its initial published product/category data; interactive search and category filtering remain client-side.
+- Added dynamic homepage, catalogue and category-index metadata with canonical URLs and index/follow directives.
+- Existing product/category detail pages continue to generate record-specific titles, descriptions, canonical URLs and product OG imagery from CMS data.
+- Added file-based Next.js robots configuration that permits public storefront crawling and blocks `/admin` and `/portal`.
+- Added a dynamic sitemap containing only the active business's published products/categories and their update timestamps, with pagination through the public APIs.
+- Removed the remaining hardcoded business slug fallback from the public inquiry form.
+- Removed fake SEO fallbacks such as a localhost metadata base and generic hardcoded business title.
+- Kept the existing Business CMS and Product/Category SEO fields as the only content source of truth; no duplicate SEO database fields or compatibility layer was introduced.
+
+### Phase 9 verification limitation
+Source-level review and GitHub diff inspection were completed. Runtime Next.js build, generated HTML inspection, live robots/sitemap responses and crawler validation were not run because the project runtime/database credentials are unavailable in this environment. The implementation follows the Next.js App Router metadata, robots, sitemap and server/client component patterns.
