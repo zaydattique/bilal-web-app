@@ -6,7 +6,6 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { CartProvider } from '@/context/CartContext';
 import CookieConsent from '@/components/public/CookieConsent';
 import AnalyticsTracker from '@/components/public/AnalyticsTracker';
-import JsonLd from '@/components/public/JsonLd';
 
 interface PublicBusiness {
   businessName?: string;
@@ -15,9 +14,7 @@ interface PublicBusiness {
     metaDescription?: string;
     ogImage?: { publicUrl?: string; altText?: string } | null;
   };
-  content?: {
-    description?: string;
-  };
+  content?: { description?: string };
   favicon?: { publicUrl?: string } | null;
 }
 
@@ -93,7 +90,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CustomerAuthProvider>
             <ThemeProvider>
               <CartProvider>
-                <JsonLd />
                 <AnalyticsTracker />
                 {children}
                 <CookieConsent />

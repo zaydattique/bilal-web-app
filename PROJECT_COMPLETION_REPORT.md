@@ -107,6 +107,14 @@ Source-level security review and GitHub diff inspection were completed. Runtime 
 ### Phase 8 verification limitation
 Source-level review and GitHub diff inspection were completed. Runtime Node/Next build, MongoDB TTL/index creation, real event ingestion, aggregation correctness and browser consent/navigation tests were not run because this environment does not have the project's runtime/database credentials. Production geo headers must also be configured only behind the actual trusted reverse proxy; Express documents that forwarded headers are unsafe to trust when proxy configuration does not match the deployment topology.
 
+### Phase 11 — Structured Data
+- Replaced the old generic client-side Store JSON-LD with server-rendered page-scoped structured data.
+- Added CMS-derived Organization/LocalBusiness and WebSite entities plus WebPage and BreadcrumbList context.
+- Added Product and Offer structured data using the canonical current product price and business currency.
+- Category pages receive WebPage/image context without inventing unsupported category claims.
+- Structured data fails closed on invalid/missing site configuration and does not emit unverified product availability.
+- No duplicate schema implementation or new source of truth was introduced.
+
 ### Phase 10 — AEO/GEO
 - Added CMS-driven answer-oriented content to the public storefront without introducing a second content source.
 - Product pages expose AEO summary, key facts, buying intent, and GEO local context when supplied by the CMS.
