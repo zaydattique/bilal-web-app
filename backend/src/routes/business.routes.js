@@ -64,6 +64,21 @@ const assertString = (value, field, max, { required = false } = {}) => {
   return trimmed;
 };
 
+const assertSafeUrl = (value, field, { allowRelative = false } = {}) => {
+  if (value === undefined || value === '') return;
+  const trimmed = assertString(value, field, 500);
+  if (allowRelative && trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed;
+  try {
+    const url = new URL(trimmed);
+    if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
+  } catch {
+    const error = new Error(`${field} must be an HTTP(S) URL`);
+    error.statusCode = 400;
+    throw error;
+  }
+  return trimmed;
+};
+
 const assertBoolean = (value, field) => {
   if (value !== undefined && typeof value !== 'boolean') {
     const error = new Error(`${field} must be boolean`);
@@ -125,12 +140,12 @@ const validateNested = (body) => {
   }
 
   if (body.socialMedia) {
-    for (const key of SOCIAL_FIELDS) assertString(body.socialMedia[key], `socialMedia.${key}`, 500);
+    for (const key of SOCIAL_FIELDS) assertSafeUrl(body.socialMedia[key], `socialMedia.${key}`);
   }
 
   if (body.policies) {
-    assertString(body.policies.termsUrl, 'policies.termsUrl', 500);
-    assertString(body.policies.privacyUrl, 'policies.privacyUrl', 500);
+    assertSafeUrl(body.policies.termsUrl, 'policies.termsUrl');
+    assertSafeUrl(body.policies.privacyUrl, 'policies.privacyUrl');
     assertString(body.policies.returnPolicy, 'policies.returnPolicy', 10000);
     assertString(body.policies.warrantyClaim, 'policies.warrantyClaim', 10000);
   }
@@ -155,7 +170,9 @@ const validateNested = (body) => {
           ? ['step', 'title', 'description']
           : ['title', 'subtitle', 'cta', 'href'];
         assertAllowedFields(item, fields);
-        fields.forEach((field) => assertString(item[field], `content.${key}[${index}].${field}`, field === 'description' || field === 'subtitle' ? 300 : field === 'href' ? 300 : 120, { required: true }));
+        fields.forEach((field) => field === 'href'
+          ? assertSafeUrl(item[field], `content.${key}[${index}].href`, { allowRelative: true })
+          : assertString(item[field], `content.${key}[${index}].${field}`, field === 'description' || field === 'subtitle' ? 300 : 120, { required: true }));
       });
     }
   }
