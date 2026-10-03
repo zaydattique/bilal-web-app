@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { admin, loading, token } = useAuth();
+  const { admin, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isLogin = pathname === '/admin/login';
