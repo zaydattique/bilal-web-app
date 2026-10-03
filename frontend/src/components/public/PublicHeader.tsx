@@ -57,11 +57,11 @@ export default function PublicHeader() {
             href="/"
             className="flex min-w-0 flex-1 items-center gap-2 rounded-full py-0.5 pl-1 pr-2 active:opacity-80"
           >
-            {business?.logo?.url ? (
+            {business?.logo?.primary?.publicUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={business.logo.url}
-                alt={business.logo.altText || business.businessName}
+                src={business.logo.primary.publicUrl}
+                alt={business.logo.primary.altText || business.businessName}
                 className="h-8 w-auto max-w-[88px] object-contain sm:h-9 sm:max-w-[110px]"
               />
             ) : (
