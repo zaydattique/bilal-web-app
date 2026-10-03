@@ -24,6 +24,7 @@ const SETTINGS_FIELDS = [
   'minDownPayment', 'enableOnlinePayment', 'enableGuestCheckout', 'showCustomerPortalLink',
 ];
 const SEO_FIELDS = ['metaTitle', 'metaDescription', 'metaKeywords', 'ogImage'];
+const ALLOWED_FONT_FAMILIES = ['Inter, sans-serif', 'DM Sans, sans-serif', 'system-ui, sans-serif', 'Arial, sans-serif', 'Georgia, serif'];
 
 const populateMedia = (query) =>
   query
@@ -130,7 +131,11 @@ const validateNested = (body) => {
   }
 
   if (body.typography) {
-    assertString(body.typography.fontFamily, 'typography.fontFamily', 120);
+    if (body.typography.fontFamily !== undefined && !ALLOWED_FONT_FAMILIES.includes(body.typography.fontFamily)) {
+      const error = new Error('Unsupported font family');
+      error.statusCode = 400;
+      throw error;
+    }
     assertNumber(body.typography.headingScale, 'typography.headingScale', { min: 0.8, max: 2 });
     assertNumber(body.typography.lineHeight, 'typography.lineHeight', { min: 1, max: 2.5 });
   }
