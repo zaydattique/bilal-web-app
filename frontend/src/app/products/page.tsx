@@ -32,7 +32,7 @@ async function getCatalogue(businessId: string) {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const businessId = await getBusinessId();
+  const business = await getBusiness();
   if (!businessId) return {};
 
   const base = apiBase();
@@ -67,8 +67,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ProductsPage() {
   const businessId = await getBusinessId();
-  if (!businessId) notFound();
+  if (!business) notFound();
 
-  const { products, categories } = await getCatalogue(businessId);
-  return <ProductsClient initialProducts={products} initialCategories={categories} />;
+  const { products, categories } = await getCatalogue(business._id);
+  return <><JsonLd business={business} pagePath="/products" pageName="Products" pageDescription={business.seo?.metaDescription || business.content?.description} crumbs={[{name:'Products',url:'/products'}]} /><ProductsClient initialProducts={products} initialCategories={categories} /></>;
 }
