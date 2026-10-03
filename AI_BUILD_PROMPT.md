@@ -73,8 +73,13 @@ Phase 3 now makes Media references canonical for business branding, product imag
 - Product availability is intentionally omitted because the public schema does not establish a verified inventory-to-schema availability contract; no stock claim is invented.
 - Structured data fails closed when NEXT_PUBLIC_SITE_URL is missing or invalid.
 
-### Phase 12 — Public UX and Conversion
-- Finish responsive storefront UX, category pages, inquiry flow and conversion paths.
+### Phase 12 — Public UX and Conversion — completed
+- Public navigation now exposes Products, Categories and a direct installment-plan conversion path across desktop and mobile.
+- Added the canonical `/inquiry` storefront route and reused the existing validated InquiryForm instead of creating a second lead form.
+- Inquiry submissions now capture the visitor's selected tenure as well as down-payment preference.
+- Category detail pages now provide responsive media-led headers, product counts, direct product browsing and installment-plan CTAs while retaining CMS AEO/GEO content and existing canonical routing.
+- Homepage featured-product navigation now includes a direct installment-plan CTA.
+- Existing Media, Business CMS, Product/Category CMS and Lead API remain the only sources of truth; no duplicate content or lead system was introduced.
 
 ### Phase 13 — Admin Operations and Reporting
 - Finish KPI dashboards, reports, exports, audit views and operational tooling.
