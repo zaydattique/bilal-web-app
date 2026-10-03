@@ -1,31 +1,26 @@
 import express from 'express';
+import crypto from 'crypto';
 import Admin from '../models/Admin.js';
 import Customer from '../models/Customer.js';
 import Business from '../models/Business.js';
 import { generateAdminToken, generateCustomerToken } from '../utils/generateToken.js';
 import { protectAdmin, protectCustomer } from '../middleware/auth.js';
 import { logAction } from '../utils/audit.js';
+import { requireObjectId, assertAllowedFields, requireString } from '../middleware/security.js';
 
 const router = express.Router();
-
-// In-memory OTP store for demo (replace with Redis/SMS in production)
 const otpStore = new Map();
+const OTP_TTL_MS = 5 * 60 * 1000;
 
-// ─── Admin ───────────────────────────────────────────────
-
-router.post('/admin/login', async (req, res) => {
+router.post('/admin/login', async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password required' });
-    }
+    assertAllowedFields(req.body, ['email', 'password']);
+    const email = requireString(req.body.email, 'email', { max: 254 }).toLowerCase();
+    const password = requireString(req.body.password, 'password', { min: 1, max: 256 });
 
-    const admin = await Admin.findOne({ email: email.toLowerCase() });
-    if (!admin || !(await admin.comparePassword(password))) {
+    const admin = await Admin.findOne({ email, deletedAt: null });
+    if (!admin || !(await admin.comparePassword(password)) || admin.status !== 'active') {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
-    if (admin.status !== 'active') {
-      return res.status(401).json({ success: false, message: 'Account is not active' });
     }
 
     admin.lastLogin = new Date();
@@ -61,7 +56,7 @@ router.post('/admin/login', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
@@ -69,87 +64,95 @@ router.get('/me', protectAdmin, async (req, res) => {
   res.json({ success: true, admin: req.admin });
 });
 
-router.post('/change-password', protectAdmin, async (req, res) => {
+router.post('/change-password', protectAdmin, async (req, res, next) => {
   try {
-    const { oldPassword, newPassword } = req.body;
+    assertAllowedFields(req.body, ['oldPassword', 'newPassword']);
+    const oldPassword = requireString(req.body.oldPassword, 'oldPassword', { min: 1, max: 256 });
+    const newPassword = requireString(req.body.newPassword, 'newPassword', { min: 12, max: 256 });
+
     const admin = await Admin.findById(req.admin._id);
-    if (!(await admin.comparePassword(oldPassword))) {
+    if (!admin || !(await admin.comparePassword(oldPassword))) {
       return res.status(400).json({ success: false, message: 'Current password is incorrect' });
     }
     admin.password = newPassword;
     await admin.save();
     res.json({ success: true, message: 'Password updated' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
-// ─── Customer portal (phone + CNIC → OTP) ────────────────
-
-/**
- * Request OTP — body: { phoneNumber, cnic, businessSlug }
- * Demo OTP is always logged and returned in non-production.
- */
-router.post('/customer/login', async (req, res) => {
+router.post('/customer/login', async (req, res, next) => {
   try {
-    const { phoneNumber, cnic, businessSlug } = req.body;
-    if (!phoneNumber || !cnic) {
-      return res.status(400).json({ success: false, message: 'phoneNumber and cnic required' });
-    }
+    assertAllowedFields(req.body, ['phoneNumber', 'cnic', 'businessSlug']);
+    const phoneNumber = requireString(req.body.phoneNumber, 'phoneNumber', { max: 32 });
+    const cnic = requireString(req.body.cnic, 'cnic', { max: 32 });
+    const businessSlug = requireString(req.body.businessSlug, 'businessSlug', { max: 120 }).toLowerCase();
 
-    let businessId;
-    if (businessSlug) {
-      const biz = await Business.findOne({ businessSlug: businessSlug.toLowerCase(), isActive: true });
-      if (!biz) return res.status(404).json({ success: false, message: 'Business not found' });
-      businessId = biz._id;
-    }
+    const business = await Business.findOne({ businessSlug, isActive: true }).select('_id');
+    if (!business) return res.status(404).json({ success: false, message: 'Business not found' });
 
-    const filter = { phoneNumber, cnic, status: 'active' };
-    if (businessId) filter.businessId = businessId;
+    const customer = await Customer.findOne({
+      businessId: business._id,
+      phoneNumber,
+      cnic,
+      status: 'active',
+    });
 
-    const customer = await Customer.findOne(filter);
     if (!customer) {
       return res.status(404).json({ success: false, message: 'Customer not found' });
     }
 
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const key = `${customer._id}`;
-    otpStore.set(key, { otp, expires: Date.now() + 10 * 60 * 1000 });
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    otpStore.set(String(customer._id), {
+      otp,
+      expiresAt: Date.now() + OTP_TTL_MS,
+      attempts: 0,
+    });
 
-    // Production: send SMS. Demo: return OTP in response when not production.
-    const payload = {
+    // Phase 2 replaces this process-local delivery store with persistent/shared OTP infrastructure.
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`Development OTP generated for customer ${customer._id}: ${otp}`);
+    }
+
+    res.json({
       success: true,
       message: 'OTP sent',
       customerId: customer._id,
-    };
-    if (process.env.NODE_ENV !== 'production') {
-      payload.demoOtp = otp;
-    }
-
-    res.json(payload);
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
-router.post('/customer/verify-otp', async (req, res) => {
+router.post('/customer/verify-otp', async (req, res, next) => {
   try {
-    const { customerId, otp } = req.body;
-    if (!customerId || !otp) {
-      return res.status(400).json({ success: false, message: 'customerId and otp required' });
-    }
+    assertAllowedFields(req.body, ['customerId', 'otp']);
+    const customerId = requireObjectId(req.body.customerId, 'customerId');
+    const otp = requireString(req.body.otp, 'otp', { min: 6, max: 6 });
 
     const entry = otpStore.get(String(customerId));
-    if (!entry || entry.expires < Date.now()) {
+    if (!entry || entry.expiresAt <= Date.now()) {
+      otpStore.delete(String(customerId));
       return res.status(400).json({ success: false, message: 'OTP expired or not found' });
     }
-    if (entry.otp !== String(otp)) {
+
+    entry.attempts += 1;
+    if (entry.attempts > 5) {
+      otpStore.delete(String(customerId));
+      return res.status(429).json({ success: false, message: 'Too many OTP attempts' });
+    }
+
+    if (entry.otp !== otp) {
       return res.status(400).json({ success: false, message: 'Invalid OTP' });
     }
     otpStore.delete(String(customerId));
 
-    const customer = await Customer.findById(customerId);
-    if (!customer || customer.status !== 'active') {
+    const customer = await Customer.findOne({
+      _id: customerId,
+      status: 'active',
+    });
+    if (!customer) {
       return res.status(404).json({ success: false, message: 'Customer not found' });
     }
 
@@ -167,7 +170,7 @@ router.post('/customer/verify-otp', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
