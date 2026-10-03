@@ -37,15 +37,6 @@ const mediaSchema = new mongoose.Schema(
         'banner',
       ],
     },
-    entityType: {
-      type: String,
-      enum: ['business', 'product', 'category', null],
-      default: null,
-    },
-    entityId: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: null,
-    },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Admin',
@@ -58,6 +49,5 @@ const mediaSchema = new mongoose.Schema(
 );
 
 mediaSchema.index({ businessId: 1, purpose: 1, createdAt: -1 });
-mediaSchema.index({ businessId: 1, entityType: 1, entityId: 1 });
 
 export default mongoose.model('Media', mediaSchema);
