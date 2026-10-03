@@ -285,6 +285,12 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'),
     if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
 
     const data = await buildData(req.body, req.businessId, category);
+    const reservedSlug = await Category.exists({
+      businessId: req.businessId,
+      historicalSlugs: data.slug,
+      _id: { $ne: id },
+    });
+    if (reservedSlug) throw error('Category slug is reserved by a previous category URL', 409);
     if (data.slug !== category.slug) {
       const duplicate = await Category.exists({
         businessId: req.businessId,
