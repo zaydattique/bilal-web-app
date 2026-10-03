@@ -1,7 +1,7 @@
-# Project Completion Report — Through Phase 4
+# Project Completion Report — Through Phase 5
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 4 — Business & Branding CMS  
+**Current phase:** Phase 5 — Product & Category CMS  
 **Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
 ## Completed
@@ -33,3 +33,20 @@ Existing Business documents do not automatically gain meaningful CMS copy. An ad
 ## Verification limitation
 
 GitHub source inspection was completed, including targeted searches for the previously hardcoded storefront claims. Runtime npm/Next build, MongoDB integration and browser verification are still deployment/runtime checks for Phase 16 because this environment has no project runtime/database credentials.
+
+
+### Phase 5 — Product & Category CMS
+- Replaced the legacy Product model with one canonical CMS schema using cashPrice, discountPrice, installment facts, lifecycle status, durable Media IDs, typed category-driven custom fields, FAQs, SEO, AEO and GEO content.
+- Replaced the legacy Category model with lifecycle status, typed custom-field definitions, FAQs, SEO/AEO/GEO content and durable Media references.
+- Added race-safe unique Product SKU and business-scoped slug indexes.
+- Added Product slug history redirects so changing a published product slug preserves the old URL path.
+- Added explicit publishing gates for product/category descriptions, SEO/AEO content and required installment facts.
+- Added scheduled product publishing with future-date validation.
+- Replaced product/category admin create forms with canonical reusable editors and added edit routes.
+- Public product detail pages are now server-rendered with dynamic metadata, canonical URLs and 404 handling; category pages are server-rendered with category metadata and published products.
+- Removed the old product price/images/isActive source-of-truth fields from the active application model. A dedicated migration converts existing legacy documents and leaves converted records as draft until required CMS facts are completed.
+- Updated dashboard/report queries and the development seed to the new lifecycle/pricing schema.
+- Continued using Phase 3 Media as the only upload/storage source of truth; product/category records store Media IDs rather than arbitrary image URLs.
+
+### Phase 5 migration/deployment note
+Run backend/src/migrations/phase5-product-category-migration.js once against the existing database before relying on the new Product/Category schema. Converted legacy products/categories intentionally remain drafts so incomplete SEO/AEO/installment data cannot silently become published storefront content.
