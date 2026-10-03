@@ -4,9 +4,21 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phase 0 (codebase cleanup and baseline) is implemented on branch `phase0-codebase-cleanup`.
+Phase 0 is merged into `main`. Phase 1 backend foundation and multi-tenant security is implemented on branch `phase1-backend-foundation-security` and is pending runtime verification.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
+
+### Phase 1 backend foundation completed
+
+- Added centralized request validation, ObjectId validation, public business resolution, and field allowlists.
+- Hardened admin/customer JWT verification with issuer/audience checks and strong-secret startup enforcement.
+- Bound authenticated admin/customer requests to an active business and preserved tenant scope in object lookups.
+- Closed public category/product cross-tenant lookup paths and validated product category ownership.
+- Enforced the server-side 200-customer tenant limit with atomic business counters and collision-safe customer/account numbering.
+- Removed public exposure of the legacy local uploads directory; persistent media is deferred to Phase 3.
+- Enabled API security headers/CSP, explicit CORS origins, payload limits, and centralized production-safe error responses.
+- Removed direct route-level production error-detail leakage and fixed startup sequencing so the API listens only after database initialization succeeds.
+- Hardened admin management input handling and seed cleanup/password policy.
 
 ### Phase 0 cleanup completed
 
