@@ -11,6 +11,12 @@ const getConfig = () => {
     }
   }
 
+  if (process.env.NODE_ENV === 'production' && !process.env.MEDIA_PUBLIC_BASE_URL.startsWith('https://')) {
+    const error = new Error('MEDIA_PUBLIC_BASE_URL must use HTTPS in production');
+    error.statusCode = 500;
+    throw error;
+  }
+
   return {
     bucket: process.env.MEDIA_BUCKET,
     region: process.env.MEDIA_REGION,
