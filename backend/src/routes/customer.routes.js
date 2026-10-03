@@ -1,5 +1,6 @@
 import express from 'express';
 import Customer from '../models/Customer.js';
+import Session from '../models/Session.js';
 import Account from '../models/Account.js';
 import Payment from '../models/Payment.js';
 import Business from '../models/Business.js';
@@ -181,6 +182,12 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'),
       if (req.body[field] !== undefined) customer[field] = req.body[field];
     }
     await customer.save();
+    if (req.body.status !== undefined) {
+      await Session.updateMany(
+        { userType: 'customer', userId: customer._id, businessId: req.businessId, revokedAt: null },
+        { $set: { revokedAt: new Date(), endedAt: new Date() } }
+      );
+    }
 
     await logAction({
       businessId: req.businessId,
@@ -204,6 +211,10 @@ router.delete('/:id', protectAdmin, requireRole('super_admin', 'admin'), async (
 
     customer.status = 'inactive';
     await customer.save();
+    await Session.updateMany(
+      { userType: 'customer', userId: customer._id, businessId: req.businessId, revokedAt: null },
+      { $set: { revokedAt: new Date(), endedAt: new Date() } }
+    );
 
     await logAction({
       businessId: req.businessId,
