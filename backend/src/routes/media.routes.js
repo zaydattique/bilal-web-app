@@ -9,8 +9,8 @@ import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import Business from '../models/Business.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
-import { assertAllowedFields, requireObjectId, requireString } from '../middleware/security.js';
-import { deleteObject, uploadObject, assertStorageConfigured, buildPublicUrl } from '../utils/mediaStorage.js';
+import { requireObjectId, requireString } from '../middleware/security.js';
+import { deleteObject, uploadObject, assertStorageConfigured } from '../utils/mediaStorage.js';
 import { logAction } from '../utils/audit.js';
 
 const router = express.Router();
@@ -42,7 +42,6 @@ const uploadLimiter = rateLimit({
   message: { success: false, message: 'Upload limit reached. Try again later.' },
   keyGenerator: (req) => String(req.admin._id),
 });
-
 
 const detectFormat = (buffer) => {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
