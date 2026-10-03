@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CustomerAuthProvider>
             <ThemeProvider>
               <CartProvider>
-                <JsonLd business={business || {}} includePage={false} />
+                {business ? <JsonLd business={business} includePage={false} /> : null}
                 <AnalyticsTracker />
                 {children}
                 <CookieConsent />
