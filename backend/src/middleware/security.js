@@ -21,9 +21,6 @@ export const assertAllowedFields = (body, allowedFields) => {
   }
 };
 
-export const pickDefined = (body, fields) =>
-  Object.fromEntries(fields.filter((field) => body?.[field] !== undefined).map((field) => [field, body[field]]));
-
 export const requireString = (value, fieldName, { min = 1, max = 255 } = {}) => {
   if (typeof value !== 'string') {
     const error = new Error(`${fieldName} must be a string`);
