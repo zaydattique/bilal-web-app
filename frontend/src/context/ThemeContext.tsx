@@ -51,32 +51,6 @@ const DEFAULT_BRANDING: Branding = {
   borderColor: '#e2e8f0',
 };
 
-const DEMO_BUSINESS: Business = {
-  _id: '000000000000000000000001',
-  businessName: 'Bilal Electronics',
-  businessSlug: 'bilal-electronics',
-  branding: DEFAULT_BRANDING,
-  contact: {
-    phone: '+92-300-1234567',
-    email: 'info@bilalelectronics.pk',
-    address: 'Shop area, Kot Khawaja Saeed',
-    city: 'Lahore',
-    whatsapp: '923001234567',
-  },
-  settings: {
-    currencySymbol: 'PKR',
-    currencyCode: 'PKR',
-    maxInstallments: 24,
-    minDownPayment: 10,
-    interestRate: 0,
-  },
-  seo: {
-    metaTitle: 'Easy Monthly Installments | Kot Khawaja Saeed Lahore',
-    metaDescription:
-      'Electronics and home appliances on easy monthly installments in Kot Khawaja Saeed, Lahore.',
-  },
-};
-
 function applyCssVars(branding: Branding, fontFamily?: string) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
@@ -102,7 +76,18 @@ export function ThemeProvider({
   const [offline, setOffline] = useState(false);
 
   const load = async () => {
-    const businessSlug = slug || process.env.NEXT_PUBLIC_BUSINESS_SLUG || 'bilal-electronics';
+    const businessSlug = slug || process.env.NEXT_PUBLIC_BUSINESS_SLUG;
+
+    if (!businessSlug) {
+      setBusiness(null);
+      setOffline(true);
+      applyCssVars(DEFAULT_BRANDING);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const res = await api.get<{ success: boolean; business: Business }>(
         `/api/admin/business/public/${businessSlug}`
@@ -111,7 +96,7 @@ export function ThemeProvider({
       setOffline(false);
       applyCssVars(res.business.branding || DEFAULT_BRANDING, res.business.typography?.fontFamily);
     } catch {
-      setBusiness({ ...DEMO_BUSINESS, businessSlug });
+      setBusiness(null);
       setOffline(true);
       applyCssVars(DEFAULT_BRANDING);
     } finally {
@@ -120,7 +105,7 @@ export function ThemeProvider({
   };
 
   useEffect(() => {
-    load();
+    void load();
   }, [slug]);
 
   return (
