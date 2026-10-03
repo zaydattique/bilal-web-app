@@ -56,6 +56,8 @@ export default function SettingsPage() {
     maxInstallments: 12,
     minDownPayment: 10,
     showCustomerPortalLink: true,
+    enableOnlinePayment: false,
+    enableGuestCheckout: false,
     logoPrimary: [] as string[],
     logoLight: [] as string[],
     logoDark: [] as string[],
@@ -117,6 +119,8 @@ export default function SettingsPage() {
       maxInstallments: business.settings?.maxInstallments || 12,
       minDownPayment: business.settings?.minDownPayment ?? 10,
       showCustomerPortalLink: business.settings?.showCustomerPortalLink ?? true,
+      enableOnlinePayment: business.settings?.enableOnlinePayment ?? false,
+      enableGuestCheckout: business.settings?.enableGuestCheckout ?? false,
       logoPrimary: business.logo?.primary?._id ? [business.logo.primary._id] : [],
       logoLight: business.logo?.light?._id ? [business.logo.light._id] : [],
       logoDark: business.logo?.dark?._id ? [business.logo.dark._id] : [],
@@ -206,6 +210,8 @@ export default function SettingsPage() {
           maxInstallments: Number(form.maxInstallments),
           minDownPayment: Number(form.minDownPayment),
           showCustomerPortalLink: form.showCustomerPortalLink,
+          enableOnlinePayment: form.enableOnlinePayment,
+          enableGuestCheckout: form.enableGuestCheckout,
         },
         seo: {
           metaTitle: form.metaTitle,
@@ -329,6 +335,14 @@ export default function SettingsPage() {
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={form.showCustomerPortalLink} onChange={(e) => setForm({ ...form, showCustomerPortalLink: e.target.checked })} />
               Show customer portal link
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={form.enableOnlinePayment} onChange={(e) => setForm({ ...form, enableOnlinePayment: e.target.checked })} />
+              Enable online payment
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={form.enableGuestCheckout} onChange={(e) => setForm({ ...form, enableGuestCheckout: e.target.checked })} />
+              Enable guest checkout
             </label>
           </div>
         </Section>
