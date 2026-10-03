@@ -26,7 +26,7 @@ router.get('/summary', protectAdmin, async (req, res, next) => {
     ] = await Promise.all([
       Customer.countDocuments({ businessId, status: 'active' }),
       Account.countDocuments({ businessId, status: 'active' }),
-      Product.countDocuments({ businessId, isActive: true }),
+      Product.countDocuments({ businessId, status: 'published' }),
       Payment.aggregate([
         {
           $match: {
