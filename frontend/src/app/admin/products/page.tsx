@@ -69,7 +69,7 @@ export default function ProductsPage() {
                 </td>
                 <td className="px-4 py-3">{p.categoryId?.name || '—'}</td>
                 <td className="px-4 py-3">
-                  {currency} {((p.discountPrice ?? p.cashPrice)).toLocaleString('en-PK').toLocaleString('en-PK')}
+                  {currency} {(p.discountPrice ?? p.cashPrice).toLocaleString('en-PK')}
                 </td>
                 <td className="px-4 py-3">{p.inventory}</td>
                 <td className="px-4 py-3">
