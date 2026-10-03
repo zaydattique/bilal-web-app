@@ -143,6 +143,15 @@ The seed data is for development/testing only. Production business information, 
 
 
 
+### Phase 10 AEO/GEO completed
+
+- Product pages expose the existing CMS AEO summary, buying intent and key facts as visible, semantic answer content.
+- Product pages expose existing CMS GEO intent and local notes as visible local-information content.
+- Category pages expose existing CMS AEO summary/key facts and GEO content.
+- The homepage exposes a CMS-sourced business information block containing only current business name, tagline, description, service area, hours, address and phone data.
+- No new AEO/GEO database model, duplicate content route, compatibility layer or hardcoded tenant claims was introduced.
+- Structured data remains intentionally deferred to Phase 11.
+
 ### Phase 9 SEO foundation completed
 
 - Public homepage now fetches business, featured products and categories on the server so core storefront content exists in the initial HTML instead of depending on client-side data fetching.
