@@ -307,10 +307,7 @@ router.post('/:id/reverse', protectAdmin, requireRole('super_admin', 'admin'), a
         createdAt: { $lt: payment.createdAt },
       }).sort({ createdAt: -1 }).session(session);
 
-      customer.totalDue = Math.min(
-        customer.totalDue + payment.paymentAmount,
-        customer.totalDue + payment.paymentAmount
-      );
+      customer.totalDue = (customer.totalDue || 0) + payment.paymentAmount;
       customer.lastPaymentDate = previousPayment?.paymentDate || null;
       await customer.save({ session });
 
