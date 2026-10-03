@@ -1,9 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { AlertTriangle, TrendingUp, Users, Package, ListOrdered } from 'lucide-react';
+import { Activity, AlertTriangle, TrendingUp, Users, Package, ListOrdered } from 'lucide-react';
 
 const cards = [
+  {
+    href: '/admin/reports/traffic',
+    title: 'Website Traffic',
+    desc: 'Visits, sessions, pageviews, locations and devices',
+    icon: Activity,
+    color: '#0f766e',
+  },
   {
     href: '/admin/reports/due-list',
     title: 'Late / Due Installments',
