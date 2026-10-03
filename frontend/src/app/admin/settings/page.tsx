@@ -143,9 +143,9 @@ export default function SettingsPage() {
       const heroSlides = parseJsonArray(form.heroSlides, 'Hero slides');
       const howItWorks = parseJsonArray(form.howItWorks, 'How it works');
 
-      await api.put('/api/admin/business', {
+      const payload = {
         businessName: form.businessName,
-        businessSlug: form.businessSlug,
+        ...(admin.role === 'super_admin' ? { businessSlug: form.businessSlug } : {}),
         logo: {
           primary: form.logoPrimary[0] || null,
           light: form.logoLight[0] || null,
@@ -209,7 +209,8 @@ export default function SettingsPage() {
           metaKeywords: splitLines(form.metaKeywords),
           ogImage: form.ogImage[0] || null,
         },
-      });
+      };
+      await api.put('/api/admin/business', payload);
       await refresh();
       setMessage('Business CMS saved successfully');
     } catch (err: unknown) {
@@ -231,7 +232,7 @@ export default function SettingsPage() {
 
         <Section title="Business identity">
           <Field label="Business name"><input className="input" value={form.businessName} onChange={(e) => setForm({ ...form, businessName: e.target.value })} /></Field>
-          <Field label="Business slug"><input className="input" value={form.businessSlug} onChange={(e) => setForm({ ...form, businessSlug: e.target.value })} /></Field>
+          <Field label="Business slug"><input className="input" disabled={admin?.role !== 'super_admin'} value={form.businessSlug} onChange={(e) => setForm({ ...form, businessSlug: e.target.value })} /></Field>
           <Field label="Tagline"><input className="input" value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} /></Field>
           <Field label="Business description"><textarea className="input min-h-24" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
         </Section>
@@ -304,10 +305,12 @@ export default function SettingsPage() {
             <Field label="Max installments"><input className="input" type="number" min={1} max={60} value={form.maxInstallments} onChange={(e) => setForm({ ...form, maxInstallments: Number(e.target.value) })} /></Field>
             <Field label="Min down payment %"><input className="input" type="number" min={0} max={100} value={form.minDownPayment} onChange={(e) => setForm({ ...form, minDownPayment: Number(e.target.value) })} /></Field>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.showCustomerPortalLink} onChange={(e) => setForm({ ...form, showCustomerPortalLink: e.target.checked })} />
-            Show customer portal link
-          </label>
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={form.showCustomerPortalLink} onChange={(e) => setForm({ ...form, showCustomerPortalLink: e.target.checked })} />
+              Show customer portal link
+            </label>
+          </div>
         </Section>
 
         <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Save all business settings'}</button>
