@@ -21,7 +21,6 @@ export default function CollectionsReport() {
     api
       .get<{ success: boolean; trend: typeof trend; totalCollected: number }>(
         `/api/admin/reports/collections?days=${days}`,
-        token
       )
       .then((res) => {
         setTrend(res.trend);
