@@ -173,17 +173,11 @@ export default function HomePage() {
             </p>
           </div>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              { n: '01', title: 'Choose your item', desc: 'Browse phones, LEDs, fridges and more.' },
-              { n: '02', title: 'Calculate plan', desc: 'See monthly amount with the online calculator.' },
-              { n: '03', title: 'Send inquiry', desc: 'Share name & phone — we call you back.' },
-              { n: '04', title: 'Visit with CNIC', desc: 'Confirm plan and documents at the shop.' },
-              { n: '05', title: 'Pay monthly', desc: 'Fixed installment — clear and recorded.' },
-            ].map((s) => (
-              <div key={s.n} className="card-hover relative text-left">
-                <span className="font-display text-3xl text-slate-100">{s.n}</span>
+            {(business?.content?.howItWorks || []).map((s, index) => (
+              <div key={`${s.step}-${index}`} className="card-hover relative text-left">
+                <span className="font-display text-3xl text-slate-100">{s.step}</span>
                 <h3 className="mt-1 text-base font-semibold text-slate-900">{s.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{s.desc}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{s.description}</p>
               </div>
             ))}
           </div>
@@ -195,15 +189,15 @@ export default function HomePage() {
               <div>
                 <p className="eyebrow">Requirements</p>
                 <h2 className="section-title mt-2">What you need</h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                  Same clear shop process families already know — transparent plans, no hidden bank fees.
-                </p>
+                {business?.content?.description && (
+                  <p className="mt-3 text-sm leading-relaxed text-slate-500">{business.content.description}</p>
+                )}
                 <ul className="mt-8 space-y-4">
                   {(business?.content?.requirements || []).map((t, index) => {
                     const icons = [FileText, UserCheck, MapPin, Smartphone, CreditCard];
                     const Icon = icons[index % icons.length];
                     return (
-                    <li key={item.t} className="flex items-center gap-3">
+                    <li key={t} className="flex items-center gap-3">
                       <span className="flex h-10 w-10 items-center justify-center rounded-2xl text-white" style={{ background: 'var(--color-primary)' }}>
                         <Icon size={18} />
                       </span>
