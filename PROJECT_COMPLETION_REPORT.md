@@ -1,7 +1,7 @@
-# Project Completion Report — Through Phase 5
+# Project Completion Report — Through Phase 6
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 5 — Product & Category CMS  
+**Current phase:** Phase 6 — Installment & Financial System Hardening  
 **Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
 ## Completed
@@ -50,3 +50,22 @@ GitHub source inspection was completed, including targeted searches for the prev
 
 ### Phase 5 migration/deployment note
 Run backend/src/migrations/phase5-product-category-migration.js once against the existing database before relying on the new Product/Category schema. Converted legacy products/categories intentionally remain drafts so incomplete SEO/AEO/installment data cannot silently become published storefront content.
+
+
+### Phase 6 — Installment & Financial System Hardening
+- Replaced multi-step payment posting with a MongoDB transaction so installment, account, customer balance and payment-record writes commit or roll back together.
+- Added required payment idempotency keys and a business-scoped unique partial index so retrying the same request returns the original payment instead of creating a duplicate; legacy payment documents without the new field remain indexable.
+- Added request fingerprinting so an idempotency key cannot be reused for a different payment payload.
+- Rejects overpayments instead of silently accepting only the allocatable portion.
+- Payment allocation now records the previous installment status and paid date, making reversal deterministic.
+- Added protected payment reversal for administrators. Reversal is refused when a later confirmed payment exists or when legacy allocation history is insufficient to reconstruct the prior state.
+- Account status changes can no longer mark an account paid/closed while a balance remains, or reopen a fully paid account as active.
+- Account creation is transactional and now uses an atomic Business counter with a hard server-side maximum of 200 customer accounts per business.
+- Startup counter synchronization now rebuilds the account count from persisted Account records.
+- Production startup rejects standalone MongoDB deployments because the financial write paths require multi-document transactions.
+- Added endpoint-specific rate limits to account creation, payment creation and payment reversal in addition to the global API limiter.
+- Updated the admin payment form to generate a stable idempotency key for retries of the same form submission.
+- No compatibility/override layer was added; the existing payment and account write paths were replaced directly.
+
+### Phase 6 verification limitation
+Source-level review and GitHub diff inspection were completed. Runtime npm/Next build, MongoDB transaction tests, concurrent-payment tests and browser verification were not run because this environment does not have the project's runtime/database credentials. MongoDB transactions require a replica set or sharded deployment in production.
