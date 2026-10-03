@@ -245,7 +245,15 @@ export default function SettingsPage() {
               </Field>
             ))}
           </div>
-          <Field label="Font family"><input className="input" value={form.fontFamily} onChange={(e) => setForm({ ...form, fontFamily: e.target.value })} /></Field>
+          <Field label="Font family">
+            <select className="input" value={form.fontFamily} onChange={(e) => setForm({ ...form, fontFamily: e.target.value })}>
+              <option>Inter, sans-serif</option>
+              <option>DM Sans, sans-serif</option>
+              <option>system-ui, sans-serif</option>
+              <option>Arial, sans-serif</option>
+              <option>Georgia, serif</option>
+            </select>
+          </Field>
           <div className="grid gap-5 sm:grid-cols-2">
             <MediaField label="Primary logo" purpose="logo" value={form.logoPrimary} onChange={(v) => setForm({ ...form, logoPrimary: v })} />
             <MediaField label="Light logo" purpose="logo_light" value={form.logoLight} onChange={(v) => setForm({ ...form, logoLight: v })} />
