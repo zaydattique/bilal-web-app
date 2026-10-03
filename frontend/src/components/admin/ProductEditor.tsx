@@ -60,7 +60,7 @@ export default function ProductEditor({productId}:{productId?:string}){
 
  const submit=async(e:FormEvent)=>{e.preventDefault();setSaving(true);setError('');try{
    const payload={...form,slug:form.slug.trim()||undefined,categoryId:form.categoryId||null,sku:form.sku?.trim()||undefined,brand:form.brand?.trim()||undefined,
-     cashPrice:Number(form.cashPrice),discountPrice:form.discountPrice==null||form.discountPrice===''?null:Number(form.discountPrice),inventory:Number(form.inventory),
+     cashPrice:Number(form.cashPrice),discountPrice:form.discountPrice==null?null:Number(form.discountPrice),inventory:Number(form.inventory),
      media:form.media,installment:{...form.installment,...Object.fromEntries(Object.entries(form.installment).filter(([k])=>k!=='frequency').map(([k,v])=>[k,Number(v)]))},
      specs:{...form.specs,weight:form.specs.weight==null?null:Number(form.specs.weight),dimensions:Object.fromEntries(Object.entries(form.specs.dimensions).map(([k,v])=>[k,v==null?null:Number(v)]))},
    };
