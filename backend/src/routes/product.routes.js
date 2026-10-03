@@ -137,7 +137,10 @@ router.get('/:idOrSlug', optionalAuth, async (req, res, next) => {
       const redirect = await ProductSlugRedirect.findOne({ businessId, oldSlug: value }).select('productId');
       if (redirect) {
         const target = await populate(Product.findOne({ _id: redirect.productId, businessId, ...publicStatusFilter() }));
-        if (target) return res.status(301).json({ success: true, redirect: `/products/${target.slug}`, product: target });
+        if (target) {
+          res.set('Location', `/products/${target.slug}`);
+          return res.status(301).json({ success: true, redirect: `/products/${target.slug}`, product: target });
+        }
       }
     }
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });

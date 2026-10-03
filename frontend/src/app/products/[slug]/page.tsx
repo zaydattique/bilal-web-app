@@ -13,7 +13,7 @@ async function getBusiness():Promise<Business|null>{
 async function getProduct(slug:string,businessId:string):Promise<{product?:PublicProduct;redirect?:string}|null>{
  const r=await fetch(`${apiBase()}/api/products/${encodeURIComponent(slug)}?businessId=${encodeURIComponent(businessId)}`,{cache:'no-store'});
  if(r.status===404)return null;
- if(!r.ok)return null;
+ if(!r.ok && r.status!==301)return null;
  return r.json();
 }
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
