@@ -1,95 +1,80 @@
-# Scalable B2B Installment Sales Platform
+# Bilal Web App
 
-White-label multi-tenant installment sales platform.
+White-label installment-sales platform for a Lahore appliance business.
 
-**Repo:** https://github.com/zaydattique/bilal-web-app  
-**Status:** Backend complete (Phase 1 + Phase 2 APIs). Frontend Phase 1 done. Not deployed live.
+## Current state
 
-## Backend status — COMPLETE
+Phase 0 (codebase cleanup and baseline) is implemented on branch `phase0-codebase-cleanup`.
 
-| Module | Endpoints | Status |
-|--------|-----------|--------|
-| Auth (admin) | login, me, change-password | Done |
-| Auth (customer) | login (OTP), verify-otp, me | Done |
-| Business config | get, update, public by slug | Done |
-| Admin users | CRUD + login history | Done |
-| Categories | list, get, create, update, soft-delete | Done |
-| Products | list, get, create, update, soft-delete | Done |
-| Customers | CRUD, accounts, payments, soft-delete | Done |
-| Accounts | list, get, create, plan, due-list, status, close | Done |
-| Payments | list, get, record (FIFO allocation) | Done |
-| Dashboard | KPI summary | Done |
-| Reports | collections, customers, products, due-list, defaults | Done |
-| Audit log | list + filters | Done |
-| Customer portal | my accounts, account detail, payments, dues | Done |
-| Seed | demo business + admin + products | Done |
+The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
-### Models
-Business, Admin, Category, Product, Customer, Account, InstallmentPlan, Payment, Lead, AuditLog
+### Phase 0 cleanup completed
 
-### Seed credentials
-- Email: `admin@bilalelectronics.pk`
-- Password: `Admin@123`
-- Slug: `bilal-electronics`
+- Removed imports and route mounts for backend files that do not exist in the repository, so the server no longer references phantom modules.
+- Removed the fake frontend business fallback. Business identity must come from configured API data.
+- Removed the `salePrice` compatibility path. `discountPrice` is the single canonical product discount field.
+- Corrected the product-detail frontend API contract to use `GET /api/products/:idOrSlug`.
+- Removed the unused duplicate `/catalog` page; `/products` is the canonical public catalogue.
+- Removed hardcoded tenant fallback from analytics and switched browser session IDs to `crypto.randomUUID()`.
+- Replaced stale completion claims with the actual project status.
 
-## Frontend status
-- Phase 1 admin UI + forms: done
-- Customer portal UI: not yet
-- Reports UI pages: not yet
+## Environment
 
-## API map (quick)
+### Backend
 
-```
-POST   /api/auth/admin/login
-GET    /api/auth/me
-POST   /api/auth/customer/login          { phoneNumber, cnic, businessSlug }
-POST   /api/auth/customer/verify-otp     { customerId, otp }
-GET    /api/auth/customer/me
+Required environment values are deployment-specific. See `backend/.env.example` if present.
 
-GET/PUT /api/admin/business
-GET     /api/admin/business/public/:slug
+### Frontend
 
-GET/POST/PUT/DELETE /api/admin/users
-GET /api/admin/users/:id/login-history
+`frontend/.env.example` should define:
 
-GET/POST/PUT/DELETE /api/categories
-GET/POST/PUT/DELETE /api/products
-
-GET/POST/PUT/DELETE /api/admin/customers
-GET /api/admin/customers/:id/accounts
-GET /api/admin/customers/:id/payments
-
-GET/POST /api/admin/accounts
-GET  /api/admin/accounts/:id
-GET  /api/admin/accounts/:id/plan
-GET  /api/admin/accounts/:id/plan/due-list
-PATCH /api/admin/accounts/:id/status
-POST  /api/admin/accounts/:id/close
-
-GET/POST /api/admin/payments
-GET /api/admin/payments/:id
-
-GET /api/admin/dashboard/summary
-GET /api/admin/reports/collections
-GET /api/admin/reports/customers
-GET /api/admin/reports/products
-GET /api/admin/reports/due-list?filter=overdue|upcoming|all
-GET /api/admin/reports/defaults
-GET /api/admin/audit-log
-
-GET /api/customer/accounts
-GET /api/customer/accounts/:id
-GET /api/customer/payments
-GET /api/customer/dues
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_BUSINESS_SLUG=bilal-electronics
 ```
 
-## Not built yet
-- Live hosting
-- Real SMS OTP (demo returns OTP in JSON when NODE_ENV ≠ production)
-- Email notifications
-- 2FA for admin
-- Image upload to S3
-- Frontend customer portal & report charts
+The business slug is configuration, not a code-level fallback.
 
-## License
-Private / Proprietary
+## Development
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Important
+
+The seed data is for development/testing only. Production business information, products, media, branding, installment rules, and customer data must be managed through the application and database.
+
+## Phase roadmap
+
+1. Phase 0 — codebase cleanup and baseline
+2. Phase 1 — backend foundation and multi-tenant security
+3. Phase 2 — authentication, sessions and account security
+4. Phase 3 — persistent media and asset management
+5. Phase 4 — business and branding CMS
+6. Phase 5 — product and category CMS
+7. Phase 6 — installment and financial integrity
+8. Phase 7 — customer portal and authorization
+9. Phase 8 — analytics
+10. Phase 9 — SEO foundation
+11. Phase 10 — AEO/GEO
+12. Phase 11 — structured data
+13. Phase 12 — public UX and conversion
+14. Phase 13 — admin operations and reporting
+15. Phase 14 — red-team/security hardening
+16. Phase 15 — automated tests
+17. Phase 16 — production/deployment verification
+18. Phase 17 — final acceptance audit
+
