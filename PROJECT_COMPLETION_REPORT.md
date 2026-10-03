@@ -111,12 +111,16 @@ Source-level review and GitHub diff inspection were completed. Runtime Node/Next
 - Converted the public homepage to a server route that fetches CMS business data and published featured products/categories before rendering, while retaining interactive client components for cart/navigation behavior.
 - Converted the public product catalogue route to server-render its initial published product/category data; interactive search and category filtering remain client-side.
 - Added dynamic homepage, catalogue and category-index metadata with canonical URLs and index/follow directives.
-- Existing product/category detail pages continue to generate record-specific titles, descriptions, canonical URLs and product OG imagery from CMS data.
-- Added file-based Next.js robots configuration that permits public storefront crawling and blocks `/admin` and `/portal`.
-- Added a dynamic sitemap containing only the active business's published products/categories and their update timestamps, with pagination through the public APIs.
+- Existing product/category detail pages generate record-specific titles, descriptions, canonical URLs, OG imagery and explicit index/follow directives from CMS data.
+- Canonical site URL parsing now rejects invalid schemes and avoids unsafe metadata bases.
+- Added HTTP `X-Robots-Tag` protection for all `/admin`, `/portal` and `/api` responses so private/internal surfaces cannot rely on client-side authentication redirects for indexing protection.
+- Added a fail-closed robots policy when `NEXT_PUBLIC_SITE_URL` is missing, and blocks private/API paths while leaving public storefront assets crawlable.
+- Added a dynamic sitemap containing only the active business's published products/categories and their update timestamps, with pagination through the public APIs; malformed upstream records or transient API failures do not crash sitemap generation.
+- Product historical slugs retain their existing 301 redirect behavior; category slug changes now persist historical slugs and issue tenant-scoped 301 redirects to the current canonical category URL.
+- Added `NEXT_PUBLIC_SITE_URL` to the frontend environment contract.
 - Removed the remaining hardcoded business slug fallback from the public inquiry form.
 - Removed fake SEO fallbacks such as a localhost metadata base and generic hardcoded business title.
 - Kept the existing Business CMS and Product/Category SEO fields as the only content source of truth; no duplicate SEO database fields or compatibility layer was introduced.
 
 ### Phase 9 verification limitation
-Source-level review and GitHub diff inspection were completed. Runtime Next.js build, generated HTML inspection, live robots/sitemap responses and crawler validation were not run because the project runtime/database credentials are unavailable in this environment. The implementation follows the Next.js App Router metadata, robots, sitemap and server/client component patterns.
+Source-level review, branch diff inspection and targeted route/config review were completed. Runtime Next.js build, generated HTML inspection, live robots/sitemap responses, Mongo-backed historical-category redirect tests and crawler validation were not run because the project runtime/database credentials are unavailable in this environment. The implementation follows the Next.js App Router metadata, robots and sitemap conventions, with private-route indexing protection enforced at the HTTP response layer.
