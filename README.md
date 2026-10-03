@@ -4,7 +4,7 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–9 are implemented on the current branch. Phase 9 adds the SEO foundation: server-rendered public catalogue/home content, dynamic metadata, canonical URLs, robots policy and a CMS-driven sitemap. Runtime verification is still required before production.
+Phases 0–10 are implemented on the current branch. Phase 10 adds CMS-driven AEO/GEO answer content to the server-rendered public storefront. Runtime verification is still required before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
@@ -142,6 +142,15 @@ The seed data is for development/testing only. Production business information, 
 18. Phase 17 — final acceptance audit
 
 
+
+### Phase 10 AEO/GEO completed
+
+- Product pages expose the existing CMS AEO summary, buying intent and key facts as visible, semantic answer content.
+- Product pages expose existing CMS GEO intent and local notes as visible local-information content.
+- Category pages expose existing CMS AEO summary/key facts and GEO content.
+- The homepage exposes a CMS-sourced business information block containing only current business name, tagline, description, service area, hours, address and phone data.
+- No new AEO/GEO database model, duplicate content route, compatibility layer or hardcoded tenant claims was introduced.
+- Structured data remains intentionally deferred to Phase 11.
 
 ### Phase 9 SEO foundation completed
 

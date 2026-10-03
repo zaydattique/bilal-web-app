@@ -60,9 +60,11 @@ Phase 3 now makes Media references canonical for business branding, product imag
 - Dynamic metadata, canonical URLs, robots, sitemap, redirects and server-rendered public product/category pages.
 - Media-backed OG images and favicons remain canonical.
 
-### Phase 10 — AEO/GEO
-- Build machine-readable answer-oriented content from the CMS.
-- Keep factual claims sourced from current business/product data.
+### Phase 10 — AEO/GEO — completed
+- Product/category answer content is rendered from existing CMS AEO/GEO fields.
+- Business answer content is rendered from current CMS business fields.
+- Public answer content is tenant-scoped through the existing public business/product/category resolution.
+- No duplicate AEO/GEO source or hardcoded tenant facts were introduced.
 
 ### Phase 11 — Structured Data
 - Product/Offer/BreadcrumbList/Organization/LocalBusiness/WebSite/WebPage structured data.
