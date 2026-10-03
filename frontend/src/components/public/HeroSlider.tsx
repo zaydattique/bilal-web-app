@@ -33,11 +33,14 @@ export default function HeroSlider() {
   const [i, setI] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setI((x) => (x + 1) % SLIDES.length), 6000);
+    const t = setInterval(() => setI((x) => (x + 1) % Math.max(slides.length, 1)), 6000);
     return () => clearInterval(t);
   }, []);
 
-  const slide = SLIDES[i];
+  const slides = business?.content?.heroSlides?.length
+    ? business.content.heroSlides
+    : [DEFAULT_SLIDE(business?.businessName || 'Installment Store', business?.content?.tagline, business?.content?.description)];
+  const slide = slides[i % slides.length];
 
   return (
     <section className="relative overflow-hidden">
@@ -69,9 +72,7 @@ export default function HeroSlider() {
       />
 
       <div className="container-page relative flex min-h-[min(72vh,560px)] flex-col justify-center py-16 sm:py-20">
-        <p className="eyebrow text-white/80">
-          {business?.businessName || 'Installment electronics'} · Lahore
-        </p>
+        <p className="eyebrow text-white/80">{business?.businessName}</p>
         <h1
           key={slide.title}
           className="font-display mt-4 max-w-2xl text-4xl leading-[1.15] text-white sm:text-5xl lg:text-6xl"
@@ -89,12 +90,12 @@ export default function HeroSlider() {
             href="/products"
             className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/25 bg-white/12 px-6 text-[15px] font-semibold text-white backdrop-blur-xl transition hover:bg-white/18 active:scale-[0.97]"
           >
-            Installment calculator
+            Browse products
           </Link>
         </div>
 
         <div className="mt-12 flex gap-2">
-          {SLIDES.map((_, idx) => (
+          {slides.map((_, idx) => (
             <button
               key={idx}
               type="button"
