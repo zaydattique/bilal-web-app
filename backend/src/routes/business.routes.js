@@ -3,7 +3,7 @@ import slugify from 'slugify';
 import Business from '../models/Business.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 import { logAction } from '../utils/audit.js';
-import { assertAllowedFields, requireString, requireNonNegativeNumber } from '../middleware/security.js';
+import { assertAllowedFields, requireString } from '../middleware/security.js';
 import { resolveMediaIds, resolveSingleMediaId } from '../utils/mediaReferences.js';
 
 const router = express.Router();
