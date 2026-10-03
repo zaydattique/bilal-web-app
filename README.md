@@ -4,7 +4,7 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–2 are merged into `main`. Phase 3 persistent media is implemented on the current branch and requires deployment storage configuration and runtime verification before production.
+Phases 0–3 are merged into `main`. Phase 4 business/branding CMS is implemented on the current branch and requires runtime verification before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 

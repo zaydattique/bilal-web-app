@@ -10,19 +10,17 @@ export default function JsonLd() {
     '@context': 'https://schema.org',
     '@type': 'Store',
     name: business.businessName,
-    description:
-      business.seo?.metaDescription ||
-      'Electronics and home appliances on easy monthly installments in Lahore.',
+    description: business.seo?.metaDescription || business.content?.description || undefined,
     url: process.env.NEXT_PUBLIC_SITE_URL || undefined,
     telephone: business.contact?.phone,
     email: business.contact?.email,
     address: {
       '@type': 'PostalAddress',
       streetAddress: business.contact?.address,
-      addressLocality: business.contact?.city || 'Lahore',
-      addressCountry: 'PK',
+      addressLocality: business.contact?.city,
+      addressCountry: business.contact?.country || undefined,
     },
-    priceRange: 'PKR',
+    priceRange: business.settings?.currencyCode ? business.settings.currencyCode : undefined,
   };
 
   return (

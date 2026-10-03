@@ -34,17 +34,31 @@ interface Business {
   heroBanners?: MediaReference[];
 
   branding: Branding;
-  typography?: { fontFamily?: string };
-  contact?: Record<string, string>;
-  socialMedia?: Record<string, string>;
+  typography?: { fontFamily?: string; headingScale?: number; lineHeight?: number };
+  contact?: { phone?: string; email?: string; address?: string; city?: string; country?: string };
+  socialMedia?: { facebook?: string; instagram?: string; twitter?: string; whatsapp?: string };
+  policies?: { termsUrl?: string; privacyUrl?: string; returnPolicy?: string; warrantyClaim?: string };
+  content?: {
+    tagline?: string;
+    description?: string;
+    serviceArea?: string;
+    hours?: string;
+    footerText?: string;
+    requirements?: string[];
+    trustPoints?: string[];
+    howItWorks?: { step: string; title: string; description: string }[];
+    heroSlides?: { title: string; subtitle: string; cta: string; href: string }[];
+  };
   settings?: {
     currencySymbol?: string;
     currencyCode?: string;
+    timezone?: string;
+    dateFormat?: string;
     maxInstallments?: number;
     minDownPayment?: number;
-    interestRate?: number;
+    showCustomerPortalLink?: boolean;
   };
-  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: MediaReference | null };
+  seo?: { metaTitle?: string; metaDescription?: string; metaKeywords?: string[]; ogImage?: MediaReference | null };
 }
 
 interface ThemeContextType {
@@ -66,7 +80,7 @@ const DEFAULT_BRANDING: Branding = {
   borderColor: '#e2e8f0',
 };
 
-function applyCssVars(branding: Branding, fontFamily?: string) {
+function applyCssVars(branding: Branding, typography?: { fontFamily?: string; headingScale?: number; lineHeight?: number }) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
   root.style.setProperty('--color-primary', branding.primaryColor);
@@ -76,7 +90,9 @@ function applyCssVars(branding: Branding, fontFamily?: string) {
   root.style.setProperty('--color-text-light', branding.textLight);
   root.style.setProperty('--color-background', branding.backgroundColor);
   root.style.setProperty('--color-border', branding.borderColor);
-  if (fontFamily) root.style.setProperty('--font-family', fontFamily);
+  if (typography?.fontFamily) root.style.setProperty('--font-family', typography.fontFamily);
+  if (typography?.headingScale) root.style.setProperty('--heading-scale', String(typography.headingScale));
+  if (typography?.lineHeight) root.style.setProperty('--content-line-height', String(typography.lineHeight));
 }
 
 export function ThemeProvider({
@@ -109,7 +125,7 @@ export function ThemeProvider({
       );
       setBusiness(res.business);
       setOffline(false);
-      applyCssVars(res.business.branding || DEFAULT_BRANDING, res.business.typography?.fontFamily);
+      applyCssVars(res.business.branding || DEFAULT_BRANDING, res.business.typography);
     } catch {
       setBusiness(null);
       setOffline(true);

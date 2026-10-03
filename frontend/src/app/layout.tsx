@@ -14,6 +14,9 @@ interface PublicBusiness {
     metaDescription?: string;
     ogImage?: { publicUrl?: string; altText?: string } | null;
   };
+  content?: {
+    description?: string;
+  };
   favicon?: { publicUrl?: string } | null;
 }
 
@@ -38,12 +41,9 @@ const getPublicBusiness = async (): Promise<PublicBusiness | null> => {
 export async function generateMetadata(): Promise<Metadata> {
   const business = await getPublicBusiness();
   const title =
-    business?.seo?.metaTitle ||
-    business?.businessName ||
-    'Easy Monthly Installments | Electronics & Appliances Kot Khawaja Saeed Lahore';
+    business?.seo?.metaTitle || business?.businessName || '';
   const description =
-    business?.seo?.metaDescription ||
-    'Buy electronics and home appliances on transparent monthly installments in Lahore.';
+    business?.seo?.metaDescription || business?.content?.description || '';
 
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),

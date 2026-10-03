@@ -39,7 +39,7 @@ export default function PublicHeader() {
     };
   }, [menuOpen]);
 
-  const phone = business?.contact?.phone || business?.contact?.whatsapp;
+  const phone = business?.contact?.phone || business?.socialMedia?.whatsapp;
 
   return (
     <>

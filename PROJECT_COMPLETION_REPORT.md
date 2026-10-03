@@ -1,69 +1,35 @@
-# Project Completion Report — Through Phase 3
+# Project Completion Report — Through Phase 4
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 3 — Persistent Media & Asset Management  
-**Main baseline:** `afbf448cea7980bb4be746a6c4b6bb8ded07fd01` before Phase 3
+**Current phase:** Phase 4 — Business & Branding CMS  
+**Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
-## Completed phases
+## Completed
 
-### Phase 0 — Codebase cleanup
-- Removed phantom imports/routes and duplicate public implementations.
-- Removed fake business fallbacks and stale pricing compatibility.
-- Established the source-of-truth rule: replacements remove the old implementation instead of layering overrides.
+### Phase 4 — Business & Branding CMS
+- Expanded the Business model with CMS-controlled public content: tagline, description, service area, hours, footer text, requirements, trust points, process steps and hero slides.
+- Hardened nested business updates with explicit field whitelists and type/length validation.
+- Added safe URL validation for social links, policy links and CMS CTA destinations.
+- Restricted typography to an explicit safe font allowlist.
+- Validated all branding colors as six-digit hexadecimal values to prevent CSS injection through theme fields.
+- Added validated installment/business settings including currency, timezone, date format, installment limits and customer portal visibility.
+- Expanded the admin Business CMS to manage identity, branding, typography, media, contact, social links, policies, public content and SEO from one screen.
+- Prevented non-super-admin users from submitting business slug mutations.
+- Removed hardcoded storefront business claims from the hero, process, requirements/trust, footer and privacy-cookie messaging.
+- Public business API now returns an explicit safe projection rather than the complete Business document, preventing internal sequence/counter fields from leaking.
+- Public metadata and JSON-LD now use CMS business data instead of hardcoded location/marketing claims.
+- Public footer now uses configured business policy/social links and business-managed content.
+- Applied CMS typography line-height and heading scale to the storefront.
+- Kept Phase 3 Media references as the only media source of truth.
 
-### Phase 1 — Backend foundation and tenant security
-- Added centralized validation and tenant-scoped object lookups.
-- Enforced server-side customer limits and tenant-safe numbering.
-- Hardened API security headers, CORS, payload limits and production error handling.
+## Source-of-truth rule
 
-### Phase 2 — Authentication, sessions and account security
-- Replaced browser JWT storage with durable MongoDB server sessions.
-- Added HttpOnly/Secure/SameSite session cookies, idle and absolute expiry, logout/revocation and session history.
-- Hardened OTP storage/verification and added encrypted TOTP MFA for administrators.
-- Removed obsolete JWT generator/dependency and token persistence.
+Phase 4 does not add an override layer for old content. Business-facing marketing/branding claims are now stored in the Business CMS and rendered from that source.
 
-### Phase 3 — Persistent media and asset management
-- Added a tenant-scoped `Media` model with storage metadata, dimensions, MIME type, purpose, uploader and lifecycle state.
-- Added S3-compatible durable object storage; application filesystem is not the media source of truth.
-- Added server-side magic-byte validation, Sharp image metadata validation, 10 MB upload limits and upload rate limiting.
-- Added admin upload, listing/filtering, replacement and deletion workflows.
-- Prevented deletion of media that is still assigned to business, product or category records.
-- Replaced legacy business logo/OG URL fields, product image URL arrays and category image URLs with Media references.
-- Added admin-managed primary/light/dark/icon logos, favicon, OG image, hero banners, product images and category images.
-- Wired favicon/OG metadata and public storefront image rendering to the persisted Media records.
-- Added an explicit one-time legacy-media migration instead of retaining URL compatibility fields.
-- Removed external image URLs from the development seed.
+## Important migration/deployment note
 
-## Current production-readiness status
-
-The repository is **not production-ready yet**. Remaining dependency-ordered work includes:
-1. Phase 4 — business/branding CMS
-2. Phase 5 — product/category CMS
-3. Phase 6 — installment/financial integrity
-4. Phase 7 — customer portal authorization
-5. Phase 8 — analytics
-6. Phase 9 — SEO foundation
-7. Phase 10 — AEO/GEO
-8. Phase 11 — structured data
-9. Phase 12 — public UX/conversion
-10. Phase 13 — admin operations/reporting
-11. Phase 14 — red-team/security hardening
-12. Phase 15 — automated tests
-13. Phase 16 — production/deployment verification
-14. Phase 17 — final acceptance audit
-
-## Phase 3 deployment requirement
-
-Production must configure the S3-compatible variables documented in `backend/.env.example`. The public media base URL must be HTTPS in production.
-
-If an existing MongoDB database contains legacy URL-based images, back it up and run:
-
-```bash
-PHASE3_MEDIA_MIGRATION_CONFIRM=true npm run migrate:phase3-media
-```
-
-The migration intentionally removes the old URL representation. Replacement media is uploaded through the admin Media/Settings UI.
+Existing Business documents do not automatically gain meaningful CMS copy. An administrator should populate the new Business CMS fields before publishing the storefront. The development seed remains a separate fixture and was not made the production content source.
 
 ## Verification limitation
 
-GitHub source changes were inspected directly, but this environment does not have the repository runtime, production MongoDB, or object-storage credentials. Therefore dependency installation, Node/Next build, live upload/delete tests, browser cookie tests and real storage integration remain deployment/runtime verification tasks for Phase 16.
+GitHub source inspection was completed, including targeted searches for the previously hardcoded storefront claims. Runtime npm/Next build, MongoDB integration and browser verification are still deployment/runtime checks for Phase 16 because this environment has no project runtime/database credentials.
