@@ -20,7 +20,7 @@ export default function TrafficReportPage() {
 
   useEffect(() => {
     setError('');
-    api.get<Summary & { success: boolean }>(`/api/admin/analytics/summary?days=${days}`)
+    api.get<Summary & { success: boolean }>(`/api/analytics/summary?days=${days}`)
       .then(setData)
       .catch((err) => setError(err.message || 'Unable to load traffic analytics.'));
   }, [days]);
