@@ -8,6 +8,20 @@ Phase 0 is merged into `main`. Phase 1 backend foundation and multi-tenant secur
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
+### Phase 2 authentication and session security completed
+
+- Replaced browser-stored bearer JWT authentication with durable server-side sessions stored in MongoDB.
+- Session cookies are HttpOnly, SameSite=Strict, Secure in production, and use `__Host-` names in production.
+- Session records store creation, last activity, expiry, revocation, logout/end time, IP, and user-agent for operational history.
+- Enforced server-side idle and absolute session timeouts.
+- Added logout, logout-all, individual session revocation, and session-history endpoints for administrators.
+- Password changes revoke the administrator's other active sessions.
+- Replaced process-local OTP state with hashed, expiring MongoDB OTP challenges and atomic single-use verification.
+- Added encrypted TOTP MFA setup/enable/disable for administrators and MFA enforcement at login.
+- Removed the obsolete JWT generator, JWT environment configuration, and JWT dependency.
+- Frontend authentication no longer stores credentials or tokens in localStorage; API requests use credentials-included cookies.
+- Production OTP delivery is deliberately not faked: it returns a configuration error until a real delivery provider is connected.
+
 ### Phase 1 backend foundation completed
 
 - Added centralized request validation, ObjectId validation, public business resolution, and field allowlists.
