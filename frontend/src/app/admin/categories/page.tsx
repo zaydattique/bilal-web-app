@@ -11,7 +11,7 @@ interface Category {
   slug: string;
   description?: string;
   order: number;
-  isActive: boolean;
+  status: 'draft' | 'published' | 'archived';
 }
 
 export default function CategoriesPage() {
@@ -49,7 +49,7 @@ export default function CategoriesPage() {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Order</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Status</th><th className="px-4 py-3">Edit</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -61,17 +61,18 @@ export default function CategoriesPage() {
                 <td className="px-4 py-3">
                   <span
                     className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                      c.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                      c.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
                     }`}
                   >
-                    {c.isActive ? 'Active' : 'Inactive'}
+                    {c.status}
                   </span>
                 </td>
+                <td className="px-4 py-3"><Link href={`/admin/categories/${c._id}`} className="text-primary underline">Edit</Link></td>
               </tr>
             ))}
             {categories.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
                   No categories yet.{' '}
                   <Link href="/admin/categories/new" className="underline" style={{ color: 'var(--color-primary)' }}>
                     Add one
