@@ -46,9 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
   if (!response.ok) return {};
 
   const business = (await response.json()).business;
-  const title = business?.seo?.metaTitle
-    ? `Products | ${business.seo.metaTitle}`
-    : `Products | ${business?.businessName || 'Catalogue'}`;
+  const title = 'Products';
   const description = business?.seo?.metaDescription || business?.content?.description || 'Browse the published product catalogue.';
 
   return {
