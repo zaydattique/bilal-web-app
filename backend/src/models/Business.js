@@ -67,6 +67,9 @@ const businessSchema = new mongoose.Schema(
       metaKeywords: [String],
       ogImage: String,
     },
+    customerCount: { type: Number, default: 0, min: 0 },
+    customerSequence: { type: Number, default: 0, min: 0 },
+    accountSequence: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
