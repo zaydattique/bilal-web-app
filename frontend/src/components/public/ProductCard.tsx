@@ -11,7 +11,6 @@ export interface ProductCardData {
   description?: string;
   price: number;
   discountPrice?: number;
-  salePrice?: number;
   images?: string[];
   featured?: boolean;
   categoryId?: { name?: string; slug?: string };
@@ -21,9 +20,8 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
   const { business } = useTheme();
   const symbol = business?.settings?.currencySymbol || 'PKR';
   const image = product.images?.[0];
-  const sale = product.discountPrice ?? product.salePrice;
-  const displayPrice =
-    sale != null && sale < product.price ? sale : product.price;
+  const sale = product.discountPrice;
+  const displayPrice = sale != null && sale < product.price ? sale : product.price;
   const hasDiscount = sale != null && sale < product.price;
 
   return (
@@ -66,21 +64,17 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
           {product.name}
         </h3>
         {product.description && (
-          <p className="mt-1.5 line-clamp-2 text-sm text-slate-500">{product.description}</p>
+          <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-500">{product.description}</p>
         )}
-        <div className="mt-auto flex items-end justify-between gap-2 pt-4">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">From</p>
-            <p className="text-lg font-bold tracking-tight" style={{ color: 'var(--color-primary)' }}>
-              {formatPKR(displayPrice, symbol)}
-            </p>
-            {hasDiscount && (
-              <p className="text-xs text-slate-400 line-through">{formatPKR(product.price, symbol)}</p>
-            )}
-          </div>
-          <span className="text-xs font-semibold text-slate-500 opacity-0 transition group-hover:opacity-100">
-            View plan →
+        <div className="mt-auto flex items-baseline gap-2 pt-4">
+          <span className="text-lg font-bold" style={{ color: 'var(--color-primary)' }}>
+            {formatPKR(displayPrice, symbol)}
           </span>
+          {hasDiscount && (
+            <span className="text-xs text-slate-400 line-through">
+              {formatPKR(product.price, symbol)}
+            </span>
+          )}
         </div>
       </div>
     </Link>
