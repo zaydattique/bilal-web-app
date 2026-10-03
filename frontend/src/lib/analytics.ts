@@ -1,6 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const BUSINESS_SLUG = process.env.NEXT_PUBLIC_BUSINESS_SLUG;
-const BUSINESS_SLUG = process.env.NEXT_PUBLIC_BUSINESS_SLUG;
 
 function sessionId(): string {
   if (typeof window === 'undefined') return 'ssr';
