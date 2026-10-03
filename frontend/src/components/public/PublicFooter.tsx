@@ -61,7 +61,6 @@ export default function PublicFooter() {
           <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
             {business?.policies?.termsUrl && <li><a href={business.policies.termsUrl} className="hover:text-white">Terms</a></li>}
             {business?.policies?.privacyUrl && <li><a href={business.policies.privacyUrl} className="hover:text-white">Privacy</a></li>}
-            {business?.policies?.returnPolicy && <li><span>Return policy available from the business</span></li>}
             {business?.socialMedia?.instagram && <li><a href={business.socialMedia.instagram} rel="noreferrer" className="hover:text-white">Instagram</a></li>}
             {business?.socialMedia?.facebook && <li><a href={business.socialMedia.facebook} rel="noreferrer" className="hover:text-white">Facebook</a></li>}
           </ul>
