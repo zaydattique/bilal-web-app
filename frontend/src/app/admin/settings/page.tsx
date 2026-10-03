@@ -68,7 +68,6 @@ export default function SettingsPage() {
             minDownPayment: form.minDownPayment,
           },
         },
-        token
       );
       await refresh();
       setMessage('Settings saved successfully');
