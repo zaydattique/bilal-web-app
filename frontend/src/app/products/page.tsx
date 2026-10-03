@@ -6,7 +6,7 @@ import type { ProductCardData } from '@/components/public/ProductCard';
 const apiBase = () => process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '';
 const businessSlug = () => process.env.NEXT_PUBLIC_BUSINESS_SLUG || '';
 
-async function getBusinessId(): Promise<string | null> {
+async function getBusiness(): Promise<any | null> {
   const base = apiBase();
   const slug = businessSlug();
   if (!base || !slug) return null;
@@ -15,7 +15,7 @@ async function getBusinessId(): Promise<string | null> {
     { cache: 'no-store' }
   );
   if (!response.ok) return null;
-  return (await response.json()).business?._id || null;
+  return (await response.json()).business || null;
 }
 
 async function getCatalogue(businessId: string) {
