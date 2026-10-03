@@ -32,7 +32,6 @@ export default function NewCategoryPage() {
           order: Number(form.order) || 0,
           isActive: form.isActive,
         },
-        token
       );
       router.push('/admin/categories');
     } catch (err: unknown) {
