@@ -7,7 +7,7 @@ import { useTheme } from '@/context/ThemeContext';
 import api from '@/lib/api';
 
 export default function CollectionsReport() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const currency = business?.settings?.currencySymbol || 'PKR';
   const [days, setDays] = useState(30);
@@ -16,7 +16,7 @@ export default function CollectionsReport() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     setLoading(true);
     api
       .get<{ success: boolean; trend: typeof trend; totalCollected: number }>(
