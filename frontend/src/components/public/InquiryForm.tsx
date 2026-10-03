@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import api, { ApiError } from '@/lib/api';
 import { trackCta } from '@/lib/analytics';
 import { useTheme } from '@/context/ThemeContext';
+import { TENURE_OPTIONS } from '@/lib/installmentLogic';
 
 interface Props {
   productId?: string;
@@ -25,6 +26,14 @@ export default function InquiryForm({
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [downPct, setDownPct] = useState(preferredDownPayment ?? 20);
+  const maxMonths = business?.settings?.maxInstallments ?? 24;
+  const tenureOptions = TENURE_OPTIONS.filter((months) => months <= maxMonths);
+  const defaultTenure = preferredMonths && tenureOptions.includes(preferredMonths as (typeof TENURE_OPTIONS)[number])
+    ? preferredMonths
+    : tenureOptions.includes(12)
+      ? 12
+      : tenureOptions[0] || 6;
+  const [months, setMonths] = useState(defaultTenure);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -46,7 +55,7 @@ export default function InquiryForm({
         preferredDownPayment: downPct,
         notes: [
           productName ? `Product: ${productName}` : null,
-          preferredMonths ? `Preferred tenure: ${preferredMonths} months` : null,
+          `Preferred tenure: ${months} months`,
           `Preferred down payment: ${downPct}%`,
         ]
           .filter(Boolean)
@@ -113,6 +122,8 @@ export default function InquiryForm({
           id="inq-name"
           className="input"
           required
+          autoComplete="name"
+          minLength={2}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Your name"
@@ -128,6 +139,8 @@ export default function InquiryForm({
           className="input"
           required
           type="tel"
+          autoComplete="tel"
+          inputMode="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="03XXXXXXXXX"
@@ -142,10 +155,25 @@ export default function InquiryForm({
           id="inq-email"
           className="input"
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
         />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium" htmlFor="inq-tenure">Preferred tenure</label>
+        <select
+          id="inq-tenure"
+          className="input"
+          value={months}
+          onChange={(e) => setMonths(Number(e.target.value))}
+        >
+          {tenureOptions.map((option) => (
+            <option key={option} value={option}>{option} months</option>
+          ))}
+        </select>
       </div>
 
       <div>

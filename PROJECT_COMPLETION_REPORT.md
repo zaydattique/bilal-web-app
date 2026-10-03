@@ -1,7 +1,7 @@
 # Project Completion Report — Through Phase 9
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 9 — SEO Foundation  
+**Current phase:** Phase 12 — Public UX & Conversion  
 **Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
 ## Completed
@@ -139,3 +139,14 @@ Source-level review and GitHub diff inspection were completed. Runtime Node/Next
 
 ### Phase 9 verification limitation
 Source-level review, branch diff inspection and targeted route/config review were completed. Runtime Next.js build, generated HTML inspection, live robots/sitemap responses, Mongo-backed historical-category redirect tests and crawler validation were not run because the project runtime/database credentials are unavailable in this environment. The implementation follows the Next.js App Router metadata, robots and sitemap conventions, with private-route indexing protection enforced at the HTTP response layer.
+
+### Phase 12 — Public UX & Conversion
+- Added a canonical public `/inquiry` route that reuses the existing InquiryForm and Lead API rather than creating a second lead workflow.
+- Added desktop/mobile navigation links for Categories and the installment-plan conversion path.
+- Inquiry submissions now record the selected tenure and down-payment preference; form controls include mobile-friendly autocomplete/input hints.
+- Category detail pages now provide responsive CMS-backed imagery, published product counts, direct product browsing and installment-plan CTAs.
+- Homepage featured-product navigation now exposes a direct installment-plan CTA.
+- No duplicate media, lead, product, category or CMS source of truth was introduced.
+
+### Phase 12 verification limitation
+Source-level review and GitHub diff inspection were completed. Runtime Next.js build, browser responsive testing and live lead-submission testing were not run because this environment does not have the project's runtime/database credentials or dependency installation access. These remain part of the later automated testing and production verification phases.

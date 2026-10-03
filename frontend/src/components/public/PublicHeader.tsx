@@ -11,6 +11,7 @@ import clsx from 'clsx';
 const links = [
   { href: '/', label: 'Home' },
   { href: '/products', label: 'Products' },
+  { href: '/categories', label: 'Categories' },
   { href: '/#how-it-works', label: 'How it works' },
 ];
 
@@ -46,17 +47,14 @@ export default function PublicHeader() {
       <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-4 sm:pt-4">
         <header
           className={clsx(
-            'pointer-events-auto flex w-full max-w-[34rem] items-center gap-1 rounded-full border px-1.5 py-1.5 transition-all duration-300 sm:gap-2 sm:px-2.5 sm:py-2',
+            'pointer-events-auto flex w-full max-w-5xl items-center gap-1 rounded-full border px-1.5 py-1.5 transition-all duration-300 sm:gap-2 sm:px-2.5 sm:py-2',
             scrolled
               ? 'border-black/[0.06] bg-white/75 shadow-[0_8px_40px_rgba(15,23,42,0.14)] backdrop-blur-2xl'
               : 'border-black/[0.08] bg-white/65 shadow-[0_4px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl'
           )}
           style={{ WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
         >
-          <Link
-            href="/"
-            className="flex min-w-0 flex-1 items-center gap-2 rounded-full py-0.5 pl-1 pr-2 active:opacity-80"
-          >
+          <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2 rounded-full py-0.5 pl-1 pr-2 active:opacity-80">
             {business?.logo?.primary?.publicUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -67,34 +65,27 @@ export default function PublicHeader() {
             ) : (
               <div
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm sm:h-9 sm:w-9 sm:text-sm"
-                style={{
-                  background:
-                    'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 88%, white), var(--color-primary))',
-                }}
+                style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 88%, white), var(--color-primary))' }}
               >
                 {(business?.businessName || 'B')[0]}
               </div>
             )}
-            <span className="truncate text-[13px] font-semibold tracking-tight text-slate-900 sm:text-[14px]">
+            <span className="hidden max-w-[170px] truncate text-[13px] font-semibold tracking-tight text-slate-900 sm:block sm:text-[14px]">
               {business?.businessName || 'Installment Store'}
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-0.5 md:flex">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 md:flex">
             {links.map((l) => {
-              const active =
-                l.href === '/'
-                  ? pathname === '/'
-                  : pathname.startsWith(l.href.split('#')[0]) && l.href !== '/';
+              const basePath = l.href.split('#')[0];
+              const active = l.href === '/' ? pathname === '/' : pathname.startsWith(basePath) && l.href !== '/';
               return (
                 <Link
                   key={l.href}
                   href={l.href}
                   className={clsx(
-                    'rounded-full px-3.5 py-1.5 text-[13px] font-medium transition active:scale-95',
-                    active
-                      ? 'bg-slate-900 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-black/[0.04] hover:text-slate-900'
+                    'rounded-full px-3 py-1.5 text-[13px] font-medium transition active:scale-95 lg:px-3.5',
+                    active ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-black/[0.04] hover:text-slate-900'
                   )}
                 >
                   {l.label}
@@ -103,38 +94,24 @@ export default function PublicHeader() {
             })}
           </nav>
 
-          <div className="flex shrink-0 items-center gap-0.5">
+          <div className="flex shrink-0 items-center gap-1">
             {phone && (
-              <a
-                href={`tel:${phone.replace(/\s/g, '')}`}
-                className="hidden h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-black/[0.05] active:scale-95 lg:inline-flex"
-                aria-label="Call"
-              >
+              <a href={`tel:${phone.replace(/\s/g, '')}`} className="hidden h-10 w-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-black/[0.05] active:scale-95 lg:inline-flex" aria-label="Call shop">
                 <Phone size={18} strokeWidth={1.75} />
               </a>
             )}
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-800 transition hover:bg-black/[0.05] active:scale-95"
-              aria-label="Cart"
-            >
+            <Link href="/inquiry" className="hidden min-h-10 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-white shadow-sm transition active:scale-95 md:inline-flex" style={{ background: 'var(--color-primary)' }}>
+              Get installment plan
+            </Link>
+            <button type="button" onClick={() => setOpen(true)} className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-800 transition hover:bg-black/[0.05] active:scale-95" aria-label="Cart">
               <ShoppingBag size={18} strokeWidth={1.75} />
               {totalItems > 0 && (
-                <span
-                  className="absolute right-1 top-1 flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-0.5 text-[10px] font-bold text-white"
-                  style={{ background: 'var(--color-primary)' }}
-                >
+                <span className="absolute right-1 top-1 flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-0.5 text-[10px] font-bold text-white" style={{ background: 'var(--color-primary)' }}>
                   {totalItems}
                 </span>
               )}
             </button>
-            <button
-              type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-slate-800 transition hover:bg-black/[0.05] active:scale-95 md:hidden"
-              aria-label={menuOpen ? 'Close' : 'Menu'}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
+            <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full text-slate-800 transition hover:bg-black/[0.05] active:scale-95 md:hidden" aria-label={menuOpen ? 'Close' : 'Menu'} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={20} strokeWidth={1.75} /> : <Menu size={20} strokeWidth={1.75} />}
             </button>
           </div>
@@ -145,40 +122,22 @@ export default function PublicHeader() {
 
       {menuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
-            aria-label="Close menu"
-            onClick={() => setMenuOpen(false)}
-          />
-          <div
-            className="absolute inset-x-3 top-[4.75rem] overflow-hidden rounded-[22px] border border-black/[0.06] bg-white/90 p-2 shadow-[0_20px_60px_rgba(15,23,42,0.2)]"
-            style={{ WebkitBackdropFilter: 'blur(28px) saturate(180%)' }}
-          >
+          <button type="button" className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" aria-label="Close menu" onClick={() => setMenuOpen(false)} />
+          <div className="absolute inset-x-3 top-[4.75rem] overflow-hidden rounded-[22px] border border-black/[0.06] bg-white/90 p-2 shadow-[0_20px_60px_rgba(15,23,42,0.2)]" style={{ WebkitBackdropFilter: 'blur(28px) saturate(180%)' }}>
             {links.map((l) => {
-              const active =
-                l.href === '/'
-                  ? pathname === '/'
-                  : pathname.startsWith(l.href.split('#')[0]) && l.href !== '/';
+              const basePath = l.href.split('#')[0];
+              const active = l.href === '/' ? pathname === '/' : pathname.startsWith(basePath) && l.href !== '/';
               return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={clsx(
-                    'flex min-h-[48px] items-center rounded-2xl px-4 text-[16px] font-medium transition active:scale-[0.99]',
-                    active ? 'bg-slate-900 text-white' : 'text-slate-800 active:bg-black/[0.04]'
-                  )}
-                  onClick={() => setMenuOpen(false)}
-                >
+                <Link key={l.href} href={l.href} className={clsx('flex min-h-[48px] items-center rounded-2xl px-4 text-[16px] font-medium transition active:scale-[0.99]', active ? 'bg-slate-900 text-white' : 'text-slate-800 active:bg-black/[0.04]')} onClick={() => setMenuOpen(false)}>
                   {l.label}
                 </Link>
               );
             })}
+            <Link href="/inquiry" className="mt-1 flex min-h-[48px] items-center justify-center rounded-2xl px-4 text-[16px] font-semibold text-white" style={{ background: 'var(--color-primary)' }} onClick={() => setMenuOpen(false)}>
+              Get installment plan
+            </Link>
             {phone && (
-              <a
-                href={`tel:${phone.replace(/\s/g, '')}`}
-                className="flex min-h-[48px] items-center gap-2.5 rounded-2xl px-4 text-[16px] font-medium text-slate-800 active:bg-black/[0.04]"
-              >
+              <a href={`tel:${phone.replace(/\s/g, '')}`} className="flex min-h-[48px] items-center gap-2.5 rounded-2xl px-4 text-[16px] font-medium text-slate-800 active:bg-black/[0.04]">
                 <Phone size={18} strokeWidth={1.75} />
                 Call shop
               </a>
