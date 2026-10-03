@@ -9,7 +9,7 @@ interface Category { _id:string; name:string; slug:string; customFields?: { key:
 interface ProductData {
   _id?:string; name:string; slug:string; sku?:string|null; brand?:string|null; shortDescription?:string; description?:string;
   cashPrice:number; discountPrice?:number|null; inventory:number; featured:boolean; status:'draft'|'published'|'scheduled'|'archived';
-  scheduledAt?:string|null; categoryId?:{_id:string}|string|null; media?:{_id:string;publicUrl:string;altText?:string}[];
+  scheduledAt?:string|null; categoryId?:{_id:string}|string|null; media?:string[];
   installment?:{advanceAmount:number;financedAmount:number;markupAmount:number;totalPayable:number;tenureMonths:number;installmentAmount:number;frequency:'weekly'|'biweekly'|'monthly'};
   seo?:{title:string;description:string;keywords:string[]}; aeo?:{summary:string;keyFacts:string[];buyingIntent:string};
   faqs?:{question:string;answer:string}[]; customFieldValues?:{key:string;value:string}[];
@@ -36,9 +36,10 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   ]).then(([cats,res])=>{
     setCategories(cats.categories||[]);
     if(res?.product) {
-      const p=res.product;
+      const p:any=res.product;
+      const mediaIds=(p.media||[]).map((m:any)=>typeof m==='string'?m:m._id).filter(Boolean);
       setForm({...blank,...p,categoryId:typeof p.categoryId==='object' ? p.categoryId?._id||null : p.categoryId||null,
-        media:(p.media||[]).map((m:any)=>m._id),
+        media:mediaIds,
         installment:{...blank.installment,...p.installment},seo:{...blank.seo,...p.seo},aeo:{...blank.aeo,...p.aeo},
       });
     }
