@@ -19,6 +19,7 @@ import adminUserRoutes from './routes/adminUser.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import customerPortalRoutes from './routes/customerPortal.routes.js';
+import mediaRoutes from './routes/media.routes.js';
 
 const requiredSecrets = ['MONGODB_URI', 'APP_ENCRYPTION_KEY'];
 for (const name of requiredSecrets) {
@@ -105,6 +106,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/business', businessRoutes);
+app.use('/api/admin/media', mediaRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/audit-log', auditRoutes);
 app.use('/api/admin/reports', reportRoutes);
