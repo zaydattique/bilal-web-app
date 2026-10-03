@@ -13,6 +13,8 @@ interface Account {
   remainingAmount: number;
   status: string;
   downPayment: number;
+  productNameSnapshot?: string | null;
+  productId?: { name: string } | null;
 }
 
 interface Due {
@@ -80,6 +82,8 @@ export default function PortalHome() {
                 {a.status}
               </span>
             </div>
+            <p className="mt-2 text-sm text-gray-500">Purchased item</p>
+            <p className="text-sm font-medium">{a.productNameSnapshot || a.productId?.name || 'Product information unavailable'}</p>
             <p className="mt-2 text-sm text-gray-500">Remaining</p>
             <p className="text-xl font-bold" style={{ color: 'var(--color-primary)' }}>
               {currency} {a.remainingAmount.toLocaleString('en-PK')}
