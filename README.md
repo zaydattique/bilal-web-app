@@ -143,6 +143,15 @@ The seed data is for development/testing only. Production business information, 
 
 
 
+### Phase 11 Structured Data completed
+
+- Replaced the previous client-side generic Store JSON-LD with server-rendered, page-scoped structured data.
+- Public pages now emit current CMS-driven Organization/LocalBusiness, WebSite, WebPage, BreadcrumbList, Product and Offer entities where applicable.
+- Product Offer pricing uses the canonical current product price and business currency.
+- Structured data fails closed when the public site URL is missing/invalid or the business identity is unavailable.
+- No stale stock/availability claim is emitted.
+- No duplicate schema source, database model or parallel CMS layer was introduced.
+
 ### Phase 10 AEO/GEO completed
 
 - Product pages expose the existing CMS AEO summary, buying intent and key facts as visible, semantic answer content.
