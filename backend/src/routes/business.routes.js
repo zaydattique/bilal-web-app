@@ -140,7 +140,15 @@ const validateNested = (body) => {
   }
 
   if (body.socialMedia) {
-    for (const key of SOCIAL_FIELDS) assertSafeUrl(body.socialMedia[key], `socialMedia.${key}`);
+    for (const key of ['facebook', 'instagram', 'twitter']) {
+      assertSafeUrl(body.socialMedia[key], `socialMedia.${key}`);
+    }
+    if (body.socialMedia.whatsapp !== undefined) {
+      const whatsapp = assertString(body.socialMedia.whatsapp, 'socialMedia.whatsapp', 40);
+      if (!/^\\+?[0-9 ()-]{7,30}$/.test(whatsapp)) {
+        assertSafeUrl(whatsapp, 'socialMedia.whatsapp');
+      }
+    }
   }
 
   if (body.policies) {
