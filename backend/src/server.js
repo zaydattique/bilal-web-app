@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
+import { assertStorageConfigured } from './utils/mediaStorage.js';
 
 import authRoutes from './routes/auth.routes.js';
 import businessRoutes from './routes/business.routes.js';
@@ -28,6 +29,7 @@ for (const name of requiredSecrets) {
     throw new Error(`${name} must be at least 32 characters`);
   }
 }
+if (process.env.NODE_ENV === 'production') assertStorageConfigured();
 
 const app = express();
 app.disable('x-powered-by');
