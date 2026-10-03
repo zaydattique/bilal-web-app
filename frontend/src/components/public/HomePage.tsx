@@ -50,22 +50,11 @@ interface HomePageProps {
 }
 
 export default function HomePage({ initialBusiness, initialFeatured, initialCategories }: HomePageProps) {
-  const { business: contextBusiness, loading: themeLoading, offline } = useTheme();
+  const { business: contextBusiness, offline } = useTheme();
   const business = contextBusiness || initialBusiness;
   const featured = initialFeatured;
   const categories = initialCategories;
   const loading = false;
-
-  if (themeLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div
-          className="h-9 w-9 animate-spin rounded-full border-[3px] border-t-transparent"
-          style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
-        />
-      </div>
-    );
-  }
 
   const phone = business?.contact?.phone || business?.socialMedia?.whatsapp;
   const address = business?.contact?.address;
