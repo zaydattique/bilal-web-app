@@ -41,22 +41,23 @@ const getPublicBusiness = async (): Promise<PublicBusiness | null> => {
 
 export async function generateMetadata(): Promise<Metadata> {
   const business = await getPublicBusiness();
-  const title =
-    business?.seo?.metaTitle || business?.businessName || '';
-  const description =
-    business?.seo?.metaDescription || business?.content?.description || '';
+  const title = business?.seo?.metaTitle || business?.businessName || '';
+  const description = business?.seo?.metaDescription || business?.content?.description || '';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) return { title: title || undefined, description: description || undefined };
 
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+    metadataBase: new URL(siteUrl),
     title: {
-      default: title,
-      template: `%s | ${business?.businessName || 'Installment Shop Lahore'}`,
+      default: title || undefined,
+      template: business?.businessName ? `%s | ${business.businessName}` : '%s',
     },
     description,
     openGraph: {
       type: 'website',
       locale: 'en_PK',
-      siteName: business?.businessName || 'Installment Shop Lahore',
+      siteName: business?.businessName || undefined,
+      url: siteUrl,
       ...(business?.seo?.ogImage?.publicUrl
         ? {
             images: [
@@ -71,13 +72,9 @@ export async function generateMetadata(): Promise<Metadata> {
     ...(business?.favicon?.publicUrl
       ? { icons: { icon: business.favicon.publicUrl } }
       : {}),
-    robots: {
-      index: true,
-      follow: true,
-    },
-    alternates: {
-      canonical: '/',
-    },
+    twitter: { card: 'summary_large_image' },
+    robots: { index: true, follow: true },
+    alternates: { canonical: '/' },
   };
 }
 
