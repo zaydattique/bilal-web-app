@@ -257,6 +257,11 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
   try {
     assertAllowedFields(req.body, FIELDS);
     const data = await buildData(req.body, req.businessId);
+    const reservedSlug = await Category.exists({
+      businessId: req.businessId,
+      historicalSlugs: data.slug,
+    });
+    if (reservedSlug) throw error('Category slug is reserved by a previous category URL', 409);
 
     const category = await Category.create({ businessId: req.businessId, ...data });
 
