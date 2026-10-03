@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, FormEvent } from 'react';
+import { useEffect, useRef, useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -25,6 +25,8 @@ export default function NewPaymentPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const pendingKey = useRef({ fingerprint: '', key: '' });
+
   const [form, setForm] = useState({
     accountId: '',
     paymentAmount: '',
@@ -51,6 +53,10 @@ export default function NewPaymentPage() {
     setSaving(true);
     setError('');
     setSuccess('');
+    const requestFingerprint = JSON.stringify(form);
+    if (pendingKey.current.fingerprint !== requestFingerprint) {
+      pendingKey.current = { fingerprint: requestFingerprint, key: globalThis.crypto.randomUUID() };
+    }
     try {
       const res = await api.post<{ success: boolean; payment: { receiptNumber: string } }>(
         '/api/admin/payments',
@@ -60,6 +66,7 @@ export default function NewPaymentPage() {
           paymentMethod: form.paymentMethod,
           referenceNumber: form.referenceNumber || undefined,
           notes: form.notes || undefined,
+          idempotencyKey: pendingKey.current.key,
         },
       );
       setSuccess(`Payment recorded. Receipt: ${res.payment.receiptNumber}`);
