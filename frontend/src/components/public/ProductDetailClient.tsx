@@ -15,7 +15,11 @@ export interface PublicProduct {
   cashPrice:number; discountPrice?:number|null; media?:{_id:string;publicUrl:string;altText?:string}[];
   categoryId?:{name?:string;slug?:string}; installment?:{advanceAmount:number;financedAmount:number;markupAmount:number;totalPayable:number;tenureMonths:number;installmentAmount:number;frequency:string};
   specs?:{weight?:number|null;dimensions?:{length?:number|null;width?:number|null;height?:number|null}};
-  customFieldValues?:{key:string;value:string}[]; faqs?:{question:string;answer:string}[];
+  customFieldValues?:{key:string;value:string}[];
+  seo?:{title?:string;description?:string;keywords?:string[]};
+  aeo?:{summary?:string;keyFacts?:string[];buyingIntent?:string};
+  geo?:{intent?:string;localNotes?:string};
+  faqs?:{question:string;answer:string}[];
 }
 
 export default function ProductDetailClient({product,business}:{product:PublicProduct;business:any}) {
