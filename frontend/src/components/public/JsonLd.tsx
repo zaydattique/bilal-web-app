@@ -96,6 +96,7 @@ export default function JsonLd({
   crumbs = [],
   product,
   category,
+  includePage = true,
 }: {
   business: BusinessData;
   siteUrl?: string;
@@ -105,12 +106,13 @@ export default function JsonLd({
   crumbs?: Crumb[];
   product?: ProductData;
   category?: CategoryData;
+  includePage?: boolean;
 }) {
   const pageUrl = absoluteUrl(siteUrl, pagePath);
   const graph = businessGraph(business, siteUrl);
   const businessId = siteUrl ? `${siteUrl.replace(/\/$/, '')}/#business` : undefined;
 
-  graph.push({
+  if (includePage) graph.push({
     '@type': 'WebPage',
     '@id': `${pageUrl}#webpage`,
     url: pageUrl,
