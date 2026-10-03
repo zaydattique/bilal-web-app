@@ -9,9 +9,9 @@ export interface ProductCardData {
   name: string;
   slug: string;
   description?: string;
-  price: number;
+  cashPrice: number;
   discountPrice?: number;
-  images?: { _id: string; publicUrl: string; altText?: string }[];
+  media?: { _id: string; publicUrl: string; altText?: string }[];
   featured?: boolean;
   categoryId?: { name?: string; slug?: string };
 }
@@ -19,10 +19,10 @@ export interface ProductCardData {
 export default function ProductCard({ product }: { product: ProductCardData }) {
   const { business } = useTheme();
   const symbol = business?.settings?.currencySymbol || 'PKR';
-  const image = product.images?.[0];
+  const image = product.media?.[0];
   const sale = product.discountPrice;
-  const displayPrice = sale != null && sale < product.price ? sale : product.price;
-  const hasDiscount = sale != null && sale < product.price;
+  const displayPrice = sale != null && sale < product.cashPrice ? sale : product.cashPrice;
+  const hasDiscount = sale != null && sale < product.cashPrice;
 
   return (
     <Link
@@ -72,7 +72,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
           </span>
           {hasDiscount && (
             <span className="text-xs text-slate-400 line-through">
-              {formatPKR(product.price, symbol)}
+              {formatPKR(product.cashPrice, symbol)}
             </span>
           )}
         </div>
