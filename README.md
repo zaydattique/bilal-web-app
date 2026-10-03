@@ -4,7 +4,7 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–10 are implemented on the current branch. Phase 10 adds CMS-driven AEO/GEO answer content to the server-rendered public storefront. Runtime verification is still required before production.
+Phases 0–12 are implemented on the current branch. Phase 12 completes the public storefront conversion flow with responsive category UX and a canonical installment inquiry path. Runtime verification is still required before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
@@ -172,3 +172,12 @@ The seed data is for development/testing only. Production business information, 
 - Removed the remaining hardcoded `bilal-electronics` inquiry fallback; business identity now comes only from the CMS or explicit environment configuration.
 - Removed the fake `Installment Shop Lahore` and localhost metadata fallbacks from production metadata generation.
 - No duplicate SEO route, legacy `/catalog` route, or override metadata layer was introduced.
+
+### Phase 12 Public UX & Conversion completed
+
+- Added responsive public navigation for Home, Products, Categories and installment-plan inquiries on desktop and mobile.
+- Added the canonical public `/inquiry` page using the existing InquiryForm and existing Lead API; no duplicate lead implementation was introduced.
+- Inquiry forms now capture preferred tenure alongside down-payment preference and use mobile-friendly browser autofill/input hints.
+- Category pages now use CMS category media in a responsive header, show the published product count, provide direct product browsing and surface installment-plan CTAs.
+- Homepage featured-product navigation now includes a direct installment-plan CTA.
+- Existing Media references, Business CMS content, Product/Category CMS content and Lead API remain the source of truth.
