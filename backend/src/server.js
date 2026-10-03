@@ -99,6 +99,17 @@ app.use('/api/auth/admin/login', authLimiter);
 app.use('/api/auth/customer/login', authLimiter);
 app.use('/api/auth/customer/verify-otp', authLimiter);
 
+const financialWriteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many financial write requests. Try again later.' },
+});
+app.post('/api/admin/accounts', financialWriteLimiter);
+app.post('/api/admin/payments', financialWriteLimiter);
+app.post('/api/admin/payments/:id/reverse', financialWriteLimiter);
+
 // Legacy local uploads are intentionally not exposed by Phase 1.
 // Persistent media is introduced in Phase 3.
 

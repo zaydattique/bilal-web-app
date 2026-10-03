@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Account from '../models/Account.js';
 import InstallmentPlan from '../models/InstallmentPlan.js';
 import Customer from '../models/Customer.js';
@@ -13,21 +14,38 @@ import {
 } from '../middleware/security.js';
 
 const router = express.Router();
+const MAX_ACCOUNTS = 200;
 
-const allocateAccountNumber = async (businessId) => {
-  const business = await Business.findOneAndUpdate(
-    { _id: businessId, isActive: true },
-    { $inc: { accountSequence: 1 } },
-    { new: true }
-  ).select('accountSequence');
-
-  if (!business) {
-    const error = new Error('Business not found');
-    error.statusCode = 404;
+const normalizeInstallments = (installments) => {
+  if (!Array.isArray(installments) || installments.length < 1 || installments.length > 60) {
+    const error = new Error('installments must contain between 1 and 60 items');
+    error.statusCode = 400;
     throw error;
   }
 
-  return `ACC-${String(business.accountSequence).padStart(5, '0')}`;
+  return installments.map((inst, index) => {
+    if (!inst || typeof inst !== 'object' || Array.isArray(inst)) {
+      const error = new Error(`Invalid installment at index ${index}`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const dueAmount = requirePositiveNumber(inst.dueAmount, `installment[${index}].dueAmount`);
+    const dueDate = new Date(inst.dueDate);
+    if (Number.isNaN(dueDate.getTime())) {
+      const error = new Error(`Invalid installment[${index}].dueDate`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return {
+      installmentNumber: index + 1,
+      dueDate,
+      dueAmount,
+      paidAmount: 0,
+      status: 'pending',
+    };
+  });
 };
 
 router.get('/', protectAdmin, async (req, res, next) => {
@@ -124,34 +142,11 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
     const customerId = requireObjectId(req.body.customerId, 'customer id');
     const totalAmount = requirePositiveNumber(req.body.totalAmount, 'totalAmount');
     const downPayment = requireNonNegativeNumber(req.body.downPayment ?? 0, 'downPayment');
-    const installments = req.body.installments;
-
-    if (!Array.isArray(installments) || installments.length < 1 || installments.length > 60) {
-      return res.status(400).json({ success: false, message: 'installments must contain between 1 and 60 items' });
-    }
     if (downPayment >= totalAmount) {
       return res.status(400).json({ success: false, message: 'downPayment must be less than totalAmount' });
     }
 
-    const customer = await Customer.findOne({ _id: customerId, businessId: req.businessId, status: 'active' });
-    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
-
-    const normalizedInstallments = installments.map((inst, index) => {
-      if (!inst || typeof inst !== 'object') {
-        const error = new Error(`Invalid installment at index ${index}`);
-        error.statusCode = 400;
-        throw error;
-      }
-      const dueAmount = requirePositiveNumber(inst.dueAmount, `installment[${index}].dueAmount`);
-      const dueDate = new Date(inst.dueDate);
-      if (Number.isNaN(dueDate.getTime())) {
-        const error = new Error(`Invalid installment[${index}].dueDate`);
-        error.statusCode = 400;
-        throw error;
-      }
-      return { installmentNumber: index + 1, dueDate, dueAmount, paidAmount: 0, status: 'pending' };
-    });
-
+    const normalizedInstallments = normalizeInstallments(req.body.installments);
     const remainingAmount = totalAmount - downPayment;
     const installmentSum = normalizedInstallments.reduce((sum, item) => sum + item.dueAmount, 0);
     if (Math.abs(installmentSum - remainingAmount) > 0.01) {
@@ -161,35 +156,63 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
       });
     }
 
-    const accountNumber = await allocateAccountNumber(req.businessId);
-    const account = await Account.create({
-      businessId: req.businessId,
-      customerId,
-      accountNumber,
-      totalAmount,
-      downPayment,
-      remainingAmount,
-      status: 'active',
+    const account = await mongoose.connection.transaction(async (session) => {
+      const customer = await Customer.findOne({
+        _id: customerId,
+        businessId: req.businessId,
+        status: 'active',
+      }).session(session);
+      if (!customer) {
+        const error = new Error('Customer not found');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      const business = await Business.findOneAndUpdate(
+        { _id: req.businessId, isActive: true, accountCount: { $lt: MAX_ACCOUNTS } },
+        { $inc: { accountSequence: 1, accountCount: 1 } },
+        { new: true, session }
+      ).select('accountSequence accountCount');
+
+      if (!business) {
+        const error = new Error(`Maximum of ${MAX_ACCOUNTS} customer accounts has been reached`);
+        error.statusCode = 409;
+        throw error;
+      }
+
+      const accountNumber = `ACC-${String(business.accountSequence).padStart(5, '0')}`;
+      const [createdAccount] = await Account.create([{
+        businessId: req.businessId,
+        customerId,
+        accountNumber,
+        totalAmount,
+        downPayment,
+        remainingAmount,
+        status: 'active',
+      }], { session });
+
+      const [plan] = await InstallmentPlan.create([{
+        businessId: req.businessId,
+        accountId: createdAccount._id,
+        numberOfInstallments: normalizedInstallments.length,
+        installments: normalizedInstallments,
+        totalInstallments: normalizedInstallments.length,
+        totalPaid: downPayment,
+        remainingInstallments: normalizedInstallments.length,
+        remainingAmount,
+      }], { session });
+
+      createdAccount.installmentPlanId = plan._id;
+      await createdAccount.save({ session });
+
+      await Customer.updateOne(
+        { _id: customer._id, businessId: req.businessId },
+        { $inc: { totalAccounts: 1, totalDue: remainingAmount } },
+        { session }
+      );
+
+      return createdAccount;
     });
-
-    const plan = await InstallmentPlan.create({
-      businessId: req.businessId,
-      accountId: account._id,
-      numberOfInstallments: normalizedInstallments.length,
-      installments: normalizedInstallments,
-      totalInstallments: normalizedInstallments.length,
-      totalPaid: downPayment,
-      remainingInstallments: normalizedInstallments.length,
-      remainingAmount,
-    });
-
-    account.installmentPlanId = plan._id;
-    await account.save();
-
-    await Customer.updateOne(
-      { _id: customer._id, businessId: req.businessId },
-      { $inc: { totalAccounts: 1, totalDue: remainingAmount } }
-    );
 
     await logAction({
       businessId: req.businessId,
@@ -221,8 +244,16 @@ router.patch('/:id/status', protectAdmin, requireRole('super_admin', 'admin', 'm
     const account = await Account.findOne({ _id: accountId, businessId: req.businessId });
     if (!account) return res.status(404).json({ success: false, message: 'Account not found' });
 
+    if (['paid', 'closed'].includes(status) && account.remainingAmount > 0.01) {
+      return res.status(400).json({ success: false, message: 'Account cannot be marked paid or closed while a balance remains' });
+    }
+    if (status === 'active' && account.remainingAmount <= 0.01) {
+      return res.status(400).json({ success: false, message: 'A fully paid account cannot be reopened as active' });
+    }
+
     account.status = status;
     if (status === 'closed' || status === 'paid') account.closedDate = new Date();
+    else account.closedDate = null;
     await account.save();
 
     await logAction({
@@ -242,20 +273,30 @@ router.patch('/:id/status', protectAdmin, requireRole('super_admin', 'admin', 'm
 
 router.post('/:id/close', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res, next) => {
   try {
-    if (Object.keys(req.body || {}).length) {
-      assertAllowedFields(req.body, []);
-    }
+    if (Object.keys(req.body || {}).length) assertAllowedFields(req.body, []);
+
     const accountId = requireObjectId(req.params.id, 'account id');
     const account = await Account.findOne({ _id: accountId, businessId: req.businessId });
     if (!account) return res.status(404).json({ success: false, message: 'Account not found' });
 
-    if (account.remainingAmount > 0 && account.status !== 'paid') {
+    if (account.remainingAmount > 0.01) {
       return res.status(400).json({ success: false, message: 'Cannot close account with remaining balance' });
     }
 
     account.status = 'closed';
     account.closedDate = new Date();
     await account.save();
+
+    await logAction({
+      businessId: req.businessId,
+      adminId: req.admin._id,
+      action: 'close',
+      entityType: 'account',
+      entityId: account._id,
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
     res.json({ success: true, account });
   } catch (error) { next(error); }
 });
