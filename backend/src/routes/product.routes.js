@@ -209,6 +209,12 @@ router.put('/:id', protectAdmin, requireRole('super_admin','admin','manager'), a
     if (product.slug !== oldSlug) {
       const duplicate = await Product.exists({ businessId: req.businessId, slug: product.slug, _id: { $ne: productId } });
       if (duplicate) throw Object.assign(new Error('Product slug already exists'), { statusCode: 409 });
+      const oldSlugUsedByAnotherProduct = await Product.exists({ businessId: req.businessId, slug: oldSlug, _id: { $ne: productId } });
+      if (oldSlugUsedByAnotherProduct) throw Object.assign(new Error('Previous slug is already used by another product'), { statusCode: 409 });
+      const oldRedirect = await ProductSlugRedirect.findOne({ businessId: req.businessId, oldSlug }).select('productId');
+      if (oldRedirect && String(oldRedirect.productId) !== String(product._id)) {
+        throw Object.assign(new Error('Previous slug is already reserved by another redirect'), { statusCode: 409 });
+      }
       await ProductSlugRedirect.updateOne({ businessId: req.businessId, oldSlug }, { $set: { productId: product._id } }, { upsert: true });
     }
     await product.save();
