@@ -7,20 +7,20 @@ import { useTheme } from '@/context/ThemeContext';
 import api from '@/lib/api';
 
 export default function ProductsReport() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const currency = business?.settings?.currencySymbol || 'PKR';
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
-      .get<any>('/api/admin/reports/products', token)
+      .get<any>('/api/admin/reports/products')
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [admin]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
 
