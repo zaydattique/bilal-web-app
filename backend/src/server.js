@@ -20,7 +20,7 @@ import auditRoutes from './routes/audit.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import customerPortalRoutes from './routes/customerPortal.routes.js';
 
-const requiredSecrets = ['MONGODB_URI', 'JWT_ADMIN_SECRET', 'JWT_CUSTOMER_SECRET'];
+const requiredSecrets = ['MONGODB_URI', 'JWT_ADMIN_SECRET', 'JWT_CUSTOMER_SECRET', 'APP_ENCRYPTION_KEY'];
 for (const name of requiredSecrets) {
   if (!process.env[name]) throw new Error(`${name} is required`);
   if (name !== 'MONGODB_URI' && process.env[name].length < 32) {
