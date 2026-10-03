@@ -66,9 +66,12 @@ Phase 3 now makes Media references canonical for business branding, product imag
 - Public answer content is tenant-scoped through the existing public business/product/category resolution.
 - No duplicate AEO/GEO source or hardcoded tenant facts were introduced.
 
-### Phase 11 — Structured Data
-- Product/Offer/BreadcrumbList/Organization/LocalBusiness/WebSite/WebPage structured data.
-- Never emit stale or invented business/product claims.
+### Phase 11 — Structured Data — completed
+- Server-rendered Product and Offer structured data uses the current published product payload and current price.
+- BreadcrumbList and WebPage structured data is emitted from the actual canonical page path.
+- Organization/LocalBusiness and WebSite entities are generated from the current CMS business record.
+- Product availability is intentionally omitted because the public schema does not establish a verified inventory-to-schema availability contract; no stock claim is invented.
+- Structured data fails closed when NEXT_PUBLIC_SITE_URL is missing or invalid.
 
 ### Phase 12 — Public UX and Conversion
 - Finish responsive storefront UX, category pages, inquiry flow and conversion paths.
