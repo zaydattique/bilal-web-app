@@ -4,7 +4,7 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–8 are implemented on the current branch. Phase 8 adds durable, consent-based storefront analytics and an authenticated admin traffic report. Runtime verification is still required before production.
+Phases 0–9 are implemented on the current branch. Phase 9 adds the SEO foundation: server-rendered public catalogue/home content, dynamic metadata, canonical URLs, robots policy and a CMS-driven sitemap. Runtime verification is still required before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
@@ -141,3 +141,16 @@ The seed data is for development/testing only. Production business information, 
 17. Phase 16 — production/deployment verification
 18. Phase 17 — final acceptance audit
 
+
+
+### Phase 9 SEO foundation completed
+
+- Public homepage now fetches business, featured products and categories on the server so core storefront content exists in the initial HTML instead of depending on client-side data fetching.
+- Public `/products` now server-renders its initial published catalogue while preserving client-side search/filter interactions.
+- Product detail and category detail pages retain server rendering with CMS-driven metadata and canonical URLs.
+- Added Next.js file-based `/robots.txt` with public crawling allowed and private `/admin` and `/portal` paths blocked.
+- Added dynamic `/sitemap.xml` containing the homepage, catalogue/category indexes, and only published product/category URLs from the active business.
+- Sitemap uses record `updatedAt` values when available and paginates through published records rather than using a fixed product list.
+- Removed the remaining hardcoded `bilal-electronics` inquiry fallback; business identity now comes only from the CMS or explicit environment configuration.
+- Removed the fake `Installment Shop Lahore` and localhost metadata fallbacks from production metadata generation.
+- No duplicate SEO route, legacy `/catalog` route, or override metadata layer was introduced.
