@@ -21,6 +21,7 @@ import auditRoutes from './routes/audit.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import customerPortalRoutes from './routes/customerPortal.routes.js';
 import mediaRoutes from './routes/media.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
 
 const requiredSecrets = ['MONGODB_URI', 'APP_ENCRYPTION_KEY'];
 for (const name of requiredSecrets) {
@@ -119,8 +120,14 @@ const customerPortalLimiter = rateLimit({
 });
 app.use('/api/customer/', customerPortalLimiter);
 
-// Legacy local uploads are intentionally not exposed by Phase 1.
-// Persistent media is introduced in Phase 3.
+const analyticsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many analytics requests. Try again later.' },
+});
+app.use('/api/analytics/', analyticsLimiter);
 
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'API is running', timestamp: new Date().toISOString() });
@@ -132,6 +139,7 @@ app.use('/api/admin/media', mediaRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/audit-log', auditRoutes);
 app.use('/api/admin/reports', reportRoutes);
+app.use('/api/admin/analytics', analyticsRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/admin/customers', customerRoutes);
