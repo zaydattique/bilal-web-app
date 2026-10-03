@@ -5,16 +5,26 @@ import Business from './models/Business.js';
 import Admin from './models/Admin.js';
 import Category from './models/Category.js';
 import Product from './models/Product.js';
+import Customer from './models/Customer.js';
+import Account from './models/Account.js';
+import Payment from './models/Payment.js';
+import InstallmentPlan from './models/InstallmentPlan.js';
+import AuditLog from './models/AuditLog.js';
 
 const seed = async () => {
   await connectDB();
 
   console.log('Clearing existing data...');
   await Promise.all([
-    Business.deleteMany({}),
-    Admin.deleteMany({}),
-    Category.deleteMany({}),
+    AuditLog.deleteMany({}),
+    Payment.deleteMany({}),
+    InstallmentPlan.deleteMany({}),
+    Account.deleteMany({}),
+    Customer.deleteMany({}),
     Product.deleteMany({}),
+    Category.deleteMany({}),
+    Admin.deleteMany({}),
+    Business.deleteMany({}),
   ]);
 
   console.log('Creating demo business...');
@@ -57,7 +67,7 @@ const seed = async () => {
   await Admin.create({
     businessId: business._id,
     email: 'admin@bilalelectronics.pk',
-    password: 'Admin@123',
+    password: 'Admin@12345!Secure',
     firstName: 'Bilal',
     lastName: 'Ahmed',
     role: 'admin',
