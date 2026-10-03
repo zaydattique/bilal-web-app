@@ -156,6 +156,12 @@ body {
     color: var(--color-text-dark);
   }
 
+  @media (min-width: 640px) {
+    .section-title {
+      font-size: calc(2.25rem * var(--heading-scale));
+    }
+  }
+
   .eyebrow {
     @apply text-xs font-semibold uppercase tracking-[0.14em];
     color: var(--color-primary);
