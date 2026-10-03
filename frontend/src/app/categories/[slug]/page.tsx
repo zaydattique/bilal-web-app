@@ -4,6 +4,7 @@ import Link from 'next/link';
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
 import ProductCard, { ProductCardData } from '@/components/public/ProductCard';
+import JsonLd from '@/components/public/JsonLd';
 
 const base=()=>process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/,'')||'';
 const slug=()=>process.env.NEXT_PUBLIC_BUSINESS_SLUG||'';
@@ -52,7 +53,7 @@ export default async function CategoryPage({params}:{params:Promise<{slug:string
  const c=result.category;
  if(!c)notFound();
  const items=await products(c._id,b._id);
- return <><PublicHeader/><main className="container-page py-10 sm:py-14"><nav className="mb-6 text-sm text-slate-500"><Link href="/products">Products</Link><span className="mx-2">/</span><span className="text-slate-800">{c.name}</span></nav><header className="max-w-3xl"><p className="eyebrow">Category</p><h1 className="section-title mt-2">{c.name}</h1>{c.description&&<p className="mt-3 text-sm leading-relaxed text-slate-600">{c.description}</p>}</header>
+ return <><JsonLd business={b} pagePath={`/categories/${c.slug}`} pageName={c.name} pageDescription={c.seo?.description || c.description} crumbs={[{name:'Products',url:'/products'},{name:c.name,url:`/categories/${c.slug}`}]} category={c}/><PublicHeader/><main className="container-page py-10 sm:py-14"><nav className="mb-6 text-sm text-slate-500"><Link href="/products">Products</Link><span className="mx-2">/</span><span className="text-slate-800">{c.name}</span></nav><header className="max-w-3xl"><p className="eyebrow">Category</p><h1 className="section-title mt-2">{c.name}</h1>{c.description&&<p className="mt-3 text-sm leading-relaxed text-slate-600">{c.description}</p>}</header>
 {(c.aeo?.summary||c.aeo?.keyFacts?.length)&&<section aria-labelledby="category-answer" className="card mt-8"><h2 id="category-answer" className="text-xl font-semibold">Quick answer</h2>{c.aeo?.summary&&<p className="mt-3 text-sm leading-relaxed text-slate-600">{c.aeo.summary}</p>}{c.aeo?.keyFacts?.length&&<ul className="mt-4 grid gap-2 sm:grid-cols-2">{c.aeo.keyFacts.map((fact:string)=><li key={fact} className="text-sm text-slate-700">• {fact}</li>)}</ul>}</section>}
 {(c.geo?.intent||c.geo?.localNotes)&&<section aria-labelledby="category-local" className="card mt-8"><h2 id="category-local" className="text-xl font-semibold">Local information</h2>{c.geo?.intent&&<p className="mt-3 text-sm leading-relaxed text-slate-600">{c.geo.intent}</p>}{c.geo?.localNotes&&<p className="mt-2 text-sm leading-relaxed text-slate-600">{c.geo.localNotes}</p>}</section>}
 {items.length===0?<div className="card mt-10 py-16 text-center text-gray-500">No published products in this category yet.</div>:<div className="mt-10 grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3">{items.map((p:ProductCardData)=><ProductCard key={p._id} product={p}/>)}</div>}{c.faqs?.length>0&&<section className="card mt-12"><h2 className="text-xl font-semibold">Frequently asked questions</h2><div className="mt-4 space-y-4">{c.faqs.map((faq:{question:string;answer:string},i:number)=><details key={i} className="border-b pb-3"><summary className="cursor-pointer font-medium">{faq.question}</summary><p className="mt-2 text-sm text-slate-600">{faq.answer}</p></details>)}</div></section>}</main><PublicFooter/></>;}
