@@ -22,6 +22,8 @@ export default function SettingsPage() {
     backgroundColor: '#fafbfc',
     borderColor: '#e2e8f0',
     fontFamily: 'Inter, sans-serif',
+    headingScale: 1.2,
+    lineHeight: 1.55,
     phone: '',
     email: '',
     address: '',
@@ -81,6 +83,8 @@ export default function SettingsPage() {
       backgroundColor: business.branding?.backgroundColor || '#fafbfc',
       borderColor: business.branding?.borderColor || '#e2e8f0',
       fontFamily: business.typography?.fontFamily || 'Inter, sans-serif',
+      headingScale: business.typography?.headingScale || 1.2,
+      lineHeight: business.typography?.lineHeight || 1.55,
       phone: business.contact?.phone || '',
       email: business.contact?.email || '',
       address: business.contact?.address || '',
@@ -163,7 +167,7 @@ export default function SettingsPage() {
           backgroundColor: form.backgroundColor,
           borderColor: form.borderColor,
         },
-        typography: { fontFamily: form.fontFamily },
+        typography: { fontFamily: form.fontFamily, headingScale: Number(form.headingScale), lineHeight: Number(form.lineHeight) },
         contact: {
           phone: form.phone,
           email: form.email,
@@ -254,6 +258,14 @@ export default function SettingsPage() {
               <option>Georgia, serif</option>
             </select>
           </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Heading scale">
+              <input className="input" type="number" min={0.8} max={2} step={0.05} value={form.headingScale} onChange={(e) => setForm({ ...form, headingScale: Number(e.target.value) })} />
+            </Field>
+            <Field label="Line height">
+              <input className="input" type="number" min={1} max={2.5} step={0.05} value={form.lineHeight} onChange={(e) => setForm({ ...form, lineHeight: Number(e.target.value) })} />
+            </Field>
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <MediaField label="Primary logo" purpose="logo" value={form.logoPrimary} onChange={(v) => setForm({ ...form, logoPrimary: v })} />
             <MediaField label="Light logo" purpose="logo_light" value={form.logoLight} onChange={(v) => setForm({ ...form, logoLight: v })} />
