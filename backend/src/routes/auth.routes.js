@@ -32,6 +32,78 @@ const cookieOptions = (maxAge) => ({
 const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 const hashOtp = (otp) => crypto.createHash('sha256').update(otp).digest('hex');
 
+const encryptionKey = () => {
+  const raw = process.env.APP_ENCRYPTION_KEY || '';
+  if (!/^[0-9a-fA-F]{64}$/.test(raw)) throw new Error('APP_ENCRYPTION_KEY must be a 64-character hex key');
+  return Buffer.from(raw, 'hex');
+};
+
+const encryptSecret = (value) => {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', encryptionKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
+  return [iv.toString('base64url'), cipher.getAuthTag().toString('base64url'), encrypted.toString('base64url')].join('.');
+};
+
+const decryptSecret = (value) => {
+  const [ivText, tagText, dataText] = String(value || '').split('.');
+  if (!ivText || !tagText || !dataText) throw new Error('Invalid encrypted MFA secret');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', encryptionKey(), Buffer.from(ivText, 'base64url'));
+  decipher.setAuthTag(Buffer.from(tagText, 'base64url'));
+  return Buffer.concat([decipher.update(Buffer.from(dataText, 'base64url')), decipher.final()]).toString('utf8');
+};
+
+const base32Encode = (buffer) => {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = 0;
+  let value = 0;
+  let output = '';
+  for (const byte of buffer) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      output += alphabet[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) output += alphabet[(value << (5 - bits)) & 31];
+  return output;
+};
+
+const base32Decode = (input) => {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = 0;
+  let value = 0;
+  const bytes = [];
+  for (const char of String(input).toUpperCase().replace(/=+$/, '')) {
+    const index = alphabet.indexOf(char);
+    if (index < 0) throw new Error('Invalid TOTP secret');
+    value = (value << 5) | index;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((value >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(bytes);
+};
+
+const verifyTotp = (secret, code) => {
+  if (!/^\d{6}$/.test(String(code))) return false;
+  const key = base32Decode(secret);
+  const counter = Math.floor(Date.now() / 1000 / 30);
+  for (let offset = -1; offset <= 1; offset += 1) {
+    const buffer = Buffer.alloc(8);
+    buffer.writeBigUInt64BE(BigInt(counter + offset));
+    const digest = crypto.createHmac('sha1', key).update(buffer).digest();
+    const index = digest[digest.length - 1] & 15;
+    const number = ((digest[index] & 127) << 24) | (digest[index + 1] << 16) | (digest[index + 2] << 8) | digest[index + 3];
+    if (String(number % 1000000).padStart(6, '0') === String(code)) return true;
+  }
+  return false;
+};
+
+
 const createSession = async ({ userType, userId, businessId, req, res }) => {
   const rawToken = crypto.randomBytes(32).toString('base64url');
   const absoluteMs = SESSION_LIMITS[userType].absoluteMs;
@@ -56,7 +128,7 @@ const clearSessionCookie = (res, userType) => {
 
 router.post('/admin/login', async (req, res, next) => {
   try {
-    assertAllowedFields(req.body, ['email', 'password']);
+    assertAllowedFields(req.body, ['email', 'password', 'mfaCode']);
     const email = requireString(req.body.email, 'email', { max: 254 }).toLowerCase();
     const password = requireString(req.body.password, 'password', { min: 1, max: 256 });
 
@@ -65,7 +137,7 @@ router.post('/admin/login', async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    const session = await createSession({
+    if (admin.twoFactorEnabled) {\n      if (!admin.twoFactorSecret || !verifyTotp(decryptSecret(admin.twoFactorSecret), req.body.mfaCode)) {\n        return res.status(401).json({ success: false, message: 'MFA verification required' });\n      }\n    }\n\n    const session = await createSession({
       userType: 'admin',
       userId: admin._id,
       businessId: admin.businessId,
@@ -163,6 +235,71 @@ router.delete('/admin/sessions/:id', protectAdmin, async (req, res, next) => {
     );
     if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
     res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+router.post('/admin/mfa/setup', protectAdmin, async (req, res, next) => {
+  try {
+    assertAllowedFields(req.body, ['password']);
+    const password = requireString(req.body.password, 'password', { min: 1, max: 256 });
+    const admin = await Admin.findById(req.admin._id);
+    if (!admin || !(await admin.comparePassword(password))) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    }
+    if (admin.twoFactorEnabled) return res.status(409).json({ success: false, message: 'MFA is already enabled' });
+
+    const secret = base32Encode(crypto.randomBytes(20));
+    admin.twoFactorSecret = encryptSecret(secret);
+    await admin.save();
+
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      success: true,
+      secret,
+      issuer: 'Bilal Installment Platform',
+      account: admin.email,
+      message: 'Add this secret to an authenticator app, then verify it to enable MFA.',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/admin/mfa/enable', protectAdmin, async (req, res, next) => {
+  try {
+    assertAllowedFields(req.body, ['code']);
+    const code = requireString(req.body.code, 'code', { min: 6, max: 6 });
+    const admin = await Admin.findById(req.admin._id);
+    if (!admin?.twoFactorSecret || !verifyTotp(decryptSecret(admin.twoFactorSecret), code)) {
+      return res.status(400).json({ success: false, message: 'Invalid MFA code' });
+    }
+    admin.twoFactorEnabled = true;
+    await admin.save();
+    res.json({ success: true, message: 'MFA enabled' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/admin/mfa/disable', protectAdmin, async (req, res, next) => {
+  try {
+    assertAllowedFields(req.body, ['password', 'code']);
+    const password = requireString(req.body.password, 'password', { min: 1, max: 256 });
+    const code = requireString(req.body.code, 'code', { min: 6, max: 6 });
+    const admin = await Admin.findById(req.admin._id);
+    if (!admin || !(await admin.comparePassword(password))) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    }
+    if (!admin.twoFactorSecret || !verifyTotp(decryptSecret(admin.twoFactorSecret), code)) {
+      return res.status(400).json({ success: false, message: 'Invalid MFA code' });
+    }
+    admin.twoFactorEnabled = false;
+    admin.twoFactorSecret = undefined;
+    await admin.save();
+    res.json({ success: true, message: 'MFA disabled' });
   } catch (error) {
     next(error);
   }
