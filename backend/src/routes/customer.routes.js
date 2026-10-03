@@ -27,10 +27,7 @@ const allocateCustomerNumber = async (businessId) => {
     throw error;
   }
 
-  return {
-    accountNumber: `CUS-${String(business.customerSequence).padStart(5, '0')}`,
-    reserved: true,
-  };
+  return `CUS-${String(business.customerSequence).padStart(5, '0')}`;
 };
 
 const releaseCustomerReservation = async (businessId) => {
@@ -127,12 +124,12 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
     const existingCnic = await Customer.exists({ businessId: req.businessId, cnic });
     if (existingCnic) return res.status(409).json({ success: false, message: 'CNIC already registered' });
 
-    const allocation = await allocateCustomerNumber(req.businessId);
+    const accountNumber = await allocateCustomerNumber(req.businessId);
     reserved = true;
 
     const customer = await Customer.create({
       businessId: req.businessId,
-      accountNumber: allocation.accountNumber,
+      accountNumber,
       firstName,
       lastName,
       email: req.body.email,
