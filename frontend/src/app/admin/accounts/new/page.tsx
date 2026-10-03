@@ -133,7 +133,6 @@ export default function NewAccountPage() {
             dueAmount: Number(i.dueAmount),
           })),
         },
-        token
       );
       router.push('/admin/accounts');
     } catch (err: unknown) {
