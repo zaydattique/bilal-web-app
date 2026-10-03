@@ -1,4 +1,5 @@
 import express from 'express';
+import { isValidObjectId } from 'mongoose';
 import Account from '../models/Account.js';
 import Payment from '../models/Payment.js';
 import InstallmentPlan from '../models/InstallmentPlan.js';
@@ -6,96 +7,104 @@ import { protectCustomer } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// My accounts
+const noStore = (res) => res.set('Cache-Control', 'private, no-store');
+
 router.get('/accounts', protectCustomer, async (req, res, next) => {
   try {
     const accounts = await Account.find({
       customerId: req.customer._id,
       businessId: req.businessId,
     })
-      .populate('installmentPlanId')
-      .sort({ createdAt: -1 });
+      .select('_id accountNumber productId productNameSnapshot totalAmount downPayment remainingAmount status installmentPlanId createdDate closedDate')
+      .populate('productId', 'name slug')
+      .populate('installmentPlanId', 'numberOfInstallments installments totalInstallments totalPaid remainingInstallments remainingAmount')
+      .sort({ createdAt: -1 })
+      .lean();
 
+    noStore(res);
     res.json({ success: true, accounts });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// Single account + schedule
 router.get('/accounts/:id', protectCustomer, async (req, res, next) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Account not found' });
+    }
+
     const account = await Account.findOne({
       _id: req.params.id,
       customerId: req.customer._id,
       businessId: req.businessId,
-    }).populate('installmentPlanId');
+    })
+      .select('_id accountNumber productId productNameSnapshot totalAmount downPayment remainingAmount status installmentPlanId createdDate closedDate')
+      .populate('productId', 'name slug shortDescription images')
+      .populate('installmentPlanId', 'numberOfInstallments installments totalInstallments totalPaid remainingInstallments remainingAmount')
+      .lean();
 
-    if (!account) {
-      return res.status(404).json({ success: false, message: 'Account not found' });
-    }
+    if (!account) return res.status(404).json({ success: false, message: 'Account not found' });
 
+    noStore(res);
     res.json({ success: true, account });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// Payment history
 router.get('/payments', protectCustomer, async (req, res, next) => {
   try {
+    const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
     const payments = await Payment.find({
       customerId: req.customer._id,
       businessId: req.businessId,
       status: 'confirmed',
     })
-      .populate('accountId', 'accountNumber')
-      .sort({ paymentDate: -1 })
-      .limit(50);
+      .select('_id accountId paymentAmount paymentMethod referenceNumber paymentDate receiptNumber allocationDetails')
+      .populate('accountId', 'accountNumber productNameSnapshot')
+      .sort({ paymentDate: -1, _id: -1 })
+      .limit(limit)
+      .lean();
 
+    noStore(res);
     res.json({ success: true, payments });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 });
 
-// Upcoming dues across all accounts
 router.get('/dues', protectCustomer, async (req, res, next) => {
   try {
     const accounts = await Account.find({
       customerId: req.customer._id,
       businessId: req.businessId,
-      status: 'active',
-    }).select('_id');
+      status: { $in: ['active', 'defaulted'] },
+    }).select('_id').lean();
 
-    const accountIds = accounts.map((a) => a._id);
+    const accountIds = accounts.map((account) => account._id);
     const plans = await InstallmentPlan.find({
       accountId: { $in: accountIds },
       businessId: req.businessId,
-    });
+    }).select('accountId installments').lean();
 
     const now = new Date();
     const dues = [];
     for (const plan of plans) {
-      for (const inst of plan.installments) {
-        if (inst.status === 'paid') continue;
-        const remaining = inst.dueAmount - (inst.paidAmount || 0);
+      for (const installment of plan.installments) {
+        if (installment.status === 'paid') continue;
+        const remaining = Math.max(0, installment.dueAmount - (installment.paidAmount || 0));
         if (remaining <= 0) continue;
         dues.push({
           accountId: plan.accountId,
-          installmentNumber: inst.installmentNumber,
-          dueDate: inst.dueDate,
+          installmentNumber: installment.installmentNumber,
+          dueDate: installment.dueDate,
+          dueAmount: installment.dueAmount,
+          paidAmount: installment.paidAmount || 0,
           remaining,
-          status: inst.dueDate < now ? 'overdue' : inst.status,
+          status: installment.dueDate < now ? 'overdue' : installment.status,
         });
       }
     }
     dues.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
-    res.json({ success: true, dues });
-  } catch (error) {
-    next(error);
-  }
+    noStore(res);
+    res.json({ success: true, dues: dues.slice(0, 100) });
+  } catch (error) { next(error); }
 });
 
 export default router;
