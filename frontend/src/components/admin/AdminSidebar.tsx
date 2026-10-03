@@ -12,6 +12,7 @@ import {
   LogOut,
   FolderTree,
   BarChart3,
+  Image,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -25,6 +26,7 @@ const nav = [
   { href: '/admin/accounts', label: 'Accounts', icon: CreditCard },
   { href: '/admin/payments', label: 'Payments', icon: Wallet },
   { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/admin/media', label: 'Media', icon: Image },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
