@@ -107,6 +107,13 @@ Source-level security review and GitHub diff inspection were completed. Runtime 
 ### Phase 8 verification limitation
 Source-level review and GitHub diff inspection were completed. Runtime Node/Next build, MongoDB TTL/index creation, real event ingestion, aggregation correctness and browser consent/navigation tests were not run because this environment does not have the project's runtime/database credentials. Production geo headers must also be configured only behind the actual trusted reverse proxy; Express documents that forwarded headers are unsafe to trust when proxy configuration does not match the deployment topology.
 
+### Phase 10 — AEO/GEO
+- Added CMS-driven answer-oriented content to the public storefront without introducing a second content source.
+- Product pages expose AEO summary, key facts, buying intent, and GEO local context when supplied by the CMS.
+- Category pages expose AEO summary/key facts and GEO local context when supplied by the CMS.
+- Homepage exposes current CMS business facts including service area, hours, address and phone.
+- Claims remain sourced from tenant-scoped public CMS records; no hardcoded tenant facts or duplicate AEO/GEO model was added.
+
 ### Phase 9 — SEO Foundation
 - Converted the public homepage to a server route that fetches CMS business data and published featured products/categories before rendering, while retaining interactive client components for cart/navigation behavior.
 - Converted the public product catalogue route to server-render its initial published product/category data; interactive search and category filtering remain client-side.
