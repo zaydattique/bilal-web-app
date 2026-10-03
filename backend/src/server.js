@@ -4,8 +4,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
@@ -21,9 +19,6 @@ import adminUserRoutes from './routes/adminUser.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import customerPortalRoutes from './routes/customerPortal.routes.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const requiredSecrets = ['MONGODB_URI', 'JWT_ADMIN_SECRET', 'JWT_CUSTOMER_SECRET'];
 for (const name of requiredSecrets) {
