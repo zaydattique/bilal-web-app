@@ -7,6 +7,17 @@ import { CartProvider } from '@/context/CartContext';
 import CookieConsent from '@/components/public/CookieConsent';
 import AnalyticsTracker from '@/components/public/AnalyticsTracker';
 
+interface PublicBusiness {
+  businessName?: string;
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: { publicUrl?: string; altText?: string } | null;
+  };
+  content?: { description?: string };
+  favicon?: { publicUrl?: string } | null;
+}
+
 const getPublicBusiness = async (): Promise<PublicBusiness | null> => {
   const slug = process.env.NEXT_PUBLIC_BUSINESS_SLUG;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
