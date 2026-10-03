@@ -21,7 +21,7 @@ const run = async () => {
           description: String(old.fullDescription || old.description || '').slice(0, 5000),
           media: Array.isArray(old.images) ? old.images : [],
           inventory: Number(old.inventory || 0),
-          status: old.isActive === false ? 'draft' : 'draft',
+          status: 'draft',
           featured: old.featured === true,
           installment: {
             advanceAmount: 0,
@@ -41,7 +41,7 @@ const run = async () => {
           geo: { intent: '', localNotes: '' },
         },
         $unset: {
-          price: '', fullDescription: '', images: [], customFieldValues: [],
+          price: '', fullDescription: '', images: [], customFieldValues: Array.isArray(old.customFieldValues) ? old.customFieldValues.map((item) => ({ key: String(item.fieldName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0,80), value: String(item.fieldValue || '').slice(0,500) })).filter((item) => item.key && item.value),
           seoTitle: '', seoDescription: '', isActive: '', weight: '', dimensions: '',
         },
       }
@@ -64,13 +64,14 @@ const run = async () => {
       {
         $set: {
           customFields: fields,
-          status: category.isActive === false ? 'draft' : 'draft',
+          status: 'draft',
+          order: Number(category.order || 0),
           faqs: category.faqs || [],
           seo: category.seo || { title: '', description: '', keywords: [] },
           aeo: category.aeo || { summary: '', keyFacts: [] },
           geo: category.geo || { intent: '', localNotes: '' },
         },
-        $unset: { isActive: '', order: category.order === undefined ? undefined : undefined },
+        $unset: { isActive: '' },
       }
     );
   }
