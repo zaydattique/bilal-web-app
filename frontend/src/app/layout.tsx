@@ -6,25 +6,6 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { CartProvider } from '@/context/CartContext';
 import CookieConsent from '@/components/public/CookieConsent';
 import AnalyticsTracker from '@/components/public/AnalyticsTracker';
-import JsonLd from '@/components/public/JsonLd';
-
-interface PublicBusiness {
-  businessName?: string;
-  seo?: {
-    metaTitle?: string;
-    metaDescription?: string;
-    ogImage?: { publicUrl?: string; altText?: string } | null;
-  };
-  content?: {
-    description?: string;
-  };
-  favicon?: { publicUrl?: string } | null;
-  logo?: { primary?: { publicUrl?: string } | null } | null;
-  contact?: { phone?: string; email?: string; address?: string; city?: string; country?: string };
-  socialMedia?: { facebook?: string; instagram?: string; twitter?: string; whatsapp?: string };
-  content?: { description?: string; serviceArea?: string; hours?: string };
-  settings?: { currencyCode?: string };
-}
 
 const getPublicBusiness = async (): Promise<PublicBusiness | null> => {
   const slug = process.env.NEXT_PUBLIC_BUSINESS_SLUG;
@@ -98,7 +79,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CustomerAuthProvider>
             <ThemeProvider>
               <CartProvider>
-                {business ? <JsonLd business={business} includePage={false} /> : null}
                 <AnalyticsTracker />
                 {children}
                 <CookieConsent />
