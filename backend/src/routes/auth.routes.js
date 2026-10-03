@@ -423,7 +423,7 @@ router.post('/customer/verify-otp', async (req, res, next) => {
       res,
     });
 
-    res.set('Cache-Control', 'no-store');
+    res.set('Cache-Control', 'private, no-store');
     res.json({
       success: true,
       customer: {
@@ -455,8 +455,18 @@ router.post('/customer/logout', protectCustomer, async (req, res, next) => {
 });
 
 router.get('/customer/me', protectCustomer, async (req, res) => {
-  res.set('Cache-Control', 'no-store');
-  res.json({ success: true, customer: req.customer });
+  res.set('Cache-Control', 'private, no-store');
+  res.json({
+    success: true,
+    customer: {
+      id: req.customer._id,
+      firstName: req.customer.firstName,
+      lastName: req.customer.lastName,
+      phoneNumber: req.customer.phoneNumber,
+      accountNumber: req.customer.accountNumber,
+      businessId: req.customer.businessId,
+    },
+  });
 });
 
 export default router;
