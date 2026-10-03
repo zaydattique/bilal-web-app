@@ -14,9 +14,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const isLogin = pathname === '/portal/login';
 
   useEffect(() => {
-    if (!loading && !token && !isLogin) router.replace('/portal/login');
-    if (!loading && token && isLogin) router.replace('/portal');
-  }, [loading, token, isLogin, router]);
+    if (!loading && !customer && !isLogin) router.replace('/portal/login');
+    if (!loading && customer && isLogin) router.replace('/portal');
+  }, [loading, customer, isLogin, router]);
 
   if (isLogin) return <>{children}</>;
 
