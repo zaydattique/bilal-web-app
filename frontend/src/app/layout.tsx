@@ -43,27 +43,36 @@ export async function generateMetadata(): Promise<Metadata> {
   const business = await getPublicBusiness();
   const title = business?.seo?.metaTitle || business?.businessName || '';
   const description = business?.seo?.metaDescription || business?.content?.description || '';
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl) return { title: title || undefined, description: description || undefined };
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
+  let metadataBase: URL | undefined;
+  if (rawSiteUrl) {
+    try {
+      const parsed = new URL(rawSiteUrl);
+      if (['http:', 'https:'].includes(parsed.protocol)) metadataBase = parsed;
+    } catch {
+      metadataBase = undefined;
+    }
+  }
 
   return {
-    metadataBase: new URL(siteUrl),
+    ...(metadataBase ? { metadataBase } : {}),
     title: {
-      default: title || undefined,
+      default: title || 'Store',
       template: business?.businessName ? `%s | ${business.businessName}` : '%s',
     },
-    description,
+    description: description || undefined,
     openGraph: {
       type: 'website',
       locale: 'en_PK',
       siteName: business?.businessName || undefined,
-      url: siteUrl,
+      ...(metadataBase ? { url: metadataBase.toString().replace(/\/$/, '') } : {}),
       ...(business?.seo?.ogImage?.publicUrl
         ? {
             images: [
               {
                 url: business.seo.ogImage.publicUrl,
-                alt: business.seo.ogImage.altText || title,
+                alt: business.seo.ogImage.altText || title || business.businessName || 'Store',
               },
             ],
           }
@@ -73,8 +82,6 @@ export async function generateMetadata(): Promise<Metadata> {
       ? { icons: { icon: business.favicon.publicUrl } }
       : {}),
     twitter: { card: 'summary_large_image' },
-    robots: { index: true, follow: true },
-    alternates: { canonical: '/' },
   };
 }
 
