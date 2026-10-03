@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import ProductDetailClient, { PublicProduct } from '@/components/public/ProductDetailClient';
+import JsonLd from '@/components/public/JsonLd';
 
 interface Business { _id:string; businessName:string; businessSlug:string; settings?:{currencySymbol?:string}; seo?:{metaTitle?:string}; }
 const apiBase=()=>process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/,'')||'';
@@ -52,5 +53,6 @@ export default async function ProductPage({params}:{params:Promise<{slug:string}
  if(!result)notFound();
  if(result.redirect)redirect(result.redirect);
  if(!result.product)notFound();
- return <ProductDetailClient product={result.product} business={business}/>;
+ const product = result.product;
+ return <><JsonLd business={business} pagePath={`/products/${product.slug}`} pageName={product.name} pageDescription={product.seo?.description || product.shortDescription || product.description} crumbs={[{name:'Products',url:'/products'},{name:product.name,url:`/products/${product.slug}`}]} product={product}/><ProductDetailClient product={product} business={business}/></>;
 }
