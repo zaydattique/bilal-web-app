@@ -17,6 +17,16 @@ If an implementation is replaced, remove the old implementation in the same phas
 
 Phase 3 now makes Media references canonical for business branding, product images and category images. Do not reintroduce URL-based image fields or local filesystem uploads.
 
+## Phase 4 completed
+
+- Business/branding fields are CMS-controlled and tenant-scoped.
+- Public marketing claims are no longer hardcoded in the storefront.
+- Nested business payloads are explicitly whitelisted and validated.
+- Public business responses use an explicit safe projection.
+- Social/policy/CTA URLs reject unsafe schemes.
+- Theme colors and typography are validated before being applied.
+- Phase 3 Media references remain canonical.
+
 ## Remaining roadmap
 
 ### Phase 4 — Business and Branding CMS
