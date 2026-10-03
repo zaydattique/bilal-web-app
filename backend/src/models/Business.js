@@ -22,7 +22,7 @@ const businessSchema = new mongoose.Schema(
       icon: mediaRef,
     },
     favicon: mediaRef,
-    heroBanners: { type: [mediaRef], default: [] },
+    heroBanners: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Media' }],
     branding: {
       primaryColor: { type: String, default: '#e74c3c' },
       secondaryColor: { type: String, default: '#3498db' },
