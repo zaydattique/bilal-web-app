@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import express from 'express';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import Media from '../models/Media.js';
@@ -33,24 +34,15 @@ const upload = multer({
   limits: { fileSize: MAX_FILE_SIZE, files: 1 },
 });
 
-const uploadLimiter = new Map();
-const UPLOAD_WINDOW_MS = 60 * 60 * 1000;
-const UPLOAD_LIMIT = 30;
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Upload limit reached. Try again later.' },
+  keyGenerator: (req) => String(req.admin._id),
+});
 
-const rateLimitUploads = (req, res, next) => {
-  const key = String(req.admin._id);
-  const now = Date.now();
-  const entry = uploadLimiter.get(key);
-  if (!entry || now - entry.startedAt >= UPLOAD_WINDOW_MS) {
-    uploadLimiter.set(key, { startedAt: now, count: 1 });
-    return next();
-  }
-  if (entry.count >= UPLOAD_LIMIT) {
-    return res.status(429).json({ success: false, message: 'Upload limit reached. Try again later.' });
-  }
-  entry.count += 1;
-  return next();
-};
 
 const detectFormat = (buffer) => {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
