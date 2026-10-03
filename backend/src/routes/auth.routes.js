@@ -349,7 +349,7 @@ router.post('/customer/login', async (req, res, next) => {
     const businessSlug = requireString(req.body.businessSlug, 'businessSlug', { max: 120 }).toLowerCase();
 
     const business = await Business.findOne({ businessSlug, isActive: true }).select('_id');
-    if (!business) return res.status(404).json({ success: false, message: 'Business not found' });
+    if (!business) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
     const customer = await Customer.findOne({
       businessId: business._id,
@@ -358,7 +358,7 @@ router.post('/customer/login', async (req, res, next) => {
       status: 'active',
     }).select('_id businessId');
 
-    if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
+    if (!customer) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
     await OtpChallenge.deleteMany({ customerId: customer._id, consumedAt: null });
 
