@@ -46,7 +46,7 @@ const customerSchema = new mongoose.Schema(
 );
 
 customerSchema.index({ accountNumber: 1, businessId: 1 }, { unique: true });
-customerSchema.index({ businessId: 1, cnic: 1 });
+customerSchema.index({ businessId: 1, cnic: 1 }, { unique: true });
 customerSchema.index({ businessId: 1, phoneNumber: 1 });
 
 export default mongoose.model('Customer', customerSchema);
