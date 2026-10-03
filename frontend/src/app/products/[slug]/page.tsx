@@ -19,7 +19,7 @@ interface Product {
   slug: string;
   description?: string;
   price: number;
-  salePrice?: number;
+  discountPrice?: number;
   images?: string[];
   featured?: boolean;
   categoryId?: { name?: string; slug?: string };
@@ -41,7 +41,7 @@ export default function ProductDetailPage() {
     setLoading(true);
     api
       .get<{ success: boolean; product: Product }>(
-        `/api/products/slug/${slug}?businessId=${business._id}`
+        `/api/products/${slug}?businessId=${business._id}`
       )
       .then((res) => setProduct(res.product))
       .catch(console.error)
@@ -50,8 +50,8 @@ export default function ProductDetailPage() {
 
   const symbol = business?.settings?.currencySymbol || 'PKR';
   const price =
-    product && product.salePrice != null && product.salePrice < product.price
-      ? product.salePrice
+    product && product.discountPrice != null && product.discountPrice < product.price
+      ? product.discountPrice
       : product?.price || 0;
 
   if (themeLoading || loading) {
@@ -119,7 +119,7 @@ export default function ProductDetailPage() {
               <span className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
                 {formatPKR(price, symbol)}
               </span>
-              {product.salePrice != null && product.salePrice < product.price && (
+              {product.discountPrice != null && product.discountPrice < product.price && (
                 <span className="text-sm text-slate-400 line-through">
                   {formatPKR(product.price, symbol)}
                 </span>
