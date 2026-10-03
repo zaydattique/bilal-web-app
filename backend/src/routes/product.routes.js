@@ -345,7 +345,10 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'),
     Object.assign(product, data);
     try {
       await product.save();
-    } catch (err) {\n      if (duplicateKey(err)) return res.status(409).json({ success: false, message: 'Product slug or SKU already exists' });\n      throw err;\n    }
+    } catch (err) {
+      if (duplicateKey(err)) return res.status(409).json({ success: false, message: 'Product slug or SKU already exists' });
+      throw err;
+    }
 
     if (data.slug !== oldSlug) {
       await ProductSlugRedirect.deleteOne({ businessId: req.businessId, oldSlug: data.slug, productId: productId });
