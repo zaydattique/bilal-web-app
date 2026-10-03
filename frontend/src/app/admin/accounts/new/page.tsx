@@ -15,6 +15,13 @@ interface Customer {
   accountNumber: string;
 }
 
+interface Product {
+  _id: string;
+  name: string;
+  cashPrice: number;
+  discountPrice?: number | null;
+}
+
 interface InstallmentRow {
   dueDate: string;
   dueAmount: string;
@@ -28,9 +35,11 @@ export default function NewAccountPage() {
   const maxInst = business?.settings?.maxInstallments || 12;
 
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [customerId, setCustomerId] = useState('');
+  const [productId, setProductId] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [downPayment, setDownPayment] = useState('0');
   const [installments, setInstallments] = useState<InstallmentRow[]>([
@@ -42,6 +51,10 @@ export default function NewAccountPage() {
     api
       .get<{ success: boolean; customers: Customer[] }>('/api/admin/customers?limit=100')
       .then((res) => setCustomers(res.customers))
+      .catch(console.error);
+    api
+      .get<{ success: boolean; products: Product[] }>('/api/products?status=published&limit=100')
+      .then((res) => setProducts(res.products))
       .catch(console.error);
   }, [admin]);
 
@@ -103,6 +116,10 @@ export default function NewAccountPage() {
       setError('Select a customer');
       return;
     }
+    if (!productId) {
+      setError('Select the purchased product');
+      return;
+    }
     if (!totalAmount || Number(totalAmount) <= 0) {
       setError('Enter a valid total amount');
       return;
@@ -126,6 +143,7 @@ export default function NewAccountPage() {
         '/api/admin/accounts',
         {
           customerId,
+          productId,
           totalAmount: Number(totalAmount),
           downPayment: Number(downPayment) || 0,
           installments: installments.map((i) => ({
@@ -182,6 +200,17 @@ export default function NewAccountPage() {
               </Link>
             </p>
           )}
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">Purchased Product *</label>
+          <select className="input" required value={productId} onChange={(e) => setProductId(e.target.value)}>
+            <option value="">— Select product —</option>
+            {products.map((p) => (
+              <option key={p._id} value={p._id}>{p.name}</option>
+            ))}
+          </select>
+          {products.length === 0 && <p className="mt-1 text-xs text-gray-500">No published products are available.</p>}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
