@@ -146,12 +146,6 @@ export default function ProductDetailPage() {
               >
                 Add to cart
               </button>
-              <button type="button" className="btn-secondary" onClick={() => {
-                  setPrefDown(20);
-                  setPrefMonths(12);
-                }}>
-                Request plan
-              </button>
             </div>
           </div>
         </div>
