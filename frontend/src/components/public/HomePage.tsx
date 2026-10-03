@@ -78,12 +78,17 @@ export default function HomePage({ initialBusiness, initialFeatured, initialCate
               <p className="eyebrow">Catalogue</p>
               <h2 className="section-title mt-2">Featured installment items</h2>
               <p className="mt-2 max-w-lg text-sm text-slate-500">
-  {business?.content?.description || ''}
+                {business?.content?.description || ''}
               </p>
             </div>
-            <Link href="/products" className="btn-secondary text-sm">
-              View all →
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/products" className="btn-secondary text-sm">
+                View all →
+              </Link>
+              <Link href="/inquiry" className="btn-primary text-sm">
+                Get an installment plan
+              </Link>
+            </div>
           </div>
 
           {loading ? (
