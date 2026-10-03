@@ -13,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: ['/'],
-        disallow: ['/admin', '/portal', '/login', '/customer-login', '/checkout'],
+        disallow: ['/admin', '/portal'],
       },
     ],
     sitemap: `${siteUrl.replace(/\/$/, '')}/sitemap.xml`,
