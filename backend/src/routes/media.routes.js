@@ -168,7 +168,7 @@ router.post(
   '/',
   protectAdmin,
   requireRole('super_admin', 'admin', 'manager'),
-  rateLimitUploads,
+  uploadLimiter,
   (req, res, next) => {
     upload.single('file')(req, res, (error) => {
       if (error instanceof multer.MulterError) {
@@ -239,7 +239,7 @@ router.put(
   '/:id',
   protectAdmin,
   requireRole('super_admin', 'admin', 'manager'),
-  rateLimitUploads,
+  uploadLimiter,
   (req, res, next) => {
     upload.single('file')(req, res, (error) => {
       if (error instanceof multer.MulterError) {
