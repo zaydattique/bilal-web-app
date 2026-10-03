@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
 export default function NewCategoryPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -20,7 +20,7 @@ export default function NewCategoryPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!admin) return;
     setSaving(true);
     setError('');
     try {
@@ -32,7 +32,6 @@ export default function NewCategoryPage() {
           order: Number(form.order) || 0,
           isActive: form.isActive,
         },
-        token
       );
       router.push('/admin/categories');
     } catch (err: unknown) {

@@ -21,7 +21,7 @@ interface InstallmentRow {
 }
 
 export default function NewAccountPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const router = useRouter();
   const currency = business?.settings?.currencySymbol || 'PKR';
@@ -38,12 +38,12 @@ export default function NewAccountPage() {
   ]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
-      .get<{ success: boolean; customers: Customer[] }>('/api/admin/customers?limit=100', token)
+      .get<{ success: boolean; customers: Customer[] }>('/api/admin/customers?limit=100')
       .then((res) => setCustomers(res.customers))
       .catch(console.error);
-  }, [token]);
+  }, [admin]);
 
   const remaining =
     (Number(totalAmount) || 0) - (Number(downPayment) || 0);
@@ -96,7 +96,7 @@ export default function NewAccountPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!admin) return;
     setError('');
 
     if (!customerId) {
@@ -133,7 +133,6 @@ export default function NewAccountPage() {
             dueAmount: Number(i.dueAmount),
           })),
         },
-        token
       );
       router.push('/admin/accounts');
     } catch (err: unknown) {

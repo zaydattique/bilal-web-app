@@ -11,6 +11,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +20,7 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, mfaCode || undefined);
       router.push('/admin');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -68,14 +69,24 @@ export default function AdminLoginPage() {
               autoComplete="current-password"
             />
           </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Authenticator code <span className="font-normal text-gray-400">(if MFA is enabled)</span></label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="\\d{6}"
+              maxLength={6}
+              className="input"
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value.replace(/\\D/g, '').slice(0, 6))}
+              autoComplete="one-time-code"
+            />
+          </div>
           <button type="submit" className="btn-primary w-full" disabled={loading}>
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-xs text-gray-400">
-          Demo: admin@bilalelectronics.pk / Admin@123
-        </p>
       </div>
     </div>
   );

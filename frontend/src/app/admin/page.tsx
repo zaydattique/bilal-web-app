@@ -17,7 +17,7 @@ interface Summary {
 }
 
 export default function AdminDashboard() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [recentPayments, setRecentPayments] = useState<any[]>([]);
@@ -27,11 +27,10 @@ export default function AdminDashboard() {
   const currency = business?.settings?.currencySymbol || 'PKR';
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
       .get<{ success: boolean; summary: Summary; recentPayments: any[]; upcomingDues: any[] }>(
         '/api/admin/dashboard/summary',
-        token
       )
       .then((res) => {
         setSummary(res.summary);
@@ -40,7 +39,7 @@ export default function AdminDashboard() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [admin]);
 
   const fmt = (n: number) =>
     `${currency} ${Number(n || 0).toLocaleString('en-PK')}`;

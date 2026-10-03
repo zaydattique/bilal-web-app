@@ -7,16 +7,16 @@ import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
-  const { customer, loading, token, logout } = useCustomerAuth();
+  const { customer, loading, logout } = useCustomerAuth();
   const { business } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const isLogin = pathname === '/portal/login';
 
   useEffect(() => {
-    if (!loading && !token && !isLogin) router.replace('/portal/login');
-    if (!loading && token && isLogin) router.replace('/portal');
-  }, [loading, token, isLogin, router]);
+    if (!loading && !customer && !isLogin) router.replace('/portal/login');
+    if (!loading && customer && isLogin) router.replace('/portal');
+  }, [loading, customer, isLogin, router]);
 
   if (isLogin) return <>{children}</>;
 

@@ -1,5 +1,6 @@
 import express from 'express';
 import Admin from '../models/Admin.js';
+import Session from '../models/Session.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 import { logAction } from '../utils/audit.js';
 import { assertAllowedFields, requireObjectId, requireString } from '../middleware/security.js';
@@ -107,6 +108,13 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin'), async (req
 
     await admin.save();
 
+    if (status !== undefined || role !== undefined || password !== undefined || permissions !== undefined) {
+      await Session.updateMany(
+        { userType: 'admin', userId: admin._id, businessId: req.businessId, revokedAt: null },
+        { $set: { revokedAt: new Date(), endedAt: new Date() } }
+      );
+    }
+
     await logAction({
       businessId: req.businessId,
       adminId: req.admin._id,
@@ -135,6 +143,10 @@ router.delete('/:id', protectAdmin, requireRole('super_admin', 'admin'), async (
     admin.deletedAt = new Date();
     admin.status = 'inactive';
     await admin.save();
+    await Session.updateMany(
+      { userType: 'admin', userId: admin._id, businessId: req.businessId, revokedAt: null },
+      { $set: { revokedAt: new Date(), endedAt: new Date() } }
+    );
 
     await logAction({
       businessId: req.businessId,
@@ -156,7 +168,12 @@ router.get('/:id/login-history', protectAdmin, requireRole('super_admin', 'admin
     const admin = await Admin.findOne({ _id: adminId, businessId: req.businessId })
       .select('loginHistory email firstName lastName');
     if (!admin) return res.status(404).json({ success: false, message: 'Admin not found' });
-    res.json({ success: true, loginHistory: admin.loginHistory || [] });
+    const sessions = await Session.find({ userType: 'admin', userId: admin._id, businessId: req.businessId })
+      .select('_id createdAt lastSeenAt expiresAt revokedAt endedAt ipAddress userAgent')
+      .sort({ createdAt: -1 })
+      .limit(100);
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, loginHistory: admin.loginHistory || [], sessions });
   } catch (error) { next(error); }
 });
 

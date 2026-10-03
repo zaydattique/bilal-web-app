@@ -14,53 +14,44 @@ interface Admin {
 
 interface AuthContextType {
   admin: Admin | null;
-  token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, mfaCode?: string) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const TOKEN_KEY = 'admin_token';
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [admin, setAdmin] = useState<Admin | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    setToken(null);
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/api/auth/admin/logout', {});
+    } catch {
+      // The server may already have expired/revoked the session.
+    }
     setAdmin(null);
   }, []);
 
   useEffect(() => {
-    const stored = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
-    if (!stored) {
-      setLoading(false);
-      return;
-    }
-    setToken(stored);
     api
-      .get<{ success: boolean; admin: Admin }>('/api/auth/me', stored)
+      .get<{ success: boolean; admin: Admin }>('/api/auth/me')
       .then((res) => setAdmin(res.admin))
-      .catch(() => logout())
+      .catch(() => setAdmin(null))
       .finally(() => setLoading(false));
-  }, [logout]);
+  }, []);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post<{ success: boolean; token: string; admin: Admin }>(
+  const login = async (email: string, password: string, mfaCode?: string) => {
+    const res = await api.post<{ success: boolean; admin: Admin }>(
       '/api/auth/admin/login',
-      { email, password }
+      { email, password, ...(mfaCode ? { mfaCode } : {}) }
     );
-    localStorage.setItem(TOKEN_KEY, res.token);
-    setToken(res.token);
     setAdmin(res.admin);
   };
 
   return (
-    <AuthContext.Provider value={{ admin, token, loading, login, logout }}>
+    <AuthContext.Provider value={{ admin, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

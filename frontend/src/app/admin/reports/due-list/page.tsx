@@ -23,7 +23,7 @@ interface DueRow {
 }
 
 export default function DueListReport() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const currency = business?.settings?.currencySymbol || 'PKR';
   const businessName = business?.businessName || 'our store';
@@ -34,12 +34,11 @@ export default function DueListReport() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     setLoading(true);
     api
       .get<{ success: boolean; dues: DueRow[]; totalDue: number }>(
         `/api/admin/reports/due-list?filter=${filter}`,
-        token
       )
       .then((res) => {
         setDues(res.dues);

@@ -18,20 +18,20 @@ interface Payment {
 }
 
 export default function PaymentsPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const currency = business?.settings?.currencySymbol || 'PKR';
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
-      .get<{ success: boolean; payments: Payment[] }>('/api/admin/payments', token)
+      .get<{ success: boolean; payments: Payment[] }>('/api/admin/payments')
       .then((res) => setPayments(res.payments))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [admin]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
 

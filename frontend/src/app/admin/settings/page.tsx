@@ -6,7 +6,7 @@ import { useTheme } from '@/context/ThemeContext';
 import api from '@/lib/api';
 
 export default function SettingsPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business, refresh } = useTheme();
   const [form, setForm] = useState({
     businessName: '',
@@ -43,7 +43,7 @@ export default function SettingsPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!admin) return;
     setSaving(true);
     setMessage('');
     try {
@@ -68,7 +68,6 @@ export default function SettingsPage() {
             minDownPayment: form.minDownPayment,
           },
         },
-        token
       );
       await refresh();
       setMessage('Settings saved successfully');

@@ -18,17 +18,17 @@ interface Customer {
 }
 
 export default function CustomersPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   const load = () => {
-    if (!token) return;
+    if (!admin) return;
     setLoading(true);
     const q = search ? `&search=${encodeURIComponent(search)}` : '';
     api
-      .get<{ success: boolean; customers: Customer[] }>(`/api/admin/customers?${q}`, token)
+      .get<{ success: boolean; customers: Customer[] }>(`/api/admin/customers?${q}`)
       .then((res) => setCustomers(res.customers))
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -36,7 +36,7 @@ export default function CustomersPage() {
 
   useEffect(() => {
     load();
-  }, [token]);
+  }, [admin]);
 
   return (
     <div className="space-y-6">

@@ -16,7 +16,7 @@ interface Account {
 }
 
 export default function NewPaymentPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const router = useRouter();
   const currency = business?.settings?.currencySymbol || 'PKR';
@@ -34,21 +34,20 @@ export default function NewPaymentPage() {
   });
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
       .get<{ success: boolean; accounts: Account[] }>(
         '/api/admin/accounts?status=active&limit=100',
-        token
       )
       .then((res) => setAccounts(res.accounts))
       .catch(console.error);
-  }, [token]);
+  }, [admin]);
 
   const selected = accounts.find((a) => a._id === form.accountId);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!admin) return;
     setSaving(true);
     setError('');
     setSuccess('');
@@ -62,7 +61,6 @@ export default function NewPaymentPage() {
           referenceNumber: form.referenceNumber || undefined,
           notes: form.notes || undefined,
         },
-        token
       );
       setSuccess(`Payment recorded. Receipt: ${res.payment.receiptNumber}`);
       setTimeout(() => router.push('/admin/payments'), 1500);

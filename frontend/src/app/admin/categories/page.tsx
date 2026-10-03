@@ -15,18 +15,18 @@ interface Category {
 }
 
 export default function CategoriesPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
-      .get<{ success: boolean; categories: Category[] }>('/api/categories?active=false', token)
+      .get<{ success: boolean; categories: Category[] }>('/api/categories?active=false')
       .then((res) => setCategories(res.categories))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [admin]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
 
