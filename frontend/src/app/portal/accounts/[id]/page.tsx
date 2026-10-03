@@ -9,7 +9,7 @@ import api from '@/lib/api';
 
 export default function PortalAccountDetail() {
   const { id } = useParams<{ id: string }>();
-  const { token } = useCustomerAuth();
+  const { customer } = useCustomerAuth();
   const { business } = useTheme();
   const currency = business?.settings?.currencySymbol || 'PKR';
   const [account, setAccount] = useState<any>(null);
@@ -18,7 +18,7 @@ export default function PortalAccountDetail() {
   useEffect(() => {
     if (!token || !id) return;
     api
-      .get<{ success: boolean; account: any }>(`/api/customer/accounts/${id}`, token)
+      .get<{ success: boolean; account: any }>(`/api/customer/accounts/${id}`)
       .then((res) => setAccount(res.account))
       .catch(console.error)
       .finally(() => setLoading(false));
