@@ -105,9 +105,18 @@ export default function JsonLd({
   category?: CategoryData;
   includePage?: boolean;
 }) {
-  const pageUrl = absoluteUrl(siteUrl, pagePath);
-  const graph = businessGraph(business, siteUrl);
-  const businessId = siteUrl ? `${siteUrl.replace(/\/$/, '')}/#business` : undefined;
+  let normalizedSiteUrl: string;
+  try {
+    const parsed = new URL(siteUrl || '');
+    if (!['http:', 'https:'].includes(parsed.protocol) || !business.businessName) return null;
+    normalizedSiteUrl = parsed.toString().replace(/\/$/, '');
+  } catch {
+    return null;
+  }
+
+  const pageUrl = absoluteUrl(normalizedSiteUrl, pagePath);
+  const graph = businessGraph(business, normalizedSiteUrl);
+  const businessId = `${normalizedSiteUrl}#business`;
 
   if (includePage) graph.push({
     '@type': 'WebPage',
@@ -115,7 +124,7 @@ export default function JsonLd({
     url: pageUrl,
     name: clean(pageName),
     description: clean(pageDescription),
-    isPartOf: siteUrl ? { '@id': `${siteUrl.replace(/\/$/, '')}/#website` } : undefined,
+    isPartOf: { '@id': `${normalizedSiteUrl}/#website` },
     about: businessId ? { '@id': businessId } : undefined,
   });
 
@@ -127,7 +136,7 @@ export default function JsonLd({
         '@type': 'ListItem',
         position: index + 1,
         name: crumb.name,
-        item: absoluteUrl(siteUrl, crumb.url),
+        item: absoluteUrl(normalizedSiteUrl, crumb.url),
       })),
     });
   }
