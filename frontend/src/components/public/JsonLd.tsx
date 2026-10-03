@@ -151,8 +151,6 @@ export default function JsonLd({
         url: productUrl,
         priceCurrency: business.settings?.currencyCode || 'PKR',
         price,
-        availability: 'https://schema.org/InStock',
-        itemCondition: 'https://schema.org/NewCondition',
       },
     });
   }
