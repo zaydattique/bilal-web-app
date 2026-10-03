@@ -1,5 +1,35 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import ProductsClient from '@/components/public/ProductsClient';
+import type { ProductCardData } from '@/components/public/ProductCard';
+
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '';
+const businessSlug = () => process.env.NEXT_PUBLIC_BUSINESS_SLUG || '';
+
+async function getBusinessId(): Promise<string | null> {
+  const base = apiBase();
+  const slug = businessSlug();
+  if (!base || !slug) return null;
+  const response = await fetch(
+    `${base}/api/admin/business/public/${encodeURIComponent(slug)}`,
+    { cache: 'no-store' }
+  );
+  if (!response.ok) return null;
+  return (await response.json()).business?._id || null;
+}
+
+async function getCatalogue(businessId: string) {
+  const base = apiBase();
+  const [productsResponse, categoriesResponse] = await Promise.all([
+    fetch(`${base}/api/products?businessId=${encodeURIComponent(businessId)}&limit=50`, { cache: 'no-store' }),
+    fetch(`${base}/api/categories?businessId=${encodeURIComponent(businessId)}&limit=100`, { cache: 'no-store' }),
+  ]);
+
+  return {
+    products: productsResponse.ok ? ((await productsResponse.json()).products || []) as ProductCardData[] : [],
+    categories: categoriesResponse.ok ? (await categoriesResponse.json()).categories || [] : [],
+  };
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -10,6 +40,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function ProductsPage() {
-  return <ProductsClient />;
+export default async function ProductsPage() {
+  const businessId = await getBusinessId();
+  if (!businessId) notFound();
+
+  const { products, categories } = await getCatalogue(businessId);
+  return <ProductsClient initialProducts={products} initialCategories={categories} />;
 }
