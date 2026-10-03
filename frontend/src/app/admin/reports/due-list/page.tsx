@@ -39,7 +39,6 @@ export default function DueListReport() {
     api
       .get<{ success: boolean; dues: DueRow[]; totalDue: number }>(
         `/api/admin/reports/due-list?filter=${filter}`,
-        token
       )
       .then((res) => {
         setDues(res.dues);
