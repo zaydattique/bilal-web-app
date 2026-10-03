@@ -18,7 +18,7 @@ const PRODUCT_FIELDS = [
 
 const MAX = { name:180, shortDescription:500, description:5000, faqs:20, media:20, facts:20, keywords:20 };
 
-const publicFilter = () => ({
+const publicStatusFilter = () => ({
   $or: [
     { status: 'published' },
     { status: 'scheduled', scheduledAt: { $lte: new Date() } },
@@ -104,13 +104,13 @@ router.get('/', optionalAuth, async (req, res, next) => {
   try {
     const businessId = await getBusinessId(req);
     const filter = { businessId };
-    if (!req.admin) Object.assign(filter, publicFilter());
+    if (!req.admin) filter.$and = [publicStatusFilter()];
     else if (req.query.status) filter.status = String(req.query.status);
     if (req.query.featured === 'true') filter.featured = true;
     if (req.query.categoryId) filter.categoryId = requireObjectId(req.query.categoryId, 'category id');
     if (req.query.search) {
       const s = String(req.query.search).trim().slice(0, 100).replace(/[.*+?^$()|[\]\\]/g, '\\$&');
-      filter.$or = [{ name: { $regex: s, $options: 'i' } }, { sku: { $regex: s, $options: 'i' } }, { brand: { $regex: s, $options: 'i' } }];
+      filter.$and = [...(filter.$and || []), { $or: [{ name: { $regex: s, $options: 'i' } }, { sku: { $regex: s, $options: 'i' } }, { brand: { $regex: s, $options: 'i' } }] }];
     }
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
@@ -135,7 +135,7 @@ router.get('/:idOrSlug', optionalAuth, async (req, res, next) => {
     if (!product && !req.admin && !/^[0-9a-f]{24}$/i.test(value)) {
       const redirect = await ProductSlugRedirect.findOne({ businessId, oldSlug: value }).select('productId');
       if (redirect) {
-        const target = await populate(Product.findOne({ _id: redirect.productId, businessId, ...publicFilter() }));
+        const target = await populate(Product.findOne({ _id: redirect.productId, businessId, ...publicStatusFilter() }));
         if (target) return res.status(301).json({ success: true, redirect: `/products/${target.slug}`, product: target });
       }
     }
