@@ -17,6 +17,7 @@
   --color-border-strong: #cbd5e1;
   --font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   --content-line-height: 1.55;
+  --heading-scale: 1.2;
   --font-display: 'Instrument Serif', Georgia, serif;
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
@@ -150,7 +151,8 @@ body {
 
   .section-title {
     font-family: var(--font-display);
-    @apply text-3xl font-normal tracking-tight sm:text-4xl;
+    font-size: calc(1.875rem * var(--heading-scale));
+    @apply font-normal tracking-tight sm:text-4xl;
     color: var(--color-text-dark);
   }
 
