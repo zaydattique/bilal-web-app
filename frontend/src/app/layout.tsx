@@ -14,6 +14,9 @@ interface PublicBusiness {
     metaDescription?: string;
     ogImage?: { publicUrl?: string; altText?: string } | null;
   };
+  content?: {
+    description?: string;
+  };
   favicon?: { publicUrl?: string } | null;
 }
 
