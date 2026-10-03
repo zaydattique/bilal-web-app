@@ -137,7 +137,13 @@ router.post('/admin/login', async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    if (admin.twoFactorEnabled) {\n      if (!admin.twoFactorSecret || !verifyTotp(decryptSecret(admin.twoFactorSecret), req.body.mfaCode)) {\n        return res.status(401).json({ success: false, message: 'MFA verification required' });\n      }\n    }\n\n    const session = await createSession({
+    if (admin.twoFactorEnabled) {
+      if (!admin.twoFactorSecret || !verifyTotp(decryptSecret(admin.twoFactorSecret), req.body.mfaCode)) {
+        return res.status(401).json({ success: false, message: 'MFA verification required' });
+      }
+    }
+
+    const session = await createSession({
       userType: 'admin',
       userId: admin._id,
       businessId: admin.businessId,
