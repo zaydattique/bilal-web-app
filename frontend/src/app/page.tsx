@@ -73,7 +73,7 @@ export default function HomePage() {
     <>
       {offline && (
         <div className="bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
-          Demo mode — connect API + run seed for live catalogue.
+          Business information is temporarily unavailable. Please try again shortly.
         </div>
       )}
       <PublicHeader />
@@ -106,7 +106,7 @@ export default function HomePage() {
             <div className="card py-14 text-center">
               <p className="font-display text-2xl text-slate-800">Products coming soon</p>
               <p className="mt-2 text-sm text-slate-500">
-                {offline ? 'Run seed on the API to load the demo catalogue.' : 'Add featured products in admin.'}
+                {offline ? 'Add products in the admin panel once the business connection is available.' : 'Add featured products in admin.'}
               </p>
               <Link href="/products" className="btn-primary mt-6 inline-flex">
                 Browse catalog
