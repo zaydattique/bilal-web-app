@@ -1,21 +1,28 @@
 import type { MetadataRoute } from 'next';
 
-export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl) {
-    return {
-      rules: [{ userAgent: '*', disallow: ['/'] }],
-    };
+const getSiteUrl = (): string | null => {
+  const value = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (!['http:', 'https:'].includes(url.protocol)) return null;
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return null;
   }
+};
+
+export default function robots(): MetadataRoute.Robots {
+  const siteUrl = getSiteUrl();
 
   return {
     rules: [
       {
         userAgent: '*',
         allow: ['/'],
-        disallow: ['/admin', '/portal'],
+        disallow: ['/admin', '/portal', '/api', '/_next'],
       },
     ],
-    sitemap: `${siteUrl.replace(/\/$/, '')}/sitemap.xml`,
+    ...(siteUrl ? { sitemap: `${siteUrl}/sitemap.xml` } : {}),
   };
 }
