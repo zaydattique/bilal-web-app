@@ -38,7 +38,7 @@ router.get('/accounts/:id', protectCustomer, async (req, res, next) => {
       businessId: req.businessId,
     })
       .select('_id accountNumber productId productNameSnapshot totalAmount downPayment remainingAmount status installmentPlanId createdDate closedDate')
-      .populate('productId', 'name slug shortDescription images')
+      .populate('productId', 'name slug shortDescription media')
       .populate('installmentPlanId', 'numberOfInstallments installments totalInstallments totalPaid remainingInstallments remainingAmount')
       .lean();
 
