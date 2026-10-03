@@ -230,7 +230,7 @@ const buildProductData = async (body, businessId, existing = null) => {
     discountPrice: body.discountPrice !== undefined ? (body.discountPrice === null || body.discountPrice === '' ? null : requireNonNegativeNumber(body.discountPrice, 'discountPrice')) : existing?.discountPrice,
     categoryId: category?._id || null,
     media: body.media !== undefined ? await resolveMediaIds(body.media, businessId, 'media') : existing?.media,
-    customFieldValues: body.customFieldValues !== undefined ? normalizeCategoryFields(category, body.customFieldValues) : existing?.customFieldValues,
+    customFieldValues: normalizeCategoryFields(category, body.customFieldValues !== undefined ? body.customFieldValues : (existing?.customFieldValues || [])),
     inventory: body.inventory !== undefined ? requireNonNegativeNumber(body.inventory, 'inventory') : existing?.inventory,
     installment: body.installment !== undefined ? normalizeInstallment(body.installment) : existing?.installment,
     specs: body.specs !== undefined ? normalizeSpecs(body.specs) : existing?.specs,
@@ -240,7 +240,7 @@ const buildProductData = async (body, businessId, existing = null) => {
     geo: body.geo !== undefined ? normalizeGeo(body.geo) : existing?.geo,
     status,
     scheduledAt: body.status !== undefined || body.scheduledAt !== undefined
-      ? normalizeSchedule(status, body.scheduledAt)
+      ? normalizeSchedule(status, body.scheduledAt !== undefined ? body.scheduledAt : existing?.scheduledAt)
       : existing?.scheduledAt,
     featured: body.featured !== undefined ? body.featured === true : existing?.featured,
   };
