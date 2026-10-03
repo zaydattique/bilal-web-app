@@ -166,8 +166,8 @@ const validateNested = (body) => {
   }
 
   if (body.policies) {
-    assertSafeUrl(body.policies.termsUrl, 'policies.termsUrl');
-    assertSafeUrl(body.policies.privacyUrl, 'policies.privacyUrl');
+    assertSafeUrl(body.policies.termsUrl, 'policies.termsUrl', { allowRelative: true });
+    assertSafeUrl(body.policies.privacyUrl, 'policies.privacyUrl', { allowRelative: true });
     assertString(body.policies.returnPolicy, 'policies.returnPolicy', 10000);
     assertString(body.policies.warrantyClaim, 'policies.warrantyClaim', 10000);
   }
