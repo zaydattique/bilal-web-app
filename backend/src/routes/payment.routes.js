@@ -279,6 +279,7 @@ router.post('/:id/reverse', protectAdmin, requireRole('super_admin', 'admin'), a
       if (!account || !plan || !customer) fail('Payment relationships are incomplete', 409);
 
       for (const allocation of payment.allocationDetails) {
+        if (!allocation.previousStatus) fail('This legacy payment does not contain enough history for a safe reversal', 409);
         const inst = plan.installments.id(allocation.installmentId);
         if (!inst) fail('Payment allocation references a missing installment', 409);
         if ((inst.paidAmount || 0) + 0.01 < allocation.amountAllocated) {
