@@ -15,20 +15,20 @@ interface Payment {
 }
 
 export default function PortalPayments() {
-  const { token } = useCustomerAuth();
+  const { customer } = useCustomerAuth();
   const { business } = useTheme();
   const currency = business?.settings?.currencySymbol || 'PKR';
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    if (!customer) return;
     api
-      .get<{ success: boolean; payments: Payment[] }>('/api/customer/payments', token)
+      .get<{ success: boolean; payments: Payment[] }>('/api/customer/payments')
       .then((res) => setPayments(res.payments))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [customer]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
 
