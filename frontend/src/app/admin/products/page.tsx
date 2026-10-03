@@ -20,20 +20,20 @@ interface Product {
 }
 
 export default function ProductsPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const currency = business?.settings?.currencySymbol || 'PKR';
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
-      .get<{ success: boolean; products: Product[] }>('/api/products?active=false', token)
+      .get<{ success: boolean; products: Product[] }>('/api/products?active=false')
       .then((res) => setProducts(res.products))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [admin]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
 
