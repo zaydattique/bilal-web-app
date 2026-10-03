@@ -15,15 +15,20 @@ interface Category {
   slug: string;
 }
 
-function ProductsContent() {
+interface ProductsClientProps {
+  initialProducts: ProductCardData[];
+  initialCategories: Category[];
+}
+
+function ProductsContent({ initialProducts, initialCategories }: ProductsClientProps) {
   const { business, loading: themeLoading } = useTheme();
   const searchParams = useSearchParams();
   const categorySlug = searchParams.get('category') || '';
 
-  const [products, setProducts] = useState<ProductCardData[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<ProductCardData[]>(initialProducts);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
   useEffect(() => {
@@ -154,7 +159,7 @@ function ProductsContent() {
   );
 }
 
-export default function ProductsPage() {
+export default function ProductsClient({ initialProducts, initialCategories }: ProductsClientProps) {
   return (
     <>
       <PublicHeader />
@@ -169,7 +174,7 @@ export default function ProductsPage() {
           </div>
         }
       >
-        <ProductsContent />
+        <ProductsContent initialProducts={initialProducts} initialCategories={initialCategories} />
       </Suspense>
       <PublicFooter />
     </>
