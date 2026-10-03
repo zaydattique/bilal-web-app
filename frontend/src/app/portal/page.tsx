@@ -24,7 +24,7 @@ interface Due {
 }
 
 export default function PortalHome() {
-  const { token } = useCustomerAuth();
+  const { customer } = useCustomerAuth();
   const { business } = useTheme();
   const currency = business?.settings?.currencySymbol || 'PKR';
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -32,10 +32,10 @@ export default function PortalHome() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    if (!customer) return;
     Promise.all([
-      api.get<{ success: boolean; accounts: Account[] }>('/api/customer/accounts', token),
-      api.get<{ success: boolean; dues: Due[] }>('/api/customer/dues', token),
+      api.get<{ success: boolean; accounts: Account[] }>('/api/customer/accounts'),
+      api.get<{ success: boolean; dues: Due[] }>('/api/customer/dues'),
     ])
       .then(([a, d]) => {
         setAccounts(a.accounts);
@@ -43,7 +43,7 @@ export default function PortalHome() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [customer]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
 
