@@ -182,6 +182,7 @@ const validateCategory = async (categoryId, businessId) => {
 
 const validatePublish = (data, category) => {
   if (!['published', 'scheduled'].includes(data.status)) return;
+
   const missing = [];
   if (!data.name || !data.shortDescription || !data.description) missing.push('product descriptions');
   if (data.cashPrice === undefined || data.cashPrice === null) missing.push('cash price');
@@ -189,26 +190,31 @@ const validatePublish = (data, category) => {
   if (category && category.status !== 'published') missing.push('published category');
   if (!data.seo?.title || !data.seo?.description) missing.push('SEO title and description');
   if (!data.aeo?.summary) missing.push('AEO summary');
+
   const installment = data.installment;
-  if (!installment || installment.financedAmount <= 0 || installment.totalPayable <= 0 || installment.installmentAmount <= 0) {
+  const salePrice = data.discountPrice != null && data.discountPrice < data.cashPrice
+    ? data.discountPrice
+    : data.cashPrice;
+
+  if (!installment || installment.advanceAmount <= 0 || installment.financedAmount <= 0 || installment.totalPayable <= 0 || installment.installmentAmount <= 0) {
     missing.push('complete installment facts');
   } else {
-    if (installment.totalPayable < installment.financedAmount) missing.push('installment total payable');
-    const baseAmount = data.discountPrice != null ? data.discountPrice : data.cashPrice;
-    const funded = installment.advanceAmount + installment.financedAmount;
-    if (Math.abs(funded - baseAmount) > 0.01 && Math.abs(funded - data.cashPrice) > 0.01) missing.push('advance plus financed amount');
-    const count = installment.frequency === 'monthly'
+    if (installment.advanceAmount >= salePrice) missing.push('advance below sale price');
+    const expectedFinanced = salePrice - installment.advanceAmount;
+    if (Math.abs(installment.financedAmount - expectedFinanced) > 0.01) missing.push('financed amount');
+    if (Math.abs(installment.totalPayable - (installment.financedAmount + installment.markupAmount)) > 0.01) missing.push('total payable');
+    const paymentCount = installment.frequency === 'monthly'
       ? installment.tenureMonths
       : installment.frequency === 'biweekly'
-        ? installment.tenureMonths * 2
+        ? Math.round(installment.tenureMonths * 26 / 12)
         : Math.round(installment.tenureMonths * 52 / 12);
-    const expected = installment.installmentAmount * count;
-    if (Math.abs(expected - installment.totalPayable) > Math.max(1, count)) missing.push('installment amount and tenure');
+    const expectedTotal = installment.installmentAmount * paymentCount;
+    if (Math.abs(expectedTotal - installment.totalPayable) > 0.01) missing.push('installment amount and tenure');
   }
-  if (data.status === 'scheduled' && !data.scheduledAt) missing.push('scheduled publish date');
-  if (missing.length) throw error(`Cannot publish: missing or invalid ${missing.join(', ')}`);
-};
 
+  if (data.status === 'scheduled' && !data.scheduledAt) missing.push('scheduled publish date');
+  if (missing.length) throw error(`Cannot publish: missing or inconsistent ${missing.join(', ')}`);
+};
 const buildSlug = (value) => {
   const slug = slugify(String(value || ''), { lower: true, strict: true }).slice(0, 220);
   if (!slug) throw error('A valid slug is required');
@@ -351,6 +357,8 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'),
     }
 
     if (data.slug !== oldSlug) {
+      const oldRedirectConflict = await ProductSlugRedirect.exists({ businessId: req.businessId, oldSlug, productId: { $ne: productId } });
+      if (oldRedirectConflict) throw error('The previous slug is already reserved by another product redirect', 409);
       await ProductSlugRedirect.deleteOne({ businessId: req.businessId, oldSlug: data.slug, productId: productId });
       await ProductSlugRedirect.updateOne(
         { businessId: req.businessId, oldSlug },
