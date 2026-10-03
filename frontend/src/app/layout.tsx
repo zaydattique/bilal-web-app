@@ -19,6 +19,11 @@ interface PublicBusiness {
     description?: string;
   };
   favicon?: { publicUrl?: string } | null;
+  logo?: { primary?: { publicUrl?: string } | null } | null;
+  contact?: { phone?: string; email?: string; address?: string; city?: string; country?: string };
+  socialMedia?: { facebook?: string; instagram?: string; twitter?: string; whatsapp?: string };
+  content?: { description?: string; serviceArea?: string; hours?: string };
+  settings?: { currencyCode?: string };
 }
 
 const getPublicBusiness = async (): Promise<PublicBusiness | null> => {
@@ -93,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CustomerAuthProvider>
             <ThemeProvider>
               <CartProvider>
-                <JsonLd />
+                <JsonLd business={business || {}} includePage={false} />
                 <AnalyticsTracker />
                 {children}
                 <CookieConsent />
