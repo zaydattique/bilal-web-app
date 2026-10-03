@@ -4,6 +4,8 @@ const accountSchema = new mongoose.Schema(
   {
     businessId: { type: mongoose.Schema.Types.ObjectId, ref: 'Business', required: true },
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+    productNameSnapshot: { type: String, trim: true, maxlength: 240, default: null },
     accountNumber: { type: String, required: true },
     totalAmount: { type: Number, required: true, min: 0 },
     downPayment: { type: Number, default: 0, min: 0 },
