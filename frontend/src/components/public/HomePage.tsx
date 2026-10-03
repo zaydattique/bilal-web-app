@@ -36,6 +36,7 @@ export interface HomeBusiness {
   content?: {
     description?: string;
     serviceArea?: string;
+    hours?: string;
     tagline?: string;
     requirements?: string[];
     trustPoints?: string[];
