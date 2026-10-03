@@ -12,9 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const b = await business();
   if (!b) return {};
 
-  const title = b.seo?.metaTitle
-    ? `Categories | ${b.seo.metaTitle}`
-    : `Categories | ${b.businessName || 'Catalogue'}`;
+  const title = 'Categories';
   const description = b.seo?.metaDescription || b.content?.description || 'Browse products by category.';
 
   return {
