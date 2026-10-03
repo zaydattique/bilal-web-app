@@ -65,7 +65,6 @@ export default function NewProductPage() {
           featured: form.featured,
           isActive: form.isActive,
         },
-        token
       );
       router.push('/admin/products');
     } catch (err: unknown) {
