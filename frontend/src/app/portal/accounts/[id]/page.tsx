@@ -16,13 +16,13 @@ export default function PortalAccountDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token || !id) return;
+    if (!customer || !id) return;
     api
       .get<{ success: boolean; account: any }>(`/api/customer/accounts/${id}`)
       .then((res) => setAccount(res.account))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token, id]);
+  }, [customer, id]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
   if (!account) return <p className="text-sm text-red-600">Account not found</p>;
