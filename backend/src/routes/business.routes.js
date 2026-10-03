@@ -65,6 +65,15 @@ const assertString = (value, field, max, { required = false } = {}) => {
   return trimmed;
 };
 
+const assertHexColor = (value, field) => {
+  if (value === undefined) return;
+  if (typeof value !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(value)) {
+    const error = new Error(`${field} must be a 6-digit hex color`);
+    error.statusCode = 400;
+    throw error;
+  }
+};
+
 const assertSafeUrl = (value, field, { allowRelative = false } = {}) => {
   if (value === undefined || value === '') return;
   const trimmed = assertString(value, field, 500);
@@ -127,7 +136,7 @@ const validateNested = (body) => {
   }
 
   if (body.branding) {
-    for (const key of BRANDING_FIELDS) assertString(body.branding[key], `branding.${key}`, 100);
+    for (const key of ['primaryColor', 'secondaryColor', 'accentColor', 'textDark', 'textLight', 'backgroundColor', 'borderColor']) assertHexColor(body.branding[key], `branding.${key}`);
   }
 
   if (body.typography) {
@@ -192,7 +201,11 @@ const validateNested = (body) => {
 
   if (body.settings) {
     assertString(body.settings.currencySymbol, 'settings.currencySymbol', 12);
-    assertString(body.settings.currencyCode, 'settings.currencyCode', 3);
+    if (body.settings.currencyCode !== undefined && !/^[A-Z]{3}$/.test(body.settings.currencyCode)) {
+      const error = new Error('settings.currencyCode must be a 3-letter uppercase code');
+      error.statusCode = 400;
+      throw error;
+    }
     assertString(body.settings.timezone, 'settings.timezone', 80);
     assertString(body.settings.dateFormat, 'settings.dateFormat', 40);
     assertNumber(body.settings.maxInstallments, 'settings.maxInstallments', { min: 1, max: 60 });
