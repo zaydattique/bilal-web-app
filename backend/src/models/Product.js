@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
   categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
   name: { type: String, required: true, trim: true, maxlength: 180 },
   slug: { type: String, required: true, lowercase: true, trim: true, maxlength: 220 },
-  sku: { type: String, trim: true, uppercase: true, maxlength: 80, default: null },
+  sku: { type: String, trim: true, uppercase: true, maxlength: 80, default: undefined },
   brand: { type: String, trim: true, maxlength: 120, default: null },
   shortDescription: { type: String, trim: true, maxlength: 500, default: '' },
   description: { type: String, trim: true, maxlength: 5000, default: '' },
