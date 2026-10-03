@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react';
-
 type BusinessData = {
   businessName?: string;
   businessSlug?: string;
@@ -45,7 +43,7 @@ const absoluteUrl = (siteUrl: string | undefined, path: string) => {
 
 const clean = (value: unknown) => value == null || value === '' ? undefined : value;
 
-const businessGraph = (business: BusinessData, siteUrl?: string) => {
+const businessGraph = (business: BusinessData, siteUrl?: string): Record<string, unknown>[] => {
   const base = siteUrl ? siteUrl.replace(/\/$/, '') : undefined;
   const businessUrl = base ? `${base}/` : undefined;
   const image = business.logo?.primary?.publicUrl || business.seo?.ogImage?.publicUrl;
@@ -67,7 +65,6 @@ const businessGraph = (business: BusinessData, siteUrl?: string) => {
     image: clean(image),
     sameAs: sameAs.length ? sameAs : undefined,
     areaServed: clean(business.content?.serviceArea),
-    openingHours: clean(business.content?.hours),
     address: business.contact?.address || business.contact?.city || business.contact?.country ? {
       '@type': 'PostalAddress',
       streetAddress: clean(business.contact?.address),
