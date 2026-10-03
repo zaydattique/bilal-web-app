@@ -14,7 +14,7 @@ interface Product {
   discountPrice?: number;
   inventory: number;
   sku?: string;
-  isActive: boolean;
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
   featured: boolean;
   categoryId?: { name: string };
 }
@@ -57,7 +57,7 @@ export default function ProductsPage() {
               <th className="px-4 py-3">Category</th>
               <th className="px-4 py-3">Price</th>
               <th className="px-4 py-3">Stock</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Status</th><th className="px-4 py-3">Edit</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -75,17 +75,18 @@ export default function ProductsPage() {
                 <td className="px-4 py-3">
                   <span
                     className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                      p.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                      p.status === 'published' ? 'bg-green-100 text-green-700' : p.status === 'scheduled' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'
                     }`}
                   >
-                    {p.isActive ? 'Active' : 'Inactive'}
+                    {p.status}
                   </span>
                 </td>
+                <td className="px-4 py-3"><Link href={`/admin/products/${p._id}`} className="text-primary underline">Edit</Link></td>
               </tr>
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                   No products yet.{' '}
                   <Link href="/admin/products/new" className="text-primary underline">
                     Add one
