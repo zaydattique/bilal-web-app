@@ -10,6 +10,7 @@ import Account from './models/Account.js';
 import Payment from './models/Payment.js';
 import InstallmentPlan from './models/InstallmentPlan.js';
 import AuditLog from './models/AuditLog.js';
+import Media from './models/Media.js';
 
 const seed = async () => {
   await connectDB();
@@ -17,6 +18,7 @@ const seed = async () => {
   console.log('Clearing existing data...');
   await Promise.all([
     AuditLog.deleteMany({}),
+    Media.deleteMany({}),
     Payment.deleteMany({}),
     InstallmentPlan.deleteMany({}),
     Account.deleteMany({}),
@@ -100,7 +102,6 @@ const seed = async () => {
     isActive: true,
   });
 
-  const img = (id) => `https://picsum.photos/seed/${id}/800/600`;
 
   console.log('Creating products (all fields)...');
   await Product.create([
@@ -114,7 +115,6 @@ const seed = async () => {
         '6.6 Super AMOLED, 8GB RAM, 128GB storage. Shop installment plan available with CNIC.',
       price: 125000,
       discountPrice: 119000,
-      images: [img('a55'), img('a55b')],
       inventory: 15,
       sku: 'SAM-A55-128',
       weight: 0.21,
@@ -137,7 +137,6 @@ const seed = async () => {
       fullDescription: 'A16 Bionic, 48MP camera. Test product for full inquiry path.',
       price: 285000,
       discountPrice: 279000,
-      images: [img('ip15')],
       inventory: 8,
       sku: 'APL-IP15-128',
       weight: 0.17,
@@ -160,7 +159,6 @@ const seed = async () => {
       fullDescription: 'Inverter technology, low power mode. Ideal for multi-month plan tests.',
       price: 145000,
       discountPrice: 139000,
-      images: [img('haierac')],
       inventory: 10,
       sku: 'HAI-AC-15T',
       weight: 35,
@@ -183,7 +181,6 @@ const seed = async () => {
       fullDescription: 'Family-size fridge for higher ticket installment demo.',
       price: 98000,
       discountPrice: 92000,
-      images: [img('fridge14')],
       inventory: 6,
       sku: 'DAW-FR-14',
       weight: 55,
@@ -202,7 +199,6 @@ const seed = async () => {
       fullDescription: 'Smart LED for category filters and linked inquiry tests.',
       price: 155000,
       discountPrice: 149000,
-      images: [img('sony43')],
       inventory: 12,
       sku: 'SNY-BR-43',
       weight: 12,
@@ -223,7 +219,6 @@ const seed = async () => {
       description: 'Budget smartphone · 6GB/128GB',
       fullDescription: 'Entry-level phone for lower down-payment calculator paths.',
       price: 42000,
-      images: [img('sparx15')],
       inventory: 25,
       sku: 'SPX-N15-128',
       featured: false,

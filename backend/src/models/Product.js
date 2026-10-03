@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema(
     fullDescription: String,
     price: { type: Number, required: true, min: 0 },
     discountPrice: { type: Number, min: 0 },
-    images: [String],
+    images: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Media' }],
     customFieldValues: [
       {
         fieldName: String,

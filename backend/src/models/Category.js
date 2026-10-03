@@ -6,7 +6,7 @@ const categorySchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, lowercase: true },
     description: String,
-    imageUrl: String,
+    image: { type: mongoose.Schema.Types.ObjectId, ref: 'Media', default: null },
     order: { type: Number, default: 0 },
     customFields: [
       {

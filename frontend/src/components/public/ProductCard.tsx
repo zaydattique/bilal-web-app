@@ -11,7 +11,7 @@ export interface ProductCardData {
   description?: string;
   price: number;
   discountPrice?: number;
-  images?: string[];
+  images?: { _id: string; publicUrl: string; altText?: string }[];
   featured?: boolean;
   categoryId?: { name?: string; slug?: string };
 }
@@ -33,8 +33,8 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={image}
-            alt={product.name}
+            src={image.publicUrl}
+            alt={image.altText || product.name}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
             loading="lazy"
           />

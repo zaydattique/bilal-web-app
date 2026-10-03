@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+import MediaUpload from '@/components/admin/MediaUpload';
 
 interface Category {
   _id: string;
@@ -26,7 +27,7 @@ export default function NewProductPage() {
     categoryId: '',
     inventory: '0',
     sku: '',
-    images: '',
+    images: [] as string[],
     featured: false,
     isActive: true,
   });
@@ -45,11 +46,6 @@ export default function NewProductPage() {
     setSaving(true);
     setError('');
     try {
-      const images = form.images
-        .split(/[\n,]/)
-        .map((s) => s.trim())
-        .filter(Boolean);
-
       await api.post(
         '/api/products',
         {
@@ -61,7 +57,7 @@ export default function NewProductPage() {
           categoryId: form.categoryId || undefined,
           inventory: Number(form.inventory) || 0,
           sku: form.sku || undefined,
-          images,
+          images: form.images,
           featured: form.featured,
           isActive: form.isActive,
         },
@@ -176,16 +172,17 @@ export default function NewProductPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Image URLs</label>
-          <textarea
-            className="input min-h-[72px]"
-            value={form.images}
-            onChange={(e) => setForm({ ...form, images: e.target.value })}
-            placeholder="One URL per line or comma-separated"
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Example: https://picsum.photos/seed/demo1/800/600
+          <label className="mb-1 block text-sm font-medium">Product images</label>
+          <p className="mb-2 text-xs text-gray-500">
+            Upload images through the admin media system. External image URLs are not accepted.
           </p>
+          <MediaUpload
+            purpose="product"
+            value={form.images}
+            onChange={(images) => setForm({ ...form, images })}
+            multiple
+            label={form.images.length ? 'Add more images' : 'Upload product images'}
+          />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">

@@ -4,9 +4,19 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phase 0 is merged into `main`. Phase 1 backend foundation and multi-tenant security is implemented on branch `phase1-backend-foundation-security` and is pending runtime verification.
+Phases 0–2 are merged into `main`. Phase 3 persistent media is implemented on the current branch and requires deployment storage configuration and runtime verification before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
+
+### Phase 3 persistent media and asset management completed
+
+- Replaced product/category/business image URL fields with tenant-owned MongoDB `Media` references.
+- Added S3-compatible durable object storage so media survives application rebuilds and redeploys.
+- Added server-side image validation using file signatures plus Sharp metadata; SVG and executable uploads are not accepted.
+- Added 10 MB per-file limit, 30 uploads/hour/admin, tenant ownership checks, audit logging, and safe storage keys.
+- Added admin media upload, replace, list/filter, and delete workflows. Referenced media cannot be deleted until unassigned.
+- Added admin-managed primary/light/dark/icon logos, favicon, OG image, hero banners, product images, and category images.
+- Added an explicit legacy-media migration command instead of retaining old URL compatibility fields.
 
 ### Phase 2 authentication and session security completed
 
@@ -25,11 +35,11 @@ The repository is **not production-ready yet**. Later phases cover authenticatio
 ### Phase 1 backend foundation completed
 
 - Added centralized request validation, ObjectId validation, public business resolution, and field allowlists.
-- Hardened admin/customer JWT verification with issuer/audience checks and strong-secret startup enforcement.
+- Hardened authenticated admin/customer session verification with server-side tenant binding and strong application encryption-key startup enforcement.
 - Bound authenticated admin/customer requests to an active business and preserved tenant scope in object lookups.
 - Closed public category/product cross-tenant lookup paths and validated product category ownership.
 - Enforced the server-side 200-customer tenant limit with atomic business counters and collision-safe customer/account numbering.
-- Removed public exposure of the legacy local uploads directory; persistent media is deferred to Phase 3.
+- Removed public exposure of the legacy local uploads directory; Phase 3 now uses durable object storage.
 - Enabled API security headers/CSP, explicit CORS origins, payload limits, and centralized production-safe error responses.
 - Removed direct route-level production error-detail leakage and fixed startup sequencing so the API listens only after database initialization succeeds.
 - Hardened admin management input handling and seed cleanup/password policy.
@@ -60,6 +70,10 @@ NEXT_PUBLIC_BUSINESS_SLUG=bilal-electronics
 ```
 
 The business slug is configuration, not a code-level fallback.
+
+### Persistent media storage
+
+Production must configure the S3-compatible storage variables in `backend/.env.example`. `MEDIA_PUBLIC_BASE_URL` must be an HTTPS CDN/public object URL in production. For an existing database that contains legacy URL-based media, back up MongoDB first and run `PHASE3_MEDIA_MIGRATION_CONFIRM=true npm run migrate:phase3-media` before serving the new schema. The migration intentionally clears legacy URL fields rather than retaining a second compatibility system; the replacement assets must then be uploaded through Admin → Media/Settings.
 
 ## Development
 

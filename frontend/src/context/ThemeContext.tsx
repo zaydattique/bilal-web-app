@@ -13,11 +13,26 @@ interface Branding {
   borderColor: string;
 }
 
+interface MediaReference {
+  _id: string;
+  publicUrl: string;
+  altText?: string;
+  purpose?: string;
+}
+
 interface Business {
   _id: string;
   businessName: string;
   businessSlug: string;
-  logo?: { url?: string; altText?: string };
+  logo?: {
+    primary?: MediaReference | null;
+    light?: MediaReference | null;
+    dark?: MediaReference | null;
+    icon?: MediaReference | null;
+  };
+  favicon?: MediaReference | null;
+  heroBanners?: MediaReference[];
+
   branding: Branding;
   typography?: { fontFamily?: string };
   contact?: Record<string, string>;
@@ -29,7 +44,7 @@ interface Business {
     minDownPayment?: number;
     interestRate?: number;
   };
-  seo?: { metaTitle?: string; metaDescription?: string };
+  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: MediaReference | null };
 }
 
 interface ThemeContextType {

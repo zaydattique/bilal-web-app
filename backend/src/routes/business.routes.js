@@ -4,17 +4,58 @@ import Business from '../models/Business.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 import { logAction } from '../utils/audit.js';
 import { assertAllowedFields, requireString } from '../middleware/security.js';
+import { resolveMediaIds, resolveSingleMediaId } from '../utils/mediaReferences.js';
 
 const router = express.Router();
 
 const BUSINESS_FIELDS = [
-  'businessName', 'businessType', 'businessSlug', 'logo', 'branding', 'typography',
-  'contact', 'socialMedia', 'policies', 'settings', 'seo', 'isActive',
+  'businessName', 'businessType', 'businessSlug', 'logo', 'favicon', 'heroBanners',
+  'branding', 'typography', 'contact', 'socialMedia', 'policies', 'settings', 'seo', 'isActive',
 ];
+
+const populateMedia = (query) =>
+  query
+    .populate('logo.primary', 'publicUrl altText purpose width height')
+    .populate('logo.light', 'publicUrl altText purpose width height')
+    .populate('logo.dark', 'publicUrl altText purpose width height')
+    .populate('logo.icon', 'publicUrl altText purpose width height')
+    .populate('favicon', 'publicUrl altText purpose width height')
+    .populate('heroBanners', 'publicUrl altText purpose width height')
+    .populate('seo.ogImage', 'publicUrl altText purpose width height');
+
+const validateBusinessMedia = async (businessId, body) => {
+  const logo = body.logo;
+  if (logo !== undefined) {
+    if (!logo || typeof logo !== 'object' || Array.isArray(logo)) {
+      const error = new Error('logo must be an object');
+      error.statusCode = 400;
+      throw error;
+    }
+    for (const key of ['primary', 'light', 'dark', 'icon']) {
+      if (logo[key] !== undefined) {
+        logo[key] = await resolveSingleMediaId(logo[key], businessId, `logo.${key}`);
+      }
+    }
+  }
+
+  if (body.favicon !== undefined) {
+    body.favicon = await resolveSingleMediaId(body.favicon, businessId, 'favicon');
+  }
+
+  if (body.heroBanners !== undefined) {
+    body.heroBanners = await resolveMediaIds(body.heroBanners, businessId, 'heroBanners');
+  }
+
+  if (body.seo?.ogImage !== undefined) {
+    body.seo.ogImage = await resolveSingleMediaId(body.seo.ogImage, businessId, 'seo.ogImage');
+  }
+};
 
 router.get('/', protectAdmin, async (req, res, next) => {
   try {
-    const business = await Business.findOne({ _id: req.businessId, isActive: true });
+    const business = await populateMedia(
+      Business.findOne({ _id: req.businessId, isActive: true })
+    );
     if (!business) return res.status(404).json({ success: false, message: 'Business not found' });
     res.json({ success: true, business });
   } catch (error) { next(error); }
@@ -23,7 +64,9 @@ router.get('/', protectAdmin, async (req, res, next) => {
 router.get('/public/:slug', async (req, res, next) => {
   try {
     const slug = requireString(req.params.slug, 'business slug', { max: 120 }).toLowerCase();
-    const business = await Business.findOne({ businessSlug: slug, isActive: true }).select('-__v');
+    const business = await populateMedia(
+      Business.findOne({ businessSlug: slug, isActive: true }).select('-__v')
+    );
     if (!business) return res.status(404).json({ success: false, message: 'Business not found' });
     res.json({ success: true, business });
   } catch (error) { next(error); }
@@ -41,6 +84,8 @@ router.put('/', protectAdmin, requireRole('super_admin', 'admin'), async (req, r
     if (req.body.businessSlug !== undefined && req.admin.role !== 'super_admin') {
       return res.status(403).json({ success: false, message: 'Only super_admin can change business slug' });
     }
+
+    await validateBusinessMedia(req.businessId, req.body);
 
     const changes = {};
     for (const key of BUSINESS_FIELDS) {
@@ -84,7 +129,8 @@ router.put('/', protectAdmin, requireRole('super_admin', 'admin'), async (req, r
       userAgent: req.get('user-agent'),
     });
 
-    res.json({ success: true, business });
+    const saved = await populateMedia(Business.findById(business._id));
+    res.json({ success: true, business: saved });
   } catch (error) { next(error); }
 });
 

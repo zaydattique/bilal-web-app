@@ -7,36 +7,78 @@ import { CartProvider } from '@/context/CartContext';
 import CookieConsent from '@/components/public/CookieConsent';
 import JsonLd from '@/components/public/JsonLd';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
-  title: {
-    default: 'Easy Monthly Installments | Electronics & Appliances Kot Khawaja Saeed Lahore',
-    template: '%s | Installment Shop Lahore',
-  },
-  description:
-    'Buy mobile phones, LED TVs, refrigerators, ACs and home appliances on easy monthly installments (qist) in Kot Khawaja Saeed, Lahore. Transparent plans, CNIC-based shop process.',
-  keywords: [
-    'installment shop Kot Khawaja Saeed',
-    'easy monthly installments Lahore',
-    'qiston pe electronics Lahore',
-    'LED TV installment Lahore',
-    'fridge on installments Kot Khawaja Saeed',
-    'mobile phone qist Lahore',
-    'home appliances installment Pakistan',
-  ],
-  openGraph: {
-    type: 'website',
-    locale: 'en_PK',
-    siteName: 'Installment Shop Lahore',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: '/',
-  },
+interface PublicBusiness {
+  businessName?: string;
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: { publicUrl?: string; altText?: string } | null;
+  };
+  favicon?: { publicUrl?: string } | null;
+}
+
+const getPublicBusiness = async (): Promise<PublicBusiness | null> => {
+  const slug = process.env.NEXT_PUBLIC_BUSINESS_SLUG;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!slug || !apiUrl) return null;
+
+  try {
+    const response = await fetch(
+      `${apiUrl.replace(/\/$/, '')}/api/admin/business/public/${encodeURIComponent(slug)}`,
+      { cache: 'no-store' }
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.business || null;
+  } catch {
+    return null;
+  }
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const business = await getPublicBusiness();
+  const title =
+    business?.seo?.metaTitle ||
+    business?.businessName ||
+    'Easy Monthly Installments | Electronics & Appliances Kot Khawaja Saeed Lahore';
+  const description =
+    business?.seo?.metaDescription ||
+    'Buy electronics and home appliances on transparent monthly installments in Lahore.';
+
+  return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+    title: {
+      default: title,
+      template: `%s | ${business?.businessName || 'Installment Shop Lahore'}`,
+    },
+    description,
+    openGraph: {
+      type: 'website',
+      locale: 'en_PK',
+      siteName: business?.businessName || 'Installment Shop Lahore',
+      ...(business?.seo?.ogImage?.publicUrl
+        ? {
+            images: [
+              {
+                url: business.seo.ogImage.publicUrl,
+                alt: business.seo.ogImage.altText || title,
+              },
+            ],
+          }
+        : {}),
+    },
+    ...(business?.favicon?.publicUrl
+      ? { icons: { icon: business.favicon.publicUrl } }
+      : {}),
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: '/',
+    },
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

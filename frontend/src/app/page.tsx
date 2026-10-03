@@ -25,6 +25,7 @@ interface Category {
   name: string;
   slug: string;
   description?: string;
+  image?: { _id: string; publicUrl: string; altText?: string } | null;
 }
 
 export default function HomePage() {
@@ -133,14 +134,22 @@ export default function HomePage() {
                     href={`/categories/${c.slug}`}
                     className="card-hover flex items-center gap-3 p-4"
                   >
-                    <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-bold text-white"
-                      style={{
-                        background:
-                          'linear-gradient(135deg, var(--color-secondary), color-mix(in srgb, var(--color-secondary) 70%, #475569))',
-                      }}
-                    >
-                      {c.name[0]}
+                    <div className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                      {c.image?.publicUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={c.image.publicUrl}
+                          alt={c.image.altText || c.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="flex h-full w-full items-center justify-center text-sm font-bold text-white"
+                          style={{ background: 'var(--color-secondary)' }}
+                        >
+                          {c.name[0]}
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-slate-900">{c.name}</p>

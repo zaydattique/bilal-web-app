@@ -20,7 +20,7 @@ interface Product {
   description?: string;
   price: number;
   discountPrice?: number;
-  images?: string[];
+  images?: { _id: string; publicUrl: string; altText?: string }[];
   featured?: boolean;
   categoryId?: { name?: string; slug?: string };
 }
@@ -102,7 +102,7 @@ export default function ProductDetailPage() {
           >
             {product.images?.[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+              <img src={product.images[0].publicUrl} alt={product.images[0].altText || product.name} className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full items-center justify-center font-display text-6xl text-slate-200">
                 {product.name[0]}
@@ -140,7 +140,7 @@ export default function ProductDetailPage() {
                     name: product.name,
                     slug: product.slug,
                     price,
-                    image: product.images?.[0],
+                    image: product.images?.[0]?.publicUrl,
                   })
                 }
               >
@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
             onInquiry={(down, months) => {
               setPrefDown(down);
               setPrefMonths(months);
-              setShowInquiry(true);
+              // The inquiry form is visible below; keep the selected calculator values in sync.
             }}
           />
           <InquiryForm

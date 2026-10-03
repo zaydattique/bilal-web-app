@@ -1,101 +1,69 @@
-# Phase 0 — Codebase Cleanup & Baseline Report
+# Project Completion Report — Through Phase 3
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Branch:** `phase0-codebase-cleanup`  
-**Purpose:** establish one source of truth before feature/security phases.
+**Current phase:** Phase 3 — Persistent Media & Asset Management  
+**Main baseline:** `afbf448cea7980bb4be746a6c4b6bb8ded07fd01` before Phase 3
 
-## Findings corrected
+## Completed phases
 
-### 1. Phantom backend modules
-`backend/src/server.js` referenced these files even though they were absent from the repository:
+### Phase 0 — Codebase cleanup
+- Removed phantom imports/routes and duplicate public implementations.
+- Removed fake business fallbacks and stale pricing compatibility.
+- Established the source-of-truth rule: replacements remove the old implementation instead of layering overrides.
 
-- `middleware/security.js`
-- `routes/lead.routes.js`
-- `routes/adminLead.routes.js`
-- `routes/analytics.routes.js`
+### Phase 1 — Backend foundation and tenant security
+- Added centralized validation and tenant-scoped object lookups.
+- Enforced server-side customer limits and tenant-safe numbering.
+- Hardened API security headers, CORS, payload limits and production error handling.
 
-Phase 0 removed those imports and mounts instead of creating placeholder/duplicate files. Lead and analytics functionality remains explicitly deferred to their proper phases.
+### Phase 2 — Authentication, sessions and account security
+- Replaced browser JWT storage with durable MongoDB server sessions.
+- Added HttpOnly/Secure/SameSite session cookies, idle and absolute expiry, logout/revocation and session history.
+- Hardened OTP storage/verification and added encrypted TOTP MFA for administrators.
+- Removed obsolete JWT generator/dependency and token persistence.
 
-### 2. Fake production fallback
-`frontend/src/context/ThemeContext.tsx` contained a hardcoded demo business with fake contact details. That was removed.
+### Phase 3 — Persistent media and asset management
+- Added a tenant-scoped `Media` model with storage metadata, dimensions, MIME type, purpose, uploader and lifecycle state.
+- Added S3-compatible durable object storage; application filesystem is not the media source of truth.
+- Added server-side magic-byte validation, Sharp image metadata validation, 10 MB upload limits and upload rate limiting.
+- Added admin upload, listing/filtering, replacement and deletion workflows.
+- Prevented deletion of media that is still assigned to business, product or category records.
+- Replaced legacy business logo/OG URL fields, product image URL arrays and category image URLs with Media references.
+- Added admin-managed primary/light/dark/icon logos, favicon, OG image, hero banners, product images and category images.
+- Wired favicon/OG metadata and public storefront image rendering to the persisted Media records.
+- Added an explicit one-time legacy-media migration instead of retaining URL compatibility fields.
+- Removed external image URLs from the development seed.
 
-If the configured business cannot be loaded, the application now has no fabricated business identity.
+## Current production-readiness status
 
-### 3. Product pricing drift
-`discountPrice` is the backend model's canonical field. The frontend previously accepted both `discountPrice` and `salePrice`.
+The repository is **not production-ready yet**. Remaining dependency-ordered work includes:
+1. Phase 4 — business/branding CMS
+2. Phase 5 — product/category CMS
+3. Phase 6 — installment/financial integrity
+4. Phase 7 — customer portal authorization
+5. Phase 8 — analytics
+6. Phase 9 — SEO foundation
+7. Phase 10 — AEO/GEO
+8. Phase 11 — structured data
+9. Phase 12 — public UX/conversion
+10. Phase 13 — admin operations/reporting
+11. Phase 14 — red-team/security hardening
+12. Phase 15 — automated tests
+13. Phase 16 — production/deployment verification
+14. Phase 17 — final acceptance audit
 
-Phase 0 removed the compatibility path and uses `discountPrice` consistently.
+## Phase 3 deployment requirement
 
-### 4. Product API contract mismatch
-The backend already exposes:
+Production must configure the S3-compatible variables documented in `backend/.env.example`. The public media base URL must be HTTPS in production.
 
-`GET /api/products/:idOrSlug`
+If an existing MongoDB database contains legacy URL-based images, back it up and run:
 
-The product detail page incorrectly called:
+```bash
+PHASE3_MEDIA_MIGRATION_CONFIRM=true npm run migrate:phase3-media
+```
 
-`GET /api/products/slug/:slug`
+The migration intentionally removes the old URL representation. Replacement media is uploaded through the admin Media/Settings UI.
 
-The frontend now calls the actual canonical endpoint.
+## Verification limitation
 
-### 5. Duplicate catalogue implementation
-`frontend/src/app/catalog/page.tsx` duplicated the public product catalogue and had no repository references.
-
-It was deleted. `/products` is now the single public catalogue implementation.
-
-### 6. Analytics tenant fallback
-Analytics previously silently defaulted to `bilal-electronics`.
-
-Phase 0 removed the hardcoded tenant fallback and uses `NEXT_PUBLIC_BUSINESS_SLUG`. If that value is missing, analytics does not send a tenantless event.
-
-Browser session IDs now use `crypto.randomUUID()` instead of `Math.random()`.
-
-### 7. Stale documentation
-The previous completion report claimed production-grade backend/security/testing status that contradicted the source tree.
-
-This report replaces those claims with the actual phase-based status.
-
-## Deliberately NOT implemented in Phase 0
-
-These are not being patched with temporary/duplicate implementations:
-
-- security middleware and centralized request validation
-- full tenant/object authorization
-- MFA, OTP hardening and server-side sessions
-- persistent media storage
-- business/branding CMS expansion
-- product/category CMS expansion
-- financial transaction integrity
-- customer portal authorization hardening
-- analytics backend
-- dynamic SEO/AEO/GEO
-- structured data
-- red-team testing
-- unit/integration/E2E tests
-- deployment and backup verification
-
-Those belong to their dependency-ordered phases.
-
-## Baseline risks remaining
-
-The repository still contains known work for later phases, including:
-
-- backend security hardening
-- local filesystem uploads
-- client-side JWT storage
-- incomplete customer/session security
-- weak input validation/authorization in several routes
-- missing automated backend tests
-- client-rendered product detail pages
-- incomplete public/category page architecture
-- missing sitemap/robots/canonical system
-- hardcoded public marketing claims that should eventually be CMS-controlled
-- incomplete lead and analytics routes
-
-These are intentionally tracked for the later phases rather than hidden behind compatibility code.
-
-## Source-of-truth rule
-
-From this point forward:
-
-> If an implementation is replaced, the old implementation is removed in the same phase. Do not add a second file, second field, fallback implementation, alias, or compatibility path unless a documented migration requires it.
-
+GitHub source changes were inspected directly, but this environment does not have the repository runtime, production MongoDB, or object-storage credentials. Therefore dependency installation, Node/Next build, live upload/delete tests, browser cookie tests and real storage integration remain deployment/runtime verification tasks for Phase 16.

@@ -41,16 +41,26 @@ export default function HeroSlider() {
 
   return (
     <section className="relative overflow-hidden">
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 60% at 20% 40%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent),
-            radial-gradient(ellipse 60% 50% at 90% 20%, color-mix(in srgb, var(--color-accent) 15%, transparent), transparent),
-            linear-gradient(160deg, #0f172a 0%, #1e293b 45%, #0f172a 100%)
-          `,
-        }}
-      />
+      <div className="absolute inset-0 bg-slate-950">
+        {business?.heroBanners?.length ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={business.heroBanners[i % business.heroBanners.length].publicUrl}
+            alt={business.heroBanners[i % business.heroBanners.length].altText || ''}
+            className="h-full w-full object-cover opacity-50"
+          />
+        ) : null}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 80% 60% at 20% 40%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent),
+              radial-gradient(ellipse 60% 50% at 90% 20%, color-mix(in srgb, var(--color-accent) 15%, transparent), transparent),
+              linear-gradient(160deg, rgba(15,23,42,0.94) 0%, rgba(30,41,59,0.84) 45%, rgba(15,23,42,0.94) 100%)
+            `,
+          }}
+        />
+      </div>
       <div
         className="absolute inset-0 opacity-[0.07]"
         style={{

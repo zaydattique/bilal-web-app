@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
+import { assertStorageConfigured } from './utils/mediaStorage.js';
 
 import authRoutes from './routes/auth.routes.js';
 import businessRoutes from './routes/business.routes.js';
@@ -19,6 +20,7 @@ import adminUserRoutes from './routes/adminUser.routes.js';
 import auditRoutes from './routes/audit.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import customerPortalRoutes from './routes/customerPortal.routes.js';
+import mediaRoutes from './routes/media.routes.js';
 
 const requiredSecrets = ['MONGODB_URI', 'APP_ENCRYPTION_KEY'];
 for (const name of requiredSecrets) {
@@ -27,6 +29,7 @@ for (const name of requiredSecrets) {
     throw new Error(`${name} must be at least 32 characters`);
   }
 }
+if (process.env.NODE_ENV === 'production') assertStorageConfigured();
 
 const app = express();
 app.disable('x-powered-by');
@@ -105,6 +108,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/business', businessRoutes);
+app.use('/api/admin/media', mediaRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/audit-log', auditRoutes);
 app.use('/api/admin/reports', reportRoutes);
