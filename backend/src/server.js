@@ -139,7 +139,7 @@ app.use('/api/admin/media', mediaRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/audit-log', auditRoutes);
 app.use('/api/admin/reports', reportRoutes);
-app.use('/api/admin/analytics', analyticsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/admin/customers', customerRoutes);
