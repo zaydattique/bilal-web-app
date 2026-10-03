@@ -57,7 +57,7 @@ router.get('/payments', protectCustomer, async (req, res, next) => {
       businessId: req.businessId,
       status: 'confirmed',
     })
-      .select('_id accountId paymentAmount paymentMethod referenceNumber paymentDate receiptNumber allocationDetails')
+      .select('_id accountId paymentAmount paymentMethod referenceNumber paymentDate receiptNumber')
       .populate('accountId', 'accountNumber productNameSnapshot')
       .sort({ paymentDate: -1, _id: -1 })
       .limit(limit)
