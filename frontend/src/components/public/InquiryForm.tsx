@@ -50,7 +50,7 @@ export default function InquiryForm({
         preferredDownPayment: downPct,
         notes: [
           productName ? `Product: ${productName}` : null,
-          preferredMonths ? `Preferred tenure: ${preferredMonths} months` : null,
+          `Preferred tenure: ${months} months`,
           `Preferred down payment: ${downPct}%`,
         ]
           .filter(Boolean)
