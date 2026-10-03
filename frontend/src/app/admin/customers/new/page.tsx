@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
 export default function NewCustomerPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -28,7 +28,7 @@ export default function NewCustomerPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!admin) return;
     setSaving(true);
     setError('');
     try {
