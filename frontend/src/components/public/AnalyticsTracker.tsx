@@ -14,7 +14,7 @@ export default function AnalyticsTracker() {
   useEffect(() => {
     const track = () => {
       if (localStorage.getItem(CONSENT_KEY) !== 'accepted') return;
-      if (!pathname || lastPath.current === pathname) return;
+      if (!pathname || pathname.startsWith('/admin') || pathname.startsWith('/portal') || lastPath.current === pathname) return;
       lastPath.current = pathname;
       trackPageView(pathname);
     };
