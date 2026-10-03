@@ -50,32 +50,11 @@ interface HomePageProps {
 }
 
 export default function HomePage({ initialBusiness, initialFeatured, initialCategories }: HomePageProps) {
-  const { business, loading: themeLoading, offline } = useTheme();
-  const [featured, setFeatured] = useState<ProductCardData[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!business?._id || offline) {
-      setLoading(false);
-      return;
-    }
-    const bid = business._id;
-    Promise.all([
-      api.get<{ success: boolean; products: ProductCardData[] }>(
-        `/api/products?businessId=${bid}&featured=true&limit=6`
-      ),
-      api.get<{ success: boolean; categories: Category[] }>(
-        `/api/categories?businessId=${bid}`
-      ),
-    ])
-      .then(([prodRes, catRes]) => {
-        setFeatured(prodRes.products || []);
-        setCategories(catRes.categories || []);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [business?._id, offline]);
+  const { business: contextBusiness, loading: themeLoading, offline } = useTheme();
+  const business = contextBusiness || initialBusiness;
+  const featured = initialFeatured;
+  const categories = initialCategories;
+  const loading = false;
 
   if (themeLoading) {
     return (
