@@ -128,7 +128,7 @@ router.get('/:idOrSlug', optionalAuth, async (req, res, next) => {
     const businessId = await getBusinessId(req);
     const value = String(req.params.idOrSlug).toLowerCase();
     const filter = { businessId };
-    if (!req.admin) Object.assign(filter, publicFilter());
+    if (!req.admin) Object.assign(filter, publicStatusFilter());
     if (/^[0-9a-f]{24}$/i.test(value)) filter._id = requireObjectId(value, 'product id');
     else filter.slug = value;
     let product = await populate(Product.findOne(filter));
