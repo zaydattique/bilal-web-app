@@ -29,7 +29,7 @@ export default function ProductsPage() {
   useEffect(() => {
     if (!admin) return;
     api
-      .get<{ success: boolean; products: Product[] }>('/api/products?active=false')
+      .get<{ success: boolean; products: Product[] }>('/api/products?status=all&limit=50')
       .then((res) => setProducts(res.products))
       .catch(console.error)
       .finally(() => setLoading(false));
