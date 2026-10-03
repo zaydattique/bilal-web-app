@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import HomePage, { HomeBusiness } from '@/components/public/HomePage';
+import JsonLd from '@/components/public/JsonLd';
 
 const apiBase = () => process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '';
 const businessSlug = () => process.env.NEXT_PUBLIC_BUSINESS_SLUG || '';
@@ -53,11 +54,14 @@ export default async function HomeRoute() {
 
   const { products, categories } = await getHomeData(business._id);
   return (
-    <HomePage
+    <>
+      <JsonLd business={business} pagePath="/" pageName={business.content?.tagline || business.businessName} pageDescription={business.content?.description || business.businessName} />
+      <HomePage
       initialBusiness={business}
       initialFeatured={products}
       initialCategories={categories}
-    />
+      />
+    </>
   );
 }
 
