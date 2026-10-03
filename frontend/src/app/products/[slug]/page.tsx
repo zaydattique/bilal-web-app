@@ -32,12 +32,14 @@ export default function ProductDetailPage() {
   const { addItem } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showInquiry, setShowInquiry] = useState(false);
   const [prefDown, setPrefDown] = useState(20);
   const [prefMonths, setPrefMonths] = useState(12);
 
   useEffect(() => {
-    if (!business?._id || !slug) return;
+    if (!business?._id || !slug) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     api
       .get<{ success: boolean; product: Product }>(
@@ -144,7 +146,10 @@ export default function ProductDetailPage() {
               >
                 Add to cart
               </button>
-              <button type="button" className="btn-secondary" onClick={() => setShowInquiry(true)}>
+              <button type="button" className="btn-secondary" onClick={() => {
+                  setPrefDown(20);
+                  setPrefMonths(12);
+                }}>
                 Request plan
               </button>
             </div>
