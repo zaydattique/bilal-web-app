@@ -296,7 +296,7 @@ router.get('/:idOrSlug', optionalAuth, async (req, res, next) => {
         const target = await populate(Product.findOne({ _id: redirect.productId, businessId, ...publicStatusFilter() }));
         if (target) {
           res.set('Location', `/products/${target.slug}`);
-          return res.status(301).json({ success: true, redirect: `/products/${target.slug}`, product: target });
+          return res.status(301).end();
         }
       }
     }
@@ -311,10 +311,15 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
     const data = await buildProductData(req.body, req.businessId);
     const exists = await Product.exists({ businessId: req.businessId, slug: data.slug });
     if (exists) throw error('Product slug already exists', 409);
+    const reserved = await ProductSlugRedirect.exists({ businessId: req.businessId, oldSlug: data.slug });
+    if (reserved) throw error('The product slug is reserved by an existing redirect', 409);
     const product = await Product.create({ businessId: req.businessId, ...data });
     await logAction({ businessId: req.businessId, adminId: req.admin._id, action: 'create', entityType: 'product', entityId: product._id, ipAddress: req.ip, userAgent: req.get('user-agent') });
     res.status(201).json({ success: true, product: await populate(Product.findById(product._id)) });
-  } catch (err) { next(err); }
+  } catch (err) {
+    if (duplicateKey(err)) return res.status(409).json({ success: false, message: 'Product slug or SKU already exists' });
+    next(err);
+  }
 });
 
 router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res, next) => {
@@ -338,7 +343,9 @@ router.put('/:id', protectAdmin, requireRole('super_admin', 'admin', 'manager'),
     }
 
     Object.assign(product, data);
-    try {\n      await product.save();\n    } catch (err) {\n      if (duplicateKey(err)) return res.status(409).json({ success: false, message: 'Product slug or SKU already exists' });\n      throw err;\n    }
+    try {
+      await product.save();
+    } catch (err) {\n      if (duplicateKey(err)) return res.status(409).json({ success: false, message: 'Product slug or SKU already exists' });\n      throw err;\n    }
 
     if (data.slug !== oldSlug) {
       await ProductSlugRedirect.deleteOne({ businessId: req.businessId, oldSlug: data.slug, productId: productId });
