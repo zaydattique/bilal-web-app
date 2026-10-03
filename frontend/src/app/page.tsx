@@ -67,7 +67,7 @@ export default function HomePage() {
     );
   }
 
-  const phone = business?.contact?.phone || business?.contact?.whatsapp;
+  const phone = business?.contact?.phone || business?.socialMedia?.whatsapp;
   const address = business?.contact?.address;
 
   return (
