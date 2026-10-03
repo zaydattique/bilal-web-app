@@ -38,7 +38,6 @@ export default function NewPaymentPage() {
     api
       .get<{ success: boolean; accounts: Account[] }>(
         '/api/admin/accounts?status=active&limit=100',
-        token
       )
       .then((res) => setAccounts(res.accounts))
       .catch(console.error);
@@ -62,7 +61,6 @@ export default function NewPaymentPage() {
           referenceNumber: form.referenceNumber || undefined,
           notes: form.notes || undefined,
         },
-        token
       );
       setSuccess(`Payment recorded. Receipt: ${res.payment.receiptNumber}`);
       setTimeout(() => router.push('/admin/payments'), 1500);
