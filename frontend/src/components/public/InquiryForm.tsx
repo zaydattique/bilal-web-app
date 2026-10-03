@@ -34,10 +34,8 @@ export default function InquiryForm({
     setError(null);
     setLoading(true);
     try {
-      const slug =
-        business?.businessSlug ||
-        process.env.NEXT_PUBLIC_BUSINESS_SLUG ||
-        'bilal-electronics';
+      const slug = business?.businessSlug || process.env.NEXT_PUBLIC_BUSINESS_SLUG;
+      if (!slug) throw new Error('Business configuration is unavailable. Please try again later.');
 
       await api.post('/api/leads', {
         businessSlug: slug,
