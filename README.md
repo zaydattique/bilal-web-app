@@ -4,7 +4,7 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–9 are implemented on the current branch. Phase 9 adds the SEO foundation: server-rendered public catalogue/home content, dynamic metadata, canonical URLs, robots policy and a CMS-driven sitemap. Runtime verification is still required before production.
+Phases 0–10 are implemented on the current branch. Phase 10 adds CMS-driven AEO/GEO answer content to the server-rendered public storefront. Runtime verification is still required before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
