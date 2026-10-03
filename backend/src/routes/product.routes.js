@@ -95,6 +95,7 @@ const validatePublish = (data) => {
   if (!data.aeo?.summary) errors.push('AEO summary');
   if (!data.installment || data.installment.totalPayable <= 0 || data.installment.installmentAmount <= 0) errors.push('complete installment facts');
   if (status === 'scheduled' && !data.scheduledAt) errors.push('scheduled publish date');
+  if (status === 'scheduled' && new Date(data.scheduledAt) <= new Date()) errors.push('future scheduled publish date');
   if (errors.length) throw Object.assign(new Error(`Cannot publish: missing ${errors.join(', ')}`), { statusCode: 400 });
 };
 
@@ -171,6 +172,7 @@ router.post('/', protectAdmin, requireRole('super_admin','admin','manager'), asy
       scheduledAt: req.body.scheduledAt ? new Date(req.body.scheduledAt) : null,
       featured: req.body.featured === true,
     };
+    if (!Array.isArray(req.body.media || []) || (req.body.media || []).length > MAX.media) throw Object.assign(new Error('A product can have at most 20 media items'), { statusCode: 400 });
     if (!data.name || !data.slug) throw Object.assign(new Error('Name and a valid slug are required'), { statusCode: 400 });
     if (data.discountPrice !== null && data.discountPrice > data.cashPrice) throw Object.assign(new Error('discountPrice cannot exceed cashPrice'), { statusCode: 400 });
     if (data.installment.advanceAmount + data.installment.financedAmount !== 0 && data.installment.financedAmount < 0) throw Object.assign(new Error('Invalid installment amounts'), { statusCode: 400 });
@@ -198,7 +200,10 @@ router.put('/:id', protectAdmin, requireRole('super_admin','admin','manager'), a
     if (next.discountPrice !== undefined && next.discountPrice !== null) next.discountPrice = requireNonNegativeNumber(next.discountPrice, 'discountPrice');
     if (next.discountPrice !== undefined && next.discountPrice !== null && next.cashPrice === undefined && next.discountPrice > product.cashPrice) throw Object.assign(new Error('discountPrice cannot exceed cashPrice'), { statusCode: 400 });
     if (next.discountPrice !== undefined && next.discountPrice !== null && next.cashPrice !== undefined && next.discountPrice > next.cashPrice) throw Object.assign(new Error('discountPrice cannot exceed cashPrice'), { statusCode: 400 });
-    if (next.media !== undefined) next.media = await resolveMediaIds(next.media, req.businessId, 'media');
+    if (next.media !== undefined) {
+      if (!Array.isArray(next.media) || next.media.length > MAX.media) throw Object.assign(new Error('A product can have at most 20 media items'), { statusCode: 400 });
+      next.media = await resolveMediaIds(next.media, req.businessId, 'media');
+    }
     if (next.categoryId !== undefined) next.categoryId = category?._id || null;
     if (next.customFieldValues !== undefined) next.customFieldValues = normalizeCategoryFields(category, next.customFieldValues);
     if (next.faqs !== undefined) next.faqs = normalizeFaqs(next.faqs);
