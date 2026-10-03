@@ -11,20 +11,24 @@ const paymentSchema = new mongoose.Schema(
       enum: ['cash', 'bank_transfer', 'cheque', 'online'],
       default: 'cash',
     },
-    referenceNumber: String,
+    referenceNumber: { type: String, trim: true, maxlength: 120 },
     paymentDate: { type: Date, default: Date.now },
-    receivedBy: String,
-    notes: String,
-    receiptNumber: { type: String, required: true },
+    receivedBy: { type: String, trim: true, maxlength: 160 },
+    notes: { type: String, trim: true, maxlength: 2000 },
+    receiptNumber: { type: String, required: true, trim: true, maxlength: 80 },
+    idempotencyKey: { type: String, required: true, trim: true, maxlength: 120 },
+    idempotencyFingerprint: { type: String, required: true, trim: true, maxlength: 64 },
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'failed', 'reversed'],
       default: 'confirmed',
     },
+    reversedAt: Date,
+    reversedBy: mongoose.Schema.Types.ObjectId,
     allocationDetails: [
       {
-        installmentId: mongoose.Schema.Types.ObjectId,
-        amountAllocated: Number,
+        installmentId: { type: mongoose.Schema.Types.ObjectId, required: true },
+        amountAllocated: { type: Number, required: true, min: 0 },
       },
     ],
   },
@@ -34,5 +38,6 @@ const paymentSchema = new mongoose.Schema(
 paymentSchema.index({ accountId: 1, businessId: 1 });
 paymentSchema.index({ customerId: 1, businessId: 1 });
 paymentSchema.index({ paymentDate: -1, businessId: 1 });
+paymentSchema.index({ businessId: 1, idempotencyKey: 1 }, { unique: true });
 
 export default mongoose.model('Payment', paymentSchema);
