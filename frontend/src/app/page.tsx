@@ -88,7 +88,7 @@ export default function HomePage() {
               <p className="eyebrow">Catalogue</p>
               <h2 className="section-title mt-2">Featured installment items</h2>
               <p className="mt-2 max-w-lg text-sm text-slate-500">
-                Clear cash prices and monthly plans — no bank apps required.
+  {business?.content?.description || ''}
               </p>
             </div>
             <Link href="/products" className="btn-secondary text-sm">
@@ -169,7 +169,7 @@ export default function HomePage() {
             <p className="eyebrow">Simple process</p>
             <h2 className="section-title mt-2">How it works</h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-slate-500">
-              No bank approval maze. Choose online, finalize at the shop with CNIC.
+{business?.content?.description || ''}
             </p>
           </div>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -199,35 +199,24 @@ export default function HomePage() {
                   Same clear shop process families already know — transparent plans, no hidden bank fees.
                 </p>
                 <ul className="mt-8 space-y-4">
-                  {[
-                    { icon: FileText, t: 'Original CNIC' },
-                    { icon: UserCheck, t: 'Guarantor with valid CNIC' },
-                    { icon: MapPin, t: 'Proof of address' },
-                    { icon: Smartphone, t: 'Valid phone number' },
-                    { icon: CreditCard, t: 'Advance / down payment' },
-                  ].map((item) => (
+                  {(business?.content?.requirements || []).map((t, index) => {
+                    const icons = [FileText, UserCheck, MapPin, Smartphone, CreditCard];
+                    const Icon = icons[index % icons.length];
+                    return (
                     <li key={item.t} className="flex items-center gap-3">
-                      <span
-                        className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
-                        style={{ background: 'var(--color-primary)' }}
-                      >
-                        <item.icon size={18} />
+                      <span className="flex h-10 w-10 items-center justify-center rounded-2xl text-white" style={{ background: 'var(--color-primary)' }}>
+                        <Icon size={18} />
                       </span>
-                      <span className="text-sm font-medium text-slate-800">{item.t}</span>
+                      <span className="text-sm font-medium text-slate-800">{t}</span>
                     </li>
-                  ))}
+                  ); })}
                 </ul>
               </div>
               <div className="card p-6 sm:p-8">
-                <p className="eyebrow">Why families choose us</p>
-                <h3 className="mt-2 font-display text-2xl text-slate-900">Clear monthly amounts</h3>
+                <p className="eyebrow">{business?.content?.tagline || 'Information'}</p>
+                <h3 className="mt-2 font-display text-2xl text-slate-900">{business?.content?.description || business?.businessName}</h3>
                 <ul className="mt-6 space-y-4">
-                  {[
-                    'Transparent fixed installment — written and recorded',
-                    'Same-day collection after shop verification',
-                    'Local team in Kot Khawaja Saeed / Lahore',
-                    'No confusing bank portals — just CNIC & plan',
-                  ].map((t) => (
+                  {(business?.content?.trustPoints || []).map((t) => (
                     <li key={t} className="flex gap-3 text-sm text-slate-600">
                       <CheckCircle2
                         className="mt-0.5 h-5 w-5 shrink-0"
@@ -263,7 +252,7 @@ export default function HomePage() {
             <Shield className="mx-auto h-10 w-10 opacity-80" />
             <h2 className="font-display mt-4 text-3xl sm:text-4xl">Visit or call the shop</h2>
             <p className="mx-auto mt-3 max-w-md text-sm text-slate-300">
-              {address || 'Kot Khawaja Saeed, Lahore'} · finalize your plan in person with CNIC.
+              {address || business?.content?.serviceArea || ''}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               {phone && (
