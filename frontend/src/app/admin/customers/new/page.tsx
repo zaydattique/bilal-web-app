@@ -55,7 +55,6 @@ export default function NewCustomerPage() {
                 }
               : undefined,
         },
-        token
       );
       router.push('/admin/customers');
     } catch (err: unknown) {
