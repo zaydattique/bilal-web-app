@@ -1,5 +1,19 @@
 import mongoose from 'mongoose';
 
+const allocationSchema = new mongoose.Schema(
+  {
+    installmentId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    amountAllocated: { type: Number, required: true, min: 0 },
+    previousStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'overdue', 'partial'],
+      required: true,
+    },
+    previousPaidDate: Date,
+  },
+  { _id: false }
+);
+
 const paymentSchema = new mongoose.Schema(
   {
     businessId: { type: mongoose.Schema.Types.ObjectId, ref: 'Business', required: true },
@@ -18,19 +32,20 @@ const paymentSchema = new mongoose.Schema(
     receiptNumber: { type: String, required: true, trim: true, maxlength: 80 },
     idempotencyKey: { type: String, required: true, trim: true, maxlength: 120 },
     idempotencyFingerprint: { type: String, required: true, trim: true, maxlength: 64 },
+    accountStatusBefore: {
+      type: String,
+      enum: ['active', 'paid', 'defaulted', 'closed'],
+      required: true,
+    },
+    accountClosedDateBefore: Date,
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'failed', 'reversed'],
       default: 'confirmed',
     },
     reversedAt: Date,
-    reversedBy: mongoose.Schema.Types.ObjectId,
-    allocationDetails: [
-      {
-        installmentId: { type: mongoose.Schema.Types.ObjectId, required: true },
-        amountAllocated: { type: Number, required: true, min: 0 },
-      },
-    ],
+    reversedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'AdminUser' },
+    allocationDetails: { type: [allocationSchema], default: [] },
   },
   { timestamps: true }
 );
