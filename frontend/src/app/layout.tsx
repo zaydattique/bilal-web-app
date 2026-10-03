@@ -5,6 +5,7 @@ import { CustomerAuthProvider } from '@/context/CustomerAuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { CartProvider } from '@/context/CartContext';
 import CookieConsent from '@/components/public/CookieConsent';
+import AnalyticsTracker from '@/components/public/AnalyticsTracker';
 import JsonLd from '@/components/public/JsonLd';
 
 interface PublicBusiness {
@@ -89,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ThemeProvider>
               <CartProvider>
                 <JsonLd />
+                <AnalyticsTracker />
                 {children}
                 <CookieConsent />
               </CartProvider>
