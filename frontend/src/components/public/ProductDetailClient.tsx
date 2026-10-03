@@ -34,6 +34,17 @@ export default function ProductDetailClient({product,business}:{product:PublicPr
     <div className="mt-3 flex items-baseline gap-2"><span className="text-2xl font-bold" style={{color:'var(--color-primary)'}}>{formatPKR(price,symbol)}</span>{product.discountPrice!=null&&product.discountPrice<product.cashPrice&&<span className="text-sm text-slate-400 line-through">{formatPKR(product.cashPrice,symbol)}</span>}</div>
     {product.shortDescription&&<p className="mt-3 text-sm font-medium text-slate-700">{product.shortDescription}</p>}
     {product.description&&<p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-600">{product.description}</p>}
+    {(product.aeo?.summary||product.aeo?.keyFacts?.length||product.aeo?.buyingIntent)&&<section aria-labelledby="product-answer" className="mt-6 rounded-2xl border bg-slate-50 p-5" style={{borderColor:'var(--color-border)'}}>
+      <h2 id="product-answer" className="text-lg font-semibold text-slate-900">Quick answer</h2>
+      {product.aeo?.summary&&<p className="mt-2 text-sm leading-relaxed text-slate-700">{product.aeo.summary}</p>}
+      {product.aeo?.buyingIntent&&<p className="mt-3 text-sm leading-relaxed text-slate-600"><span className="font-semibold text-slate-800">Best for:</span> {product.aeo.buyingIntent}</p>}
+      {product.aeo?.keyFacts?.length&&<ul className="mt-4 grid gap-2 sm:grid-cols-2">{product.aeo.keyFacts.map((fact)=><li key={fact} className="text-sm text-slate-700">• {fact}</li>)}</ul>}
+    </section>}
+    {product.geo?.intent||product.geo?.localNotes?<section aria-labelledby="product-local" className="mt-6 rounded-2xl border p-5" style={{borderColor:'var(--color-border)'}}>
+      <h2 id="product-local" className="text-lg font-semibold text-slate-900">Local buying information</h2>
+      {product.geo?.intent&&<p className="mt-2 text-sm leading-relaxed text-slate-700">{product.geo.intent}</p>}
+      {product.geo?.localNotes&&<p className="mt-2 text-sm leading-relaxed text-slate-600">{product.geo.localNotes}</p>}
+    </section>:null}
     <button type="button" className="btn-primary mt-6" onClick={()=>addItem({productId:product._id,name:product.name,slug:product.slug,price,image:product.media?.[0]?.publicUrl})}>Add to cart</button>
    </div>
   </div>
