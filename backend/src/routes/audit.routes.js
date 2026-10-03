@@ -4,7 +4,7 @@ import { protectAdmin, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res) => {
+router.get('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res, next) => {
   try {
     const filter = { businessId: req.businessId };
     if (req.query.action) filter.action = req.query.action;
@@ -36,7 +36,7 @@ router.get('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), as
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
