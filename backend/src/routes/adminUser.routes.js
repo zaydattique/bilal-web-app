@@ -1,5 +1,6 @@
 import express from 'express';
 import Admin from '../models/Admin.js';
+import Session from '../models/Session.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 import { logAction } from '../utils/audit.js';
 import { assertAllowedFields, requireObjectId, requireString } from '../middleware/security.js';
@@ -156,7 +157,7 @@ router.get('/:id/login-history', protectAdmin, requireRole('super_admin', 'admin
     const admin = await Admin.findOne({ _id: adminId, businessId: req.businessId })
       .select('loginHistory email firstName lastName');
     if (!admin) return res.status(404).json({ success: false, message: 'Admin not found' });
-    res.json({ success: true, loginHistory: admin.loginHistory || [] });
+    const sessions = await Session.find({ userType: 'admin', userId: admin._id, businessId: req.businessId })\n      .select('_id createdAt lastSeenAt expiresAt revokedAt endedAt ipAddress userAgent')\n      .sort({ createdAt: -1 })\n      .limit(100);\n    res.set('Cache-Control', 'no-store');\n    res.json({ success: true, loginHistory: admin.loginHistory || [], sessions });
   } catch (error) { next(error); }
 });
 
