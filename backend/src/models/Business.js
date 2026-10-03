@@ -51,10 +51,30 @@ const businessSchema = new mongoose.Schema(
       whatsapp: String,
     },
     policies: {
-      termsUrl: String,
-      privacyUrl: String,
-      returnPolicy: String,
-      warrantyClaim: String,
+      termsUrl: { type: String, trim: true, maxlength: 500 },
+      privacyUrl: { type: String, trim: true, maxlength: 500 },
+      returnPolicy: { type: String, trim: true, maxlength: 10000 },
+      warrantyClaim: { type: String, trim: true, maxlength: 10000 },
+    },
+    content: {
+      tagline: { type: String, trim: true, maxlength: 160 },
+      description: { type: String, trim: true, maxlength: 2000 },
+      serviceArea: { type: String, trim: true, maxlength: 500 },
+      hours: { type: String, trim: true, maxlength: 500 },
+      footerText: { type: String, trim: true, maxlength: 1000 },
+      requirements: [{ type: String, trim: true, maxlength: 300 }],
+      trustPoints: [{ type: String, trim: true, maxlength: 300 }],
+      howItWorks: [{
+        step: { type: String, trim: true, maxlength: 80 },
+        title: { type: String, trim: true, maxlength: 120 },
+        description: { type: String, trim: true, maxlength: 300 },
+      }],
+      heroSlides: [{
+        title: { type: String, trim: true, maxlength: 120 },
+        subtitle: { type: String, trim: true, maxlength: 300 },
+        cta: { type: String, trim: true, maxlength: 60 },
+        href: { type: String, trim: true, maxlength: 300 },
+      }],
     },
     settings: {
       currencySymbol: { type: String, default: 'PKR' },
@@ -65,6 +85,7 @@ const businessSchema = new mongoose.Schema(
       minDownPayment: { type: Number, default: 10 },
       enableOnlinePayment: { type: Boolean, default: false },
       enableGuestCheckout: { type: Boolean, default: false },
+      showCustomerPortalLink: { type: Boolean, default: true },
     },
     seo: {
       metaTitle: String,
