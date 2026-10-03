@@ -10,6 +10,7 @@ import Account from './models/Account.js';
 import Payment from './models/Payment.js';
 import InstallmentPlan from './models/InstallmentPlan.js';
 import AuditLog from './models/AuditLog.js';
+import Media from './models/Media.js';
 
 const seed = async () => {
   await connectDB();
@@ -17,6 +18,7 @@ const seed = async () => {
   console.log('Clearing existing data...');
   await Promise.all([
     AuditLog.deleteMany({}),
+    Media.deleteMany({}),
     Payment.deleteMany({}),
     InstallmentPlan.deleteMany({}),
     Account.deleteMany({}),
@@ -100,7 +102,6 @@ const seed = async () => {
     isActive: true,
   });
 
-  const img = (id) => `https://picsum.photos/seed/${id}/800/600`;
 
   console.log('Creating products (all fields)...');
   await Product.create([
