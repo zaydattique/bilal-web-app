@@ -4,6 +4,7 @@ import Account from '../models/Account.js';
 import InstallmentPlan from '../models/InstallmentPlan.js';
 import Customer from '../models/Customer.js';
 import Business from '../models/Business.js';
+import Product from '../models/Product.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 import { logAction } from '../utils/audit.js';
 import {
@@ -61,6 +62,7 @@ router.get('/', protectAdmin, async (req, res, next) => {
     const [accounts, total] = await Promise.all([
       Account.find(filter)
         .populate('customerId', 'firstName lastName phoneNumber accountNumber')
+        .populate('productId', 'name slug status')
         .populate('installmentPlanId')
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -77,6 +79,7 @@ router.get('/:id', protectAdmin, async (req, res, next) => {
     const accountId = requireObjectId(req.params.id, 'account id');
     const account = await Account.findOne({ _id: accountId, businessId: req.businessId })
       .populate('customerId')
+      .populate('productId', 'name slug status')
       .populate('installmentPlanId');
 
     if (!account) return res.status(404).json({ success: false, message: 'Account not found' });
@@ -137,9 +140,10 @@ router.get('/:id/plan/due-list', protectAdmin, async (req, res, next) => {
 
 router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res, next) => {
   try {
-    assertAllowedFields(req.body, ['customerId', 'totalAmount', 'downPayment', 'installments']);
+    assertAllowedFields(req.body, ['customerId', 'productId', 'totalAmount', 'downPayment', 'installments']);
 
     const customerId = requireObjectId(req.body.customerId, 'customer id');
+    const productId = requireObjectId(req.body.productId, 'product id');
     const totalAmount = requirePositiveNumber(req.body.totalAmount, 'totalAmount');
     const downPayment = requireNonNegativeNumber(req.body.downPayment ?? 0, 'downPayment');
     if (downPayment >= totalAmount) {
@@ -168,6 +172,13 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
         throw error;
       }
 
+      const product = await Product.findOne({ _id: productId, businessId: req.businessId, status: 'published' }).select('_id name').session(session);
+      if (!product) {
+        const error = new Error('Published product not found');
+        error.statusCode = 404;
+        throw error;
+      }
+
       const business = await Business.findOneAndUpdate(
         { _id: req.businessId, isActive: true, accountCount: { $lt: MAX_ACCOUNTS } },
         { $inc: { accountSequence: 1, accountCount: 1 } },
@@ -184,6 +195,8 @@ router.post('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), a
       const [createdAccount] = await Account.create([{
         businessId: req.businessId,
         customerId,
+        productId: product._id,
+        productNameSnapshot: product.name,
         accountNumber,
         totalAmount,
         downPayment,
