@@ -110,6 +110,15 @@ app.post('/api/admin/accounts', financialWriteLimiter);
 app.post('/api/admin/payments', financialWriteLimiter);
 app.post('/api/admin/payments/:id/reverse', financialWriteLimiter);
 
+const customerPortalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many portal requests. Try again later.' },
+});
+app.use('/api/customer/', customerPortalLimiter);
+
 // Legacy local uploads are intentionally not exposed by Phase 1.
 // Persistent media is introduced in Phase 3.
 

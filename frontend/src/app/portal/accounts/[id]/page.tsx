@@ -28,6 +28,7 @@ export default function PortalAccountDetail() {
   if (!account) return <p className="text-sm text-red-600">Account not found</p>;
 
   const plan = account.installmentPlanId;
+  const productName = account.productNameSnapshot || account.productId?.name || 'Product information unavailable';
   const now = new Date();
 
   return (
@@ -38,6 +39,7 @@ export default function PortalAccountDetail() {
             ← Back
           </Link>
           <h1 className="text-2xl font-bold font-mono">{account.accountNumber}</h1>
+          <p className="mt-1 text-sm text-gray-500">Purchased item: {productName}</p>
         </div>
         <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
           {account.status}

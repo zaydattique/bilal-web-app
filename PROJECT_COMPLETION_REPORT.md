@@ -1,7 +1,7 @@
-# Project Completion Report — Through Phase 6
+# Project Completion Report — Through Phase 7
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 6 — Installment & Financial System Hardening  
+**Current phase:** Phase 7 — Customer Portal & Authorization  
 **Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
 ## Completed
@@ -69,3 +69,23 @@ Run backend/src/migrations/phase5-product-category-migration.js once against the
 
 ### Phase 6 verification limitation
 Source-level review and GitHub diff inspection were completed. Runtime npm/Next build, MongoDB transaction tests, concurrent-payment tests and browser verification were not run because this environment does not have the project's runtime/database credentials. MongoDB transactions require a replica set or sharded deployment in production.
+
+
+### Phase 7 — Customer Portal & Authorization
+- Replaced customer portal reads with strict server-side ownership and tenant filters on every account, payment and installment-plan query.
+- Customer account IDs are validated before lookup and an account is returned only when both `customerId` and `businessId` match the authenticated session.
+- Customer responses use explicit projections instead of returning full MongoDB documents.
+- Customer authentication `/me` no longer exposes CNIC, address, guarantor, totals or other private Customer-model fields.
+- Portal responses are explicitly `private, no-store` to prevent sensitive financial data being cached.
+- Customer payment history is limited, tenant-scoped, status-scoped to confirmed payments, and returned as a safe projection.
+- Upcoming dues are derived only from the authenticated customer's own active/defaulted accounts.
+- Customer login no longer distinguishes an unknown business/customer from invalid credentials.
+- Customer portal endpoints have their own rate limiter in addition to the global API limiter.
+- Installment accounts now record the purchased Product reference plus a product-name snapshot. New accounts require a currently published product, so the customer portal can identify what was purchased even if that product is later archived.
+- Product details/media shown in the customer portal are explicitly projected through the existing Product and Media sources; no second media system was introduced.
+- The admin new-account workflow now requires selecting the purchased product.
+- No customer-facing write endpoint was added; customers remain read-only for financial records.
+- No override/duplicate authorization layer was added; existing customer portal routes were replaced directly.
+
+### Phase 7 verification limitation
+Source-level security review and GitHub diff inspection were completed. Runtime Node/Next/Mongo/browser authorization tests, including two-customer IDOR/concurrent-session tests, could not be run because this environment does not have the project's runtime/database credentials.
