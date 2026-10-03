@@ -44,7 +44,7 @@ const paymentSchema = new mongoose.Schema(
       default: 'confirmed',
     },
     reversedAt: Date,
-    reversedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'AdminUser' },
+    reversedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
     allocationDetails: { type: [allocationSchema], default: [] },
   },
   { timestamps: true }
