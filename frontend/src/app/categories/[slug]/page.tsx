@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import PublicHeader from '@/components/public/PublicHeader';
 import PublicFooter from '@/components/public/PublicFooter';
@@ -8,16 +8,22 @@ import ProductCard, { ProductCardData } from '@/components/public/ProductCard';
 const base=()=>process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/,'')||'';
 const slug=()=>process.env.NEXT_PUBLIC_BUSINESS_SLUG||'';
 async function business(){const b=base(),s=slug();if(!b||!s)return null;const r=await fetch(`${b}/api/admin/business/public/${encodeURIComponent(s)}`,{cache:'no-store'});return r.ok?(await r.json()).business:null;}
-async function category(value:string,businessId:string){const r=await fetch(`${base()}/api/categories/${encodeURIComponent(value)}?businessId=${encodeURIComponent(businessId)}`,{cache:'no-store'});return r.ok?(await r.json()).category:null;}
+async function category(value:string,businessId:string):Promise<{category?:any;redirect?:string}>{
+ const r=await fetch(`${base()}/api/categories/${encodeURIComponent(value)}?businessId=${encodeURIComponent(businessId)}`,{cache:'no-store',redirect:'manual'});
+ if(r.status===301)return{redirect:r.headers.get('location')||undefined};
+ if(!r.ok)return{};
+ return{category:(await r.json()).category};
+}
 async function products(categoryId:string,businessId:string){const r=await fetch(`${base()}/api/products?businessId=${encodeURIComponent(businessId)}&categoryId=${encodeURIComponent(categoryId)}&limit=50`,{cache:'no-store'});return r.ok?(await r.json()).products||[]:[];}
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const p = await params;
   const b = await business();
   if (!b) return {};
 
-  const c = await category(p.slug, b._id);
-  if (!c) return {};
+  const result = await category(p.slug, b._id);
+  if (!result?.category) return {};
 
+  const c = result.category;
   const title = c.seo?.title || c.name;
   const description = c.seo?.description || c.description || b.seo?.metaDescription || b.content?.description || '';
   return {
