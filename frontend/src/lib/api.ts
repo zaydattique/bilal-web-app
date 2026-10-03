@@ -22,6 +22,7 @@ async function request<T>(
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
+    credentials: 'include',
   });
 
   const data = await res.json().catch(() => ({}));
