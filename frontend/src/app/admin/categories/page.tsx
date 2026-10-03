@@ -22,7 +22,7 @@ export default function CategoriesPage() {
   useEffect(() => {
     if (!admin) return;
     api
-      .get<{ success: boolean; categories: Category[] }>('/api/categories?active=false')
+      .get<{ success: boolean; categories: Category[] }>('/api/categories?status=all&limit=50')
       .then((res) => setCategories(res.categories))
       .catch(console.error)
       .finally(() => setLoading(false));
