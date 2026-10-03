@@ -38,7 +38,7 @@ export default function PublicFooter() {
           <p className="text-xs font-semibold uppercase tracking-wider text-white/70">Visit</p>
           <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
             {contact.address && <li>{contact.address}</li>}
-            <li>{contact.city || 'Lahore'}, Pakistan</li>
+            {(contact.city || business?.contact?.country) && <li>{[contact.city, business?.contact?.country].filter(Boolean).join(', ')}</li>}
             {contact.phone && (
               <li>
                 <a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="hover:text-white">
