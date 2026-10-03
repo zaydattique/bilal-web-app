@@ -153,6 +153,21 @@ export default function HomePage({ initialBusiness, initialFeatured, initialCate
           </section>
         )}
 
+        <section aria-labelledby="business-answer" className="container-page py-10 sm:py-12">
+          <div className="card">
+            <p className="eyebrow">Business information</p>
+            <h2 id="business-answer" className="section-title mt-2">{business.businessName}</h2>
+            {business.content?.tagline&&<p className="mt-2 text-sm font-medium text-slate-700">{business.content.tagline}</p>}
+            {business.content?.description&&<p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">{business.content.description}</p>}
+            <dl className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {business.content?.serviceArea&&<div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Service area</dt><dd className="mt-1 text-sm text-slate-700">{business.content.serviceArea}</dd></div>}
+              {business.content?.hours&&<div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Hours</dt><dd className="mt-1 text-sm text-slate-700">{business.content.hours}</dd></div>}
+              {business.contact?.address&&<div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Address</dt><dd className="mt-1 text-sm text-slate-700">{business.contact.address}</dd></div>}
+              {phone&&<div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</dt><dd className="mt-1 text-sm text-slate-700">{phone}</dd></div>}
+            </dl>
+          </div>
+        </section>
+
         <section id="how-it-works" className="container-page py-14 sm:py-20">
           <div className="text-center">
             <p className="eyebrow">Simple process</p>
