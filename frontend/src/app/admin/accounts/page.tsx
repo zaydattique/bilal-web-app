@@ -17,20 +17,20 @@ interface Account {
 }
 
 export default function AccountsPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const { business } = useTheme();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const currency = business?.settings?.currencySymbol || 'PKR';
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
-      .get<{ success: boolean; accounts: Account[] }>('/api/admin/accounts', token)
+      .get<{ success: boolean; accounts: Account[] }>('/api/admin/accounts')
       .then((res) => setAccounts(res.accounts))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [admin]);
 
   if (loading) return <p className="text-sm text-gray-500">Loading…</p>;
 
