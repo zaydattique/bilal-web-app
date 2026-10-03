@@ -1,5 +1,11 @@
 import mongoose from 'mongoose';
 
+const mediaRef = {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Media',
+  default: null,
+};
+
 const businessSchema = new mongoose.Schema(
   {
     businessName: { type: String, required: true, trim: true },
@@ -10,14 +16,13 @@ const businessSchema = new mongoose.Schema(
       default: 'installment_sales',
     },
     logo: {
-      url: String,
-      altText: String,
-      variants: {
-        light: String,
-        dark: String,
-        icon: String,
-      },
+      primary: mediaRef,
+      light: mediaRef,
+      dark: mediaRef,
+      icon: mediaRef,
     },
+    favicon: mediaRef,
+    heroBanners: { type: [mediaRef], default: [] },
     branding: {
       primaryColor: { type: String, default: '#e74c3c' },
       secondaryColor: { type: String, default: '#3498db' },
@@ -65,7 +70,7 @@ const businessSchema = new mongoose.Schema(
       metaTitle: String,
       metaDescription: String,
       metaKeywords: [String],
-      ogImage: String,
+      ogImage: mediaRef,
     },
     customerCount: { type: Number, default: 0, min: 0 },
     customerSequence: { type: Number, default: 0, min: 0 },
