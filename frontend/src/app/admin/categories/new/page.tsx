@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+import MediaUpload from '@/components/admin/MediaUpload';
 
 export default function NewCategoryPage() {
   const { admin } = useAuth();
@@ -14,6 +15,7 @@ export default function NewCategoryPage() {
   const [form, setForm] = useState({
     name: '',
     description: '',
+    image: [] as string[],
     order: '0',
     isActive: true,
   });
@@ -29,6 +31,7 @@ export default function NewCategoryPage() {
         {
           name: form.name,
           description: form.description || undefined,
+          image: form.image[0] || null,
           order: Number(form.order) || 0,
           isActive: form.isActive,
         },
@@ -72,6 +75,19 @@ export default function NewCategoryPage() {
             className="input min-h-[80px]"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">Category image</label>
+          <p className="mb-2 text-xs text-gray-500">
+            Upload the category image through the admin media system.
+          </p>
+          <MediaUpload
+            purpose="category"
+            value={form.image}
+            onChange={(image) => setForm({ ...form, image })}
+            label={form.image.length ? 'Upload replacement' : 'Upload category image'}
           />
         </div>
 
