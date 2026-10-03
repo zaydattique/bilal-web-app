@@ -31,7 +31,6 @@ export default function AdminDashboard() {
     api
       .get<{ success: boolean; summary: Summary; recentPayments: any[]; upcomingDues: any[] }>(
         '/api/admin/dashboard/summary',
-        token
       )
       .then((res) => {
         setSummary(res.summary);
