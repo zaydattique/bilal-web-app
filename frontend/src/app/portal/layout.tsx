@@ -7,7 +7,7 @@ import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { useTheme } from '@/context/ThemeContext';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
-  const { customer, loading, token, logout } = useCustomerAuth();
+  const { customer, loading, logout } = useCustomerAuth();
   const { business } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
