@@ -1,73 +1,117 @@
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import Admin from '../models/Admin.js';
 import Customer from '../models/Customer.js';
 import Business from '../models/Business.js';
+import Session from '../models/Session.js';
 import { requireObjectId } from './security.js';
 
-const ADMIN_ISSUER = 'bilal-installment-platform';
-const CUSTOMER_ISSUER = 'bilal-installment-platform';
-
-const getBearerToken = (req) => {
-  const header = req.headers.authorization;
-  if (!header) return null;
-  const [scheme, token] = header.split(' ');
-  if (scheme !== 'Bearer' || !token) return null;
-  return token;
+const COOKIE_NAMES = {
+  admin: '__Host-admin_session',
+  customer: '__Host-customer_session',
 };
 
-const verifyToken = (token, secret, audience, issuer) =>
-  jwt.verify(token, secret, { audience, issuer });
+const LIMITS = {
+  admin: { idleMs: 30 * 60 * 1000, absoluteMs: 8 * 60 * 60 * 1000 },
+  customer: { idleMs: 30 * 60 * 1000, absoluteMs: 24 * 60 * 60 * 1000 },
+};
+
+const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
+
+const getCookie = (req, name) => {
+  const header = req.headers.cookie || '';
+  for (const part of header.split(';')) {
+    const index = part.indexOf('=');
+    if (index < 0) continue;
+    if (part.slice(0, index).trim() === name) return decodeURIComponent(part.slice(index + 1).trim());
+  }
+  return null;
+};
+
+const loadSession = async (req, userType) => {
+  const raw = getCookie(req, COOKIE_NAMES[userType]);
+  if (!raw || raw.length < 32 || raw.length > 128) return null;
+
+  const session = await Session.findOne({
+    userType,
+    tokenHash: hashToken(raw),
+    revokedAt: null,
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!session) return null;
+
+  const limits = LIMITS[userType];
+  const now = Date.now();
+  if (now - session.lastSeenAt.getTime() > limits.idleMs) {
+    session.revokedAt = new Date();
+    session.endedAt = new Date();
+    await session.save();
+    return null;
+  }
+
+  if (session.userAgent && session.userAgent !== (req.get('user-agent') || '')) {
+    session.revokedAt = new Date();
+    session.endedAt = new Date();
+    await session.save();
+    return null;
+  }
+
+  if (now - session.lastSeenAt.getTime() > 5 * 60 * 1000) {
+    session.lastSeenAt = new Date(now);
+    await session.save();
+  }
+
+  return session;
+};
 
 export const protectAdmin = async (req, res, next) => {
   try {
-    const token = getBearerToken(req);
-    if (!token) return res.status(401).json({ success: false, message: 'Not authorized' });
-
-    const decoded = verifyToken(token, process.env.JWT_ADMIN_SECRET, 'admin', ADMIN_ISSUER);
-    const adminId = requireObjectId(decoded.id, 'admin token id');
+    const session = await loadSession(req, 'admin');
+    if (!session) return res.status(401).json({ success: false, message: 'Not authorized' });
 
     const admin = await Admin.findOne({
-      _id: adminId,
+      _id: session.userId,
+      businessId: session.businessId,
       status: 'active',
       deletedAt: null,
     }).select('-password -twoFactorSecret');
 
     if (!admin) return res.status(401).json({ success: false, message: 'Admin not found or inactive' });
 
-    const business = await Business.findOne({ _id: admin.businessId, isActive: true }).select('_id');
+    const business = await Business.findOne({ _id: session.businessId, isActive: true }).select('_id');
     if (!business) return res.status(401).json({ success: false, message: 'Business is inactive or unavailable' });
 
     req.admin = admin;
-    req.businessId = admin.businessId;
+    req.businessId = session.businessId;
+    req.session = session;
     next();
   } catch {
-    return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+    return res.status(401).json({ success: false, message: 'Invalid or expired session' });
   }
 };
 
 export const protectCustomer = async (req, res, next) => {
   try {
-    const token = getBearerToken(req);
-    if (!token) return res.status(401).json({ success: false, message: 'Not authorized' });
-
-    const decoded = verifyToken(token, process.env.JWT_CUSTOMER_SECRET, 'customer', CUSTOMER_ISSUER);
-    const customerId = requireObjectId(decoded.id, 'customer token id');
+    const session = await loadSession(req, 'customer');
+    if (!session) return res.status(401).json({ success: false, message: 'Not authorized' });
 
     const customer = await Customer.findOne({
-      _id: customerId,
+      _id: session.userId,
+      businessId: session.businessId,
       status: 'active',
     });
 
     if (!customer) return res.status(401).json({ success: false, message: 'Customer not found or inactive' });
 
-    const business = await Business.findOne({ _id: customer.businessId, isActive: true }).select('_id');
+    const business = await Business.findOne({ _id: session.businessId, isActive: true }).select('_id');
     if (!business) return res.status(401).json({ success: false, message: 'Business is inactive or unavailable' });
 
     req.customer = customer;
-    req.businessId = customer.businessId;
+    req.businessId = session.businessId;
+    req.session = session;
     next();
   } catch {
-    return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+    return res.status(401).json({ success: false, message: 'Invalid or expired session' });
   }
 };
 
@@ -80,26 +124,26 @@ export const requireRole = (...roles) => (req, res, next) => {
 
 export const optionalAuth = async (req, res, next) => {
   try {
-    const token = getBearerToken(req);
-    if (!token) return next();
+    const session = await loadSession(req, 'admin');
+    if (!session) return next();
 
-    const decoded = verifyToken(token, process.env.JWT_ADMIN_SECRET, 'admin', ADMIN_ISSUER);
-    const adminId = requireObjectId(decoded.id, 'admin token id');
     const admin = await Admin.findOne({
-      _id: adminId,
+      _id: session.userId,
+      businessId: session.businessId,
       status: 'active',
       deletedAt: null,
     }).select('-password -twoFactorSecret');
 
     if (admin) {
-      const business = await Business.findOne({ _id: admin.businessId, isActive: true }).select('_id');
+      const business = await Business.findOne({ _id: session.businessId, isActive: true }).select('_id');
       if (business) {
         req.admin = admin;
-        req.businessId = admin.businessId;
+        req.businessId = session.businessId;
+        req.session = session;
       }
     }
   } catch {
-    // Public endpoints remain public when no valid optional admin token is supplied.
+    // Invalid optional sessions do not make public endpoints private.
   }
   next();
 };
