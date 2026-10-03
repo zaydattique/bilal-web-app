@@ -4,7 +4,7 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–3 are merged into `main`. Phase 4 business/branding CMS is implemented on the current branch and requires runtime verification before production.
+Phases 0–8 are implemented on the current branch. Phase 8 adds durable, consent-based storefront analytics and an authenticated admin traffic report. Runtime verification is still required before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
@@ -17,6 +17,18 @@ The repository is **not production-ready yet**. Later phases cover authenticatio
 - Added admin media upload, replace, list/filter, and delete workflows. Referenced media cannot be deleted until unassigned.
 - Added admin-managed primary/light/dark/icon logos, favicon, OG image, hero banners, product images, and category images.
 - Added an explicit legacy-media migration command instead of retaining old URL compatibility fields.
+
+### Phase 8 analytics completed
+
+- Added one canonical MongoDB `AnalyticsEvent` source for pageviews and CTA events, tenant-scoped by `businessId`.
+- Added consent-gated browser tracking with per-tab session IDs; private `/admin` and `/portal` routes are never tracked.
+- Added server-side HMAC hashing of session IDs; raw session IDs and raw IP addresses are never persisted.
+- Added server-side event validation, UUID event IDs, duplicate-event protection and a dedicated analytics rate limit.
+- Added 180-day TTL retention for raw analytics events and indexes for tenant/date/session aggregation.
+- Added authenticated traffic summaries for visits/sessions/pageviews, daily traffic, top pages, CTA activity, device class and optional city/region/country aggregation.
+- Bot-classified traffic is excluded from admin traffic metrics.
+- Geographic headers are ignored unless `ANALYTICS_GEO_HEADERS=true` and a supported trusted provider (`vercel` or `cloudflare`) is explicitly configured.
+- Added the admin Reports → Website Traffic dashboard without introducing a second analytics implementation.
 
 ### Phase 2 authentication and session security completed
 
@@ -68,6 +80,17 @@ Required environment values are deployment-specific. See `backend/.env.example` 
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PUBLIC_BUSINESS_SLUG=bilal-electronics
 ```
+
+### Analytics deployment
+
+Optional trusted proxy geo aggregation:
+
+```env
+ANALYTICS_GEO_HEADERS=false
+ANALYTICS_GEO_PROVIDER=vercel
+```
+
+Enable geo headers only when the configured provider is the trusted reverse proxy in front of the API. Express proxy configuration must match the real deployment topology; do not blindly trust forwarded headers from an internet-facing client. Analytics raw events are retained for 180 days and then removed automatically by MongoDB TTL.
 
 The business slug is configuration, not a code-level fallback.
 

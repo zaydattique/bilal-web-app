@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 
 const KEY = 'cookie_consent_v1';
+const CONSENT_EVENT = 'analytics-consent-changed';
 
 export default function CookieConsent() {
   const { business } = useTheme();
@@ -17,12 +18,13 @@ export default function CookieConsent() {
     }
   }, []);
 
-  const accept = () => {
+  const setConsent = (value: 'accepted' | 'declined') => {
     try {
-      localStorage.setItem(KEY, 'accepted');
+      localStorage.setItem(KEY, value);
     } catch {
-      /* ignore */
+      /* Analytics remains disabled when storage is unavailable. */
     }
+    window.dispatchEvent(new Event(CONSENT_EVENT));
     setVisible(false);
   };
 
@@ -32,14 +34,19 @@ export default function CookieConsent() {
     <div className="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-2xl backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-600">
-          We use cookies for basic analytics and to improve the storefront.
+          We use browser storage for basic analytics and to improve the storefront.
           {business?.policies?.privacyUrl && (
             <> See our <a href={business.policies.privacyUrl} className="font-medium underline">privacy policy</a>.</>
           )}
         </p>
-        <button type="button" className="btn-primary shrink-0" onClick={accept}>
-          Accept
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button type="button" className="btn-secondary" onClick={() => setConsent('declined')}>
+            Not now
+          </button>
+          <button type="button" className="btn-primary" onClick={() => setConsent('accepted')}>
+            Accept
+          </button>
+        </div>
       </div>
     </div>
   );

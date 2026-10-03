@@ -1,7 +1,7 @@
-# Project Completion Report — Through Phase 7
+# Project Completion Report — Through Phase 8
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 7 — Customer Portal & Authorization  
+**Current phase:** Phase 8 — Analytics  
 **Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
 ## Completed
@@ -89,3 +89,20 @@ Source-level review and GitHub diff inspection were completed. Runtime npm/Next 
 
 ### Phase 7 verification limitation
 Source-level security review and GitHub diff inspection were completed. Runtime Node/Next/Mongo/browser authorization tests, including two-customer IDOR/concurrent-session tests, could not be run because this environment does not have the project's runtime/database credentials.
+
+
+### Phase 8 — Analytics System
+- Replaced the previously orphaned frontend analytics collector with a real canonical backend analytics API at `/api/analytics`.
+- Added tenant-scoped MongoDB analytics events for pageviews and CTA activity with explicit field validation.
+- Browser tracking now requires affirmative analytics consent and creates a per-tab session identifier only after consent.
+- Admin and customer portal paths are excluded from storefront tracking.
+- Session identifiers are HMAC-hashed using the existing application encryption key; raw IP addresses are not stored.
+- Added unique event IDs for idempotent ingestion, dedicated rate limiting and bot classification.
+- Added 180-day TTL retention and aggregation indexes for scalable reporting.
+- Added authenticated traffic reporting for visits/sessions/pageviews, daily trends, top pages, CTA activity, device class and optional coarse geography.
+- Added trusted-provider-only geographic header handling; untrusted client-supplied location data is not accepted.
+- Added the Website Traffic report to the existing Reports hub and reused the existing API/authentication infrastructure.
+- No analytics compatibility alias, duplicate event model, or second source of truth was introduced.
+
+### Phase 8 verification limitation
+Source-level review and GitHub diff inspection were completed. Runtime Node/Next build, MongoDB TTL/index creation, real event ingestion, aggregation correctness and browser consent/navigation tests were not run because this environment does not have the project's runtime/database credentials. Production geo headers must also be configured only behind the actual trusted reverse proxy; Express documents that forwarded headers are unsafe to trust when proxy configuration does not match the deployment topology.
