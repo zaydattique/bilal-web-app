@@ -15,14 +15,20 @@ const getSiteUrl = (): string | null => {
 export default function robots(): MetadataRoute.Robots {
   const siteUrl = getSiteUrl();
 
+  if (!siteUrl) {
+    return {
+      rules: [{ userAgent: '*', disallow: ['/'] }],
+    };
+  }
+
   return {
     rules: [
       {
         userAgent: '*',
         allow: ['/'],
-        disallow: ['/admin', '/portal', '/api', '/_next'],
+        disallow: ['/admin', '/portal', '/api'],
       },
     ],
-    ...(siteUrl ? { sitemap: `${siteUrl}/sitemap.xml` } : {}),
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }
