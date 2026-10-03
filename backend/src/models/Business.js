@@ -96,6 +96,7 @@ const businessSchema = new mongoose.Schema(
     customerCount: { type: Number, default: 0, min: 0 },
     customerSequence: { type: Number, default: 0, min: 0 },
     accountSequence: { type: Number, default: 0, min: 0 },
+    accountCount: { type: Number, default: 0, min: 0, max: 200 },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
