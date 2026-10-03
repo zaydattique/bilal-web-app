@@ -12,7 +12,7 @@ interface Category {
 }
 
 export default function NewProductPage() {
-  const { token } = useAuth();
+  const { admin } = useAuth();
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
@@ -32,16 +32,16 @@ export default function NewProductPage() {
   });
 
   useEffect(() => {
-    if (!token) return;
+    if (!admin) return;
     api
-      .get<{ success: boolean; categories: Category[] }>('/api/categories', token)
+      .get<{ success: boolean; categories: Category[] }>('/api/categories')
       .then((res) => setCategories(res.categories))
       .catch(console.error);
-  }, [token]);
+  }, [admin]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!token) return;
+    if (!admin) return;
     setSaving(true);
     setError('');
     try {
