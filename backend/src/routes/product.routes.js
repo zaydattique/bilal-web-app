@@ -222,7 +222,7 @@ const buildProductData = async (body, businessId, existing = null) => {
   const data = {
     name: body.name !== undefined ? cleanString(body.name, 'name', 180, true) : existing?.name,
     slug: body.slug !== undefined || body.name !== undefined ? buildSlug(body.slug || body.name) : existing?.slug,
-    sku: body.sku !== undefined ? (body.sku ? cleanString(body.sku, 'sku', 80).toUpperCase() : null) : existing?.sku,
+    sku: body.sku !== undefined ? (body.sku ? cleanString(body.sku, 'sku', 80).toUpperCase() : undefined) : existing?.sku,
     brand: body.brand !== undefined ? (body.brand ? cleanString(body.brand, 'brand', 120) : null) : existing?.brand,
     shortDescription: body.shortDescription !== undefined ? cleanString(body.shortDescription, 'shortDescription', 500) : existing?.shortDescription,
     description: body.description !== undefined ? cleanString(body.description, 'description', 5000) : existing?.description,
