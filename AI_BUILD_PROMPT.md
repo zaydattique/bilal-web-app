@@ -81,8 +81,13 @@ Phase 3 now makes Media references canonical for business branding, product imag
 - Homepage featured-product navigation now includes a direct installment-plan CTA.
 - Existing Media, Business CMS, Product/Category CMS and Lead API remain the only sources of truth; no duplicate content or lead system was introduced.
 
-### Phase 13 — Admin Operations and Reporting
-- Finish KPI dashboards, reports, exports, audit views and operational tooling.
+### Phase 13 — Admin Operations and Reporting — completed
+- Expanded the existing Reports hub into the operational KPI surface using the existing dashboard summary source.
+- Added responsive report views for traffic, collections, customers, products, due lists and defaults/aging.
+- Added authenticated tenant-scoped CSV exports for customers, products, collections, due lists and aging.
+- Added an admin audit-log UI using the existing AuditLog model/API, with search and pagination; no second audit store was introduced.
+- Hardened audit date/search filtering and kept all reporting queries tenant-scoped.
+- Reused existing analytics, financial, product, customer, account, installment and audit sources rather than creating duplicate reporting models.
 
 ### Phase 14 — Security / Red-Team
 - Test authentication, authorization, tenant isolation, uploads, storage keys, rate limits, CSRF, XSS, SSRF, injection, IDOR and abuse cases.
