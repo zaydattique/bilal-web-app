@@ -10,11 +10,23 @@ router.get('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), as
     if (req.query.action) filter.action = req.query.action;
     if (req.query.entityType) filter.entityType = req.query.entityType;
     if (req.query.adminId) filter.adminId = req.query.adminId;
+    if (req.query.search) filter.$or = [
+      { action: { $regex: String(req.query.search).slice(0, 80), $options: 'i' } },
+      { entityType: { $regex: String(req.query.search).slice(0, 80), $options: 'i' } },
+    ];
 
     if (req.query.from || req.query.to) {
       filter.timestamp = {};
-      if (req.query.from) filter.timestamp.$gte = new Date(req.query.from);
-      if (req.query.to) filter.timestamp.$lte = new Date(req.query.to);
+      if (req.query.from) {
+        const from = new Date(req.query.from);
+        if (Number.isNaN(from.getTime())) return res.status(400).json({ success: false, message: 'Invalid from date' });
+        filter.timestamp.$gte = from;
+      }
+      if (req.query.to) {
+        const to = new Date(req.query.to);
+        if (Number.isNaN(to.getTime())) return res.status(400).json({ success: false, message: 'Invalid to date' });
+        filter.timestamp.$lte = to;
+      }
     }
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
