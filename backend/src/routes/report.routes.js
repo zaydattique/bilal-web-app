@@ -241,4 +241,101 @@ router.get('/defaults', protectAdmin, async (req, res, next) => {
   }
 });
 
+const REPORT_TYPES = new Set(['customers', 'products', 'collections', 'due-list', 'defaults']);
+
+const csvCell = (value) => {
+  const text = value == null ? '' : String(value);
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
+const sendCsv = (res, filename, headers, rows) => {
+  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(',')).join('\n');
+  res.set({
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': `attachment; filename="${filename}"`,
+    'Cache-Control': 'private, no-store',
+  });
+  return res.send(csv);
+};
+
+router.get('/export/:type', protectAdmin, async (req, res, next) => {
+  try {
+    const type = String(req.params.type || '');
+    if (!REPORT_TYPES.has(type)) return res.status(404).json({ success: false, message: 'Unknown report export' });
+
+    const businessId = oid(req.businessId);
+
+    if (type === 'customers') {
+      const rows = await Customer.find({ businessId }).sort({ createdAt: -1 })
+        .select('accountNumber firstName lastName phoneNumber status totalAccounts totalDue registeredDate').lean();
+      return sendCsv(res, 'customers.csv',
+        ['Account #', 'First name', 'Last name', 'Phone', 'Status', 'Accounts', 'Total due', 'Registered'],
+        rows.map((x) => [x.accountNumber, x.firstName, x.lastName, x.phoneNumber, x.status, x.totalAccounts, x.totalDue, x.registeredDate]));
+    }
+
+    if (type === 'products') {
+      const rows = await Product.find({ businessId }).populate('categoryId', 'name')
+        .sort({ name: 1 }).select('name sku cashPrice inventory status featured categoryId').lean();
+      return sendCsv(res, 'products.csv',
+        ['Name', 'SKU', 'Cash price', 'Inventory', 'Status', 'Featured', 'Category'],
+        rows.map((x) => [x.name, x.sku, x.cashPrice, x.inventory, x.status, x.featured, x.categoryId?.name || '']));
+    }
+
+    if (type === 'collections') {
+      const days = Math.min(90, Math.max(1, Number.parseInt(req.query.days, 10) || 30));
+      const since = new Date();
+      since.setDate(since.getDate() - days);
+      since.setHours(0, 0, 0, 0);
+      const rows = await Payment.find({ businessId, status: 'confirmed', paymentDate: { $gte: since } })
+        .sort({ paymentDate: 1 }).select('receiptNumber paymentAmount paymentMethod paymentDate customerId accountId')
+        .populate('customerId', 'firstName lastName').populate('accountId', 'accountNumber').lean();
+      return sendCsv(res, 'collections.csv',
+        ['Receipt', 'Amount', 'Method', 'Date', 'Customer', 'Account'],
+        rows.map((x) => [x.receiptNumber, x.paymentAmount, x.paymentMethod, x.paymentDate?.toISOString(), x.customerId ? `${x.customerId.firstName} ${x.customerId.lastName}` : '', x.accountId?.accountNumber || '']));
+    }
+
+    const now = new Date();
+    const filter = type === 'due-list' ? String(req.query.filter || 'all') : 'overdue';
+    if (!['all', 'overdue', 'upcoming'].includes(filter)) return res.status(400).json({ success: false, message: 'Invalid due-list filter' });
+    const match = { 'installments.status': { $in: ['pending', 'partial', 'overdue'] } };
+    if (filter === 'overdue') match['installments.dueDate'] = { $lt: now };
+    if (filter === 'upcoming') {
+      const next30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      match['installments.dueDate'] = { $gte: now, $lte: next30 };
+    }
+
+    const dues = await InstallmentPlan.aggregate([
+      { $match: { businessId } }, { $unwind: '$installments' }, { $match: match },
+      { $lookup: { from: 'accounts', localField: 'accountId', foreignField: '_id', as: 'account' } }, { $unwind: '$account' },
+      { $lookup: { from: 'customers', localField: 'account.customerId', foreignField: '_id', as: 'customer' } }, { $unwind: '$customer' },
+      { $project: {
+        dueDate: '$installments.dueDate', dueAmount: '$installments.dueAmount',
+        paidAmount: { $ifNull: ['$installments.paidAmount', 0] }, status: '$installments.status',
+        accountNumber: '$account.accountNumber', accountStatus: '$account.status',
+        customerName: { $concat: ['$customer.firstName', ' ', '$customer.lastName'] }, phone: '$customer.phoneNumber',
+      }},
+      { $addFields: { remaining: { $subtract: ['$dueAmount', '$paidAmount'] } } },
+      { $match: { remaining: { $gt: 0 }, accountStatus: 'active' } },
+      { $sort: { dueDate: 1 } }, { $limit: 5000 },
+    ]);
+
+    if (type === 'due-list') {
+      return sendCsv(res, 'due-list.csv',
+        ['Customer', 'Phone', 'Account', 'Due date', 'Due amount', 'Paid', 'Remaining', 'Status'],
+        dues.map((x) => [x.customerName, x.phone, x.accountNumber, x.dueDate?.toISOString(), x.dueAmount, x.paidAmount, x.remaining, x.status]));
+    }
+
+    const aging = dues.map((x) => {
+      const daysOverdue = Math.max(0, Math.floor((now - new Date(x.dueDate)) / 86400000));
+      const bucket = daysOverdue < 30 ? '0-30' : daysOverdue < 60 ? '30-60' : daysOverdue < 90 ? '60-90' : daysOverdue < 180 ? '90-180' : '180+';
+      return { ...x, daysOverdue, bucket };
+    });
+    return sendCsv(res, 'defaults-aging.csv',
+      ['Customer', 'Phone', 'Account', 'Due date', 'Remaining', 'Days overdue', 'Aging bucket', 'Status'],
+      aging.map((x) => [x.customerName, x.phone, x.accountNumber, x.dueDate?.toISOString(), x.remaining, x.daysOverdue, x.bucket, x.status]));
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
