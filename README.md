@@ -4,7 +4,7 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–12 are implemented on the current branch. Phase 12 completes the public storefront conversion flow with responsive category UX and a canonical installment inquiry path. Runtime verification is still required before production.
+Phases 0–13 are implemented on the current branch. Phase 13 completes the admin KPI, reporting, export, audit and operational reporting surfaces. Runtime verification is still required before production.
 
 The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
 
@@ -181,3 +181,11 @@ The seed data is for development/testing only. Production business information, 
 - Category pages now use CMS category media in a responsive header, show the published product count, provide direct product browsing and surface installment-plan CTAs.
 - Homepage featured-product navigation now includes a direct installment-plan CTA.
 - Existing Media references, Business CMS content, Product/Category CMS content and Lead API remain the source of truth.
+
+### Phase 13 Admin Operations & Reporting completed
+
+- Reports hub now surfaces current customer, account, product, receivable, collection and overdue KPIs.
+- Added report views for website traffic, collections, customers, products, due installments and defaults/aging.
+- Added authenticated tenant-scoped CSV exports for operational reports.
+- Added the existing AuditLog view to the admin navigation with search and pagination.
+- Reporting continues to use the existing analytics, financial, Product, Customer, Account, InstallmentPlan and AuditLog sources of truth.
