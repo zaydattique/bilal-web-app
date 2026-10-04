@@ -46,6 +46,44 @@ export const requirePositiveNumber = (value, fieldName) => {
   return number;
 };
 
+const COOKIE_SESSION_NAMES = ['__Host-admin_session', '__Host-customer_session', 'admin_session', 'customer_session'];
+
+const hasSessionCookie = (req) => {
+  const header = req.headers.cookie || '';
+  return COOKIE_SESSION_NAMES.some((name) =>
+    header.split(';').some((part) => part.trim().startsWith(name + '='))
+  );
+};
+
+const allowedOriginSet = () =>
+  (process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+export const requireSameOriginForCookieMutations = (req, res, next) => {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method) || !hasSessionCookie(req)) return next();
+
+  const allowedOrigins = allowedOriginSet();
+  const origin = req.get('origin');
+  const referer = req.get('referer');
+
+  let requestOrigin = origin;
+  if (!requestOrigin && referer) {
+    try {
+      requestOrigin = new URL(referer).origin;
+    } catch {
+      requestOrigin = null;
+    }
+  }
+
+  if (!requestOrigin || !allowedOrigins.includes(requestOrigin)) {
+    return res.status(403).json({ success: false, message: 'Cross-site request blocked' });
+  }
+
+  next();
+};
+
 export const requireNonNegativeNumber = (value, fieldName) => {
   const number = Number(value);
   if (!Number.isFinite(number) || number < 0) {
