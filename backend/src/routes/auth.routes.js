@@ -11,10 +11,9 @@ import { requireObjectId, assertAllowedFields, requireString } from '../middlewa
 
 const router = express.Router();
 
-const COOKIE_NAMES = {
-  admin: '__Host-admin_session',
-  customer: '__Host-customer_session',
-};
+const COOKIE_NAMES = process.env.NODE_ENV === 'production'
+  ? { admin: '__Host-admin_session', customer: '__Host-customer_session' }
+  : { admin: 'admin_session', customer: 'customer_session' };
 
 const SESSION_LIMITS = {
   admin: { idleMs: 30 * 60 * 1000, absoluteMs: 8 * 60 * 60 * 1000 },
