@@ -131,3 +131,12 @@ Phase 3 now makes Media references canonical for business branding, product imag
 Admin uploads go through `POST /api/admin/media`, are validated server-side, stored in S3-compatible durable object storage, and recorded in MongoDB. Media can be listed, replaced and deleted. Assigned media cannot be deleted. Product/category/business records store Media ObjectId references and public endpoints populate the safe public media fields.
 
 Production requires the variables in `backend/.env.example`. Do not add a local `/uploads` fallback.
+
+### Phase 15 — Automated Testing — completed
+- Added deterministic backend tests for request validation, ObjectId validation, CSRF/origin enforcement, payment idempotency/fingerprinting/date validation and persistent media configuration/URL safety.
+- Added frontend tests for installment calculations, interest handling, bounds and canonical tenure/currency formatting.
+- Replaced the backend placeholder test command with the Node test runner.
+- Updated the frontend test command to execute TypeScript tests through tsx.
+- Added GitHub Actions CI for backend and frontend test suites on pushes and pull requests to main.
+- Tests exercise existing source-of-truth helpers; no duplicate production logic was created.
+- Runtime execution in this environment remains unverified because dependencies are not installed and project runtime/database credentials are unavailable.

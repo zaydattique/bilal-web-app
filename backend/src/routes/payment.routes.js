@@ -19,13 +19,13 @@ const fail = (message, statusCode = 400) => {
   throw error;
 };
 
-const getIdempotencyKey = (value) => {
+export const getIdempotencyKey = (value) => {
   const key = String(value || '').trim();
   if (!/^[A-Za-z0-9._:-]{8,120}$/.test(key)) fail('A valid idempotencyKey is required');
   return key;
 };
 
-const fingerprint = (data) => crypto
+export const fingerprint = (data) => crypto
   .createHash('sha256')
   .update(JSON.stringify(data))
   .digest('hex');
@@ -34,13 +34,13 @@ const populatePayment = (query) => query
   .populate('customerId', 'firstName lastName phoneNumber')
   .populate('accountId', 'accountNumber');
 
-const assertSameRequest = (payment, requestFingerprint) => {
+export const assertSameRequest = (payment, requestFingerprint) => {
   if (payment.idempotencyFingerprint !== requestFingerprint) {
     fail('This idempotencyKey was already used for a different payment request', 409);
   }
 };
 
-const normalizePaymentDate = (value) => {
+export const normalizePaymentDate = (value) => {
   if (value === undefined || value === null || value === '') return new Date();
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) fail('paymentDate is invalid');
