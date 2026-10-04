@@ -258,6 +258,7 @@ router.put(
       if (!media) return res.status(404).json({ success: false, message: 'Media not found' });
 
       const changes = {};
+      let oldKey = null;
       if (req.file) {
         const meta = await parseFile(req.file);
         const digest = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
@@ -269,7 +270,7 @@ router.put(
           sizeBytes: req.file.size,
         });
 
-        const oldKey = media.storageKey;
+        oldKey = media.storageKey;
         media.storageKey = key;
         media.publicUrl = publicUrl;
         media.originalName = requireString(req.file.originalname || 'image', 'filename', { max: 255 });
