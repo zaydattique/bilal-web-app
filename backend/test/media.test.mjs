@@ -14,10 +14,17 @@ test('persistent media configuration fails closed when required settings are mis
 });
 
 test('public media URLs encode each storage-key segment safely', () => {
-  const previous = process.env.MEDIA_PUBLIC_BASE_URL;
+  const names = ['MEDIA_BUCKET', 'MEDIA_REGION', 'MEDIA_ACCESS_KEY_ID', 'MEDIA_SECRET_ACCESS_KEY', 'MEDIA_PUBLIC_BASE_URL'];
+  const previous = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  process.env.MEDIA_BUCKET = 'bucket';
+  process.env.MEDIA_REGION = 'auto';
+  process.env.MEDIA_ACCESS_KEY_ID = 'key';
+  process.env.MEDIA_SECRET_ACCESS_KEY = 'secret';
   process.env.MEDIA_PUBLIC_BASE_URL = 'https://cdn.example/assets///';
   const url = buildPublicUrl('business one/image 01.webp');
   assert.equal(url, 'https://cdn.example/assets/business%20one/image%2001.webp');
-  if (previous === undefined) delete process.env.MEDIA_PUBLIC_BASE_URL;
-  else process.env.MEDIA_PUBLIC_BASE_URL = previous;
+  for (const [name, value] of Object.entries(previous)) {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
 });
