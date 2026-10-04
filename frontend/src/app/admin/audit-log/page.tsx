@@ -43,7 +43,7 @@ export default function AuditLogPage() {
               <td className="px-4 py-3">{log.adminId ? `${log.adminId.firstName || ''} ${log.adminId.lastName || ''}`.trim() || log.adminId.email : '—'}</td>
               <td className="px-4 py-3 font-medium">{log.action}</td>
               <td className="px-4 py-3">{log.entityType || '—'}</td>
-              <td className="max-w-md truncate px-4 py-3 text-gray-500">{typeof log.details === 'string' ? log.details : JSON.stringify(log.details || {})}</td>
+              <td className="max-w-md truncate px-4 py-3 text-gray-500">{JSON.stringify(log.changes || {})}</td>
             </tr>)}
             {!data.logs?.length && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">No audit entries found.</td></tr>}
           </tbody>
