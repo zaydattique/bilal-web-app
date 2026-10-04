@@ -3,7 +3,7 @@ import AuditLog from '../models/AuditLog.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
-const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\\]\\]/g, '\\const router = express.Router();');
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
 
 router.get('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res, next) => {
   try {
