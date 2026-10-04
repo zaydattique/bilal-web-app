@@ -81,7 +81,7 @@ const parseFile = async (file) => {
     throw error;
   }
 
-  const metadata = await sharp(file.buffer, { limitInputPixels: 40_000_000 }).metadata();
+  const metadata = await sharp(file.buffer, { limitInputPixels: 25_000_000, failOn: 'error' }).metadata();
   if (!metadata.width || !metadata.height) {
     const error = new Error('Image dimensions could not be read');
     error.statusCode = 400;
@@ -280,12 +280,6 @@ router.put(
         media.height = meta.height;
         changes.replaced = true;
 
-        try {
-          await deleteObject(oldKey);
-        } catch {
-          try { await deleteObject(key); } catch {}
-          throw new Error('Previous media could not be removed; replacement cancelled');
-        }
       }
 
       if (req.body.altText !== undefined) {
@@ -293,7 +287,26 @@ router.put(
         changes.altText = media.altText;
       }
 
-      await media.save();
+      try {
+        await media.save();
+      } catch (error) {
+        if (changes.replaced) {
+          try { await deleteObject(media.storageKey); } catch {}
+        }
+        throw error;
+      }
+
+      if (changes.replaced) {
+        try {
+          await deleteObject(oldKey);
+        } catch (error) {
+          // The database now points to the new object. Leave the old object for a safe retry/cleanup.
+          error.statusCode = 502;
+          error.message = 'Replacement saved, but the previous media could not be removed';
+          throw error;
+        }
+      }
+
       await logAction({
         businessId: req.businessId,
         adminId: req.admin._id,
