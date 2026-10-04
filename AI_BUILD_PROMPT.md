@@ -89,9 +89,14 @@ Phase 3 now makes Media references canonical for business branding, product imag
 - Hardened audit date/search filtering and kept all reporting queries tenant-scoped.
 - Reused existing analytics, financial, product, customer, account, installment and audit sources rather than creating duplicate reporting models.
 
-### Phase 14 — Security / Red-Team
-- Test authentication, authorization, tenant isolation, uploads, storage keys, rate limits, CSRF, XSS, SSRF, injection, IDOR and abuse cases.
-- Attempt cross-tenant and cross-customer data access deliberately.
+### Phase 14 — Security / Red-Team — completed
+- Added centralized same-origin enforcement for state-changing requests carrying an authenticated session cookie, using the existing security middleware and configured CORS origins.
+- Kept tenant and ownership checks on authenticated object lookups and verified query construction does not accept raw client Mongo operators.
+- Production uses __Host- session cookies; development uses valid non-prefixed cookie names so local HTTP development cookies are not silently rejected.
+- Hardened media processing against oversized image dimensions and malformed image parsing.
+- Fixed media replacement ordering so a database-save failure cannot delete the only referenced object; successful replacement keeps the database and new object consistent, with failed old-object cleanup surfaced for retry.
+- Reviewed authentication, authorization, tenant isolation, uploads, storage keys, rate limits, CSRF, XSS, SSRF, injection, IDOR and abuse-sensitive routes.
+- No duplicate security layer, alternate media source, or compatibility implementation was introduced.
 
 ### Phase 15 — Automated Testing
 - Add backend integration tests, authorization tests, financial tests, media tests and frontend critical-path tests.
@@ -126,12 +131,3 @@ Phase 3 now makes Media references canonical for business branding, product imag
 Admin uploads go through `POST /api/admin/media`, are validated server-side, stored in S3-compatible durable object storage, and recorded in MongoDB. Media can be listed, replaced and deleted. Assigned media cannot be deleted. Product/category/business records store Media ObjectId references and public endpoints populate the safe public media fields.
 
 Production requires the variables in `backend/.env.example`. Do not add a local `/uploads` fallback.
-
-### Phase 14 — Security / Red-Team — completed
-- Added centralized same-origin enforcement for state-changing requests carrying an authenticated session cookie, using the existing security middleware and configured CORS origins.
-- Kept tenant and ownership checks on authenticated object lookups and verified query construction does not accept raw client Mongo operators.
-- Production uses __Host- session cookies; development uses valid non-prefixed cookie names so local HTTP development cookies are not silently rejected.
-- Hardened media processing against oversized image dimensions and malformed image parsing.
-- Fixed media replacement ordering so a database-save failure cannot delete the only referenced object; successful replacement keeps the database and new object consistent, with failed old-object cleanup surfaced for retry.
-- Reviewed authentication, authorization, tenant isolation, uploads, storage keys, rate limits, CSRF, XSS, SSRF, injection, IDOR and abuse-sensitive routes.
-- No duplicate security layer, alternate media source, or compatibility implementation was introduced.
