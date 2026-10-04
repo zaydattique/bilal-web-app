@@ -169,3 +169,9 @@ Source-level review and GitHub diff inspection were completed. Runtime Next.js b
 
 ### Phase 13 verification limitation
 GitHub source inspection and final file retrieval were completed. Runtime backend/frontend builds, authenticated browser verification, CSV download tests and MongoDB aggregation/index execution were not run because this environment does not have the project's runtime/database credentials. Those checks remain required in the later automated testing and production verification phases.
+
+### Phase 15 — Automated Testing
+- Added backend tests for validation/security helpers, payment idempotency/date rules and persistent media configuration/URL handling.
+- Added frontend tests for installment calculations and canonical tenure/currency behavior.
+- Added GitHub Actions CI for backend and frontend test suites on pushes and pull requests to main.
+- Runtime test execution remains unverified in this environment because dependencies/runtime credentials are unavailable.
