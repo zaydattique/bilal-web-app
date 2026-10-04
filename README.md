@@ -195,3 +195,9 @@ The seed data is for development/testing only. Production business information, 
 - Added authenticated tenant-scoped CSV exports for operational reports.
 - Added the existing AuditLog view to the admin navigation with search and pagination.
 - Reporting continues to use the existing analytics, financial, Product, Customer, Account, InstallmentPlan and AuditLog sources of truth.
+
+### Phase 15 Automated Testing completed
+- Added backend automated tests for validation/security helpers, payment idempotency/date rules and persistent media configuration/URL handling.
+- Added frontend automated tests for installment calculations and canonical tenure/currency behavior.
+- Added GitHub Actions CI to run both suites on pushes and pull requests to main.
+- The tests exercise existing production helpers instead of copying business logic into test-only implementations.
