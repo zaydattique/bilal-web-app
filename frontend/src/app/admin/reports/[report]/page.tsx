@@ -30,7 +30,7 @@ export default function ReportPage({ params }: { params: { report: string } }) {
 
   const path = useMemo(() => {
     if (params.report === 'traffic') return `/api/analytics/summary?days=${days}`;
-    if (params.exportType === 'collections') return `/api/admin/reports/collections?days=${days}`;
+    if (config.exportType === 'collections') return `/api/admin/reports/collections?days=${days}`;
     return `/api/admin/reports/${params.report}${params.report === 'due-list' ? `?filter=${filter}` : ''}`;
   }, [params.report, days, filter]);
 
