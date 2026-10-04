@@ -3,6 +3,7 @@ import AuditLog from '../models/AuditLog.js';
 import { protectAdmin, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\\]\\]/g, '\\const router = express.Router();');
 
 router.get('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), async (req, res, next) => {
   try {
@@ -11,7 +12,7 @@ router.get('/', protectAdmin, requireRole('super_admin', 'admin', 'manager'), as
     if (req.query.entityType) filter.entityType = req.query.entityType;
     if (req.query.adminId) filter.adminId = req.query.adminId;
     if (req.query.search) filter.$or = [
-      { action: { $regex: String(req.query.search).slice(0, 80), $options: 'i' } },
+      { action: { $regex: escapeRegex(String(req.query.search).slice(0, 80)), $options: 'i' } },
       { entityType: { $regex: String(req.query.search).slice(0, 80), $options: 'i' } },
     ];
 
