@@ -1,7 +1,7 @@
 # Project Completion Report — Through Phase 9
 
 **Repository:** `zaydattique/bilal-web-app`  
-**Current phase:** Phase 13 — Admin Operations & Reporting  
+**Current phase:** Phase 14 — Security / Red-Team  
 **Main baseline before Phase 4:** `9cece6a00d33ff761da831244911b447733f37ba`
 
 ## Completed
@@ -151,6 +151,13 @@ Source-level review, branch diff inspection and targeted route/config review wer
 ### Phase 12 verification limitation
 Source-level review and GitHub diff inspection were completed. Runtime Next.js build, browser responsive testing and live lead-submission testing were not run because this environment does not have the project's runtime/database credentials or dependency installation access. These remain part of the later automated testing and production verification phases.
 
+
+### Phase 14 — Security / Red-Team
+- Added centralized same-origin enforcement for authenticated cookie mutations.
+- Corrected environment-specific session cookie names so the production __Host- requirement is preserved without invalid development cookies.
+- Hardened media image parsing limits and replacement consistency.
+- Reviewed authentication, authorization, tenant isolation, uploads, storage keys, rate limiting, CSRF, XSS, SSRF, injection and IDOR-sensitive query paths.
+- No duplicate security or media source of truth was introduced.
 
 ### Phase 13 — Admin Operations & Reporting
 - Expanded the existing Reports hub with live KPI cards sourced from the existing dashboard summary endpoint.

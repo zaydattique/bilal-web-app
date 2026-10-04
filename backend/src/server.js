@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 import { assertStorageConfigured } from './utils/mediaStorage.js';
+import { requireSameOriginForCookieMutations } from './middleware/security.js';
 
 import authRoutes from './routes/auth.routes.js';
 import businessRoutes from './routes/business.routes.js';
@@ -78,6 +79,7 @@ app.use(
 
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: false, limit: '256kb' }));
+app.use('/api/', requireSameOriginForCookieMutations);
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 const limiter = rateLimit({

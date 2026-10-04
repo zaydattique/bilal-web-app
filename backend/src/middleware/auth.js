@@ -5,10 +5,9 @@ import Business from '../models/Business.js';
 import Session from '../models/Session.js';
 import { requireObjectId } from './security.js';
 
-const COOKIE_NAMES = {
-  admin: '__Host-admin_session',
-  customer: '__Host-customer_session',
-};
+const COOKIE_NAMES = process.env.NODE_ENV === 'production'
+  ? { admin: '__Host-admin_session', customer: '__Host-customer_session' }
+  : { admin: 'admin_session', customer: 'customer_session' };
 
 const LIMITS = {
   admin: { idleMs: 30 * 60 * 1000, absoluteMs: 8 * 60 * 60 * 1000 },

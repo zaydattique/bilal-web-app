@@ -182,6 +182,12 @@ The seed data is for development/testing only. Production business information, 
 - Homepage featured-product navigation now includes a direct installment-plan CTA.
 - Existing Media references, Business CMS content, Product/Category CMS content and Lead API remain the source of truth.
 
+### Phase 14 Security / Red-Team completed
+- Added same-origin protection for authenticated cookie mutations to prevent cross-site state-changing requests.
+- Production session cookies use __Host- names; development uses valid non-prefixed names so local HTTP development cookies are not silently rejected.
+- Hardened image parsing against malformed/oversized image inputs and fixed replacement ordering so media references cannot be left pointing at a deleted object after a database failure.
+- Reused the existing security/auth/media implementations; no duplicate security or storage layer was introduced.
+
 ### Phase 13 Admin Operations & Reporting completed
 
 - Reports hub now surfaces current customer, account, product, receivable, collection and overdue KPIs.
