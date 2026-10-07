@@ -21,7 +21,7 @@ test('idempotency keys cannot replay a different payment request', () => {
   assert.doesNotThrow(() => assertSameRequest({ idempotencyFingerprint: 'same' }, 'same'));
   assert.throws(
     () => assertSameRequest({ idempotencyFingerprint: 'other' }, 'same'),
-    /already been used for a different payment request/,
+    /already used for a different payment request/,
   );
 });
 

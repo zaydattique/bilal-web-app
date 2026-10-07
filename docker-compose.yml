@@ -1,5 +1,10 @@
 version: '3.8'
 
+# Local development stack. Production financial writes require a MongoDB replica set.
+# For transaction testing locally, prefer MongoDB Atlas free tier or:
+#   docker run --rm -d -p 27017:27017 --name mongo-rs mongo:6 --replSet rs0
+# then rs.initiate() in mongosh.
+
 services:
   mongodb:
     image: mongo:6
@@ -24,17 +29,34 @@ services:
       MONGODB_URI: mongodb://root:password@mongodb:27017/installment_platform?authSource=admin
       APP_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       CORS_ORIGIN: http://localhost:3000
+      TRUST_PROXY: "false"
+      # Optional for local media testing against MinIO / R2 / S3:
+      # MEDIA_BUCKET:
+      # MEDIA_REGION:
+      # MEDIA_ACCESS_KEY_ID:
+      # MEDIA_SECRET_ACCESS_KEY:
+      # MEDIA_PUBLIC_BASE_URL:
+      # MEDIA_ENDPOINT:
+      # MEDIA_FORCE_PATH_STYLE: "true"
     volumes:
       - ./backend:/app
       - /app/node_modules
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5000
+        NEXT_PUBLIC_BUSINESS_SLUG: bilal-electronics
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
     ports:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:5000
+      NEXT_PUBLIC_BUSINESS_SLUG: bilal-electronics
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      PORT: 3000
     depends_on:
       - backend
     volumes:
