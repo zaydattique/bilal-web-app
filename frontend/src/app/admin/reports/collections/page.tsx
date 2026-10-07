@@ -28,7 +28,7 @@ export default function CollectionsReport() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token, days]);
+  }, [admin, days]);
 
   const max = Math.max(...trend.map((t) => t.total), 1);
 

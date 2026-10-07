@@ -46,7 +46,7 @@ export default function DueListReport() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [token, filter]);
+  }, [admin, filter]);
 
   return (
     <div className="space-y-6">
