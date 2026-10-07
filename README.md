@@ -4,9 +4,20 @@ White-label installment-sales platform for a Lahore appliance business.
 
 ## Current state
 
-Phases 0–13 are implemented on the current branch. Phase 13 completes the admin KPI, reporting, export, audit and operational reporting surfaces. Runtime verification is still required before production.
+Phases 0–15 are implemented. **Phase 16 (in-repo build & deployment preparation) is complete** as of 2026-10-07: automated tests pass, Next.js production build succeeds, env contracts and CI builds are in place. See `PHASE16_DEPLOYMENT_VERIFICATION.md`.
 
-The repository is **not production-ready yet**. Later phases cover authentication/session hardening, persistent media, product/category CMS, financial integrity, customer isolation, analytics, SEO/AEO/GEO, structured data, security testing, automated tests, and deployment verification.
+**Live production verification is still pending** (real MongoDB replica set, object storage, hosted deploys). Phase 17 final acceptance audit remains after that. Do not treat the app as production-ready until those are signed off.
+
+The repository is **not live** and **not production-ready** until Phase 16 live checklist + Phase 17 are done.
+
+### Phase 16 summary
+
+- Fixed production-build blockers (ProductDetailClient syntax, api client path args, report auth deps, type mismatches, categories metadata).
+- Backend unit tests: 11/11 pass.
+- Frontend unit tests: 4/4 pass.
+- Frontend `next build` succeeds with production public env vars.
+- CI runs backend tests, frontend tests, frontend production build, and backend syntax checks.
+- Expanded `.env.example` files and docker-compose notes for replica set + media.
 
 ### Phase 3 persistent media and asset management completed
 
@@ -70,15 +81,16 @@ The repository is **not production-ready yet**. Later phases cover authenticatio
 
 ### Backend
 
-Required environment values are deployment-specific. See `backend/.env.example` if present.
+Required environment values are deployment-specific. See `backend/.env.example`.
 
 ### Frontend
 
-`frontend/.env.example` should define:
+`frontend/.env.example` defines:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 NEXT_PUBLIC_BUSINESS_SLUG=bilal-electronics
+NEXT_PUBLIC_SITE_URL=https://example.com
 ```
 
 ### Analytics deployment
@@ -90,13 +102,11 @@ ANALYTICS_GEO_HEADERS=false
 ANALYTICS_GEO_PROVIDER=vercel
 ```
 
-Enable geo headers only when the configured provider is the trusted reverse proxy in front of the API. Express proxy configuration must match the real deployment topology; do not blindly trust forwarded headers from an internet-facing client. Analytics raw events are retained for 180 days and then removed automatically by MongoDB TTL.
-
-The business slug is configuration, not a code-level fallback.
+Enable geo headers only when the configured provider is the trusted reverse proxy in front of the API.
 
 ### Persistent media storage
 
-Production must configure the S3-compatible storage variables in `backend/.env.example`. `MEDIA_PUBLIC_BASE_URL` must be an HTTPS CDN/public object URL in production. For an existing database that contains legacy URL-based media, back up MongoDB first and run `PHASE3_MEDIA_MIGRATION_CONFIRM=true npm run migrate:phase3-media` before serving the new schema. The migration intentionally clears legacy URL fields rather than retaining a second compatibility system; the replacement assets must then be uploaded through Admin → Media/Settings.
+Production must configure the S3-compatible storage variables in `backend/.env.example`. `MEDIA_PUBLIC_BASE_URL` must be an HTTPS CDN/public object URL in production. For an existing database that contains legacy URL-based media, back up MongoDB first and run `PHASE3_MEDIA_MIGRATION_CONFIRM=true npm run migrate:phase3-media` before serving the new schema.
 
 ## Development
 
@@ -122,82 +132,25 @@ The seed data is for development/testing only. Production business information, 
 
 ## Phase roadmap
 
-1. Phase 0 — codebase cleanup and baseline
-2. Phase 1 — backend foundation and multi-tenant security
-3. Phase 2 — authentication, sessions and account security
-4. Phase 3 — persistent media and asset management
-5. Phase 4 — business and branding CMS
-6. Phase 5 — product and category CMS
-7. Phase 6 — installment and financial integrity
-8. Phase 7 — customer portal and authorization
-9. Phase 8 — analytics
-10. Phase 9 — SEO foundation
-11. Phase 10 — AEO/GEO
-12. Phase 11 — structured data
-13. Phase 12 — public UX and conversion
-14. Phase 13 — admin operations and reporting
-15. Phase 14 — red-team/security hardening
-16. Phase 15 — automated tests
-17. Phase 16 — production/deployment verification
-18. Phase 17 — final acceptance audit
+1. Phase 0 — codebase cleanup and baseline ✅
+2. Phase 1 — backend foundation and multi-tenant security ✅
+3. Phase 2 — authentication, sessions and account security ✅
+4. Phase 3 — persistent media and asset management ✅
+5. Phase 4 — business and branding CMS ✅
+6. Phase 5 — product and category CMS ✅
+7. Phase 6 — installment and financial integrity ✅
+8. Phase 7 — customer portal and authorization ✅
+9. Phase 8 — analytics ✅
+10. Phase 9 — SEO foundation ✅
+11. Phase 10 — AEO/GEO ✅
+12. Phase 11 — structured data ✅
+13. Phase 12 — public UX and conversion ✅
+14. Phase 13 — admin operations and reporting ✅
+15. Phase 14 — red-team/security hardening ✅
+16. Phase 15 — automated tests ✅
+17. Phase 16 — production/deployment verification ✅ in-repo / ⏳ live env
+18. Phase 17 — final acceptance audit ⏳
 
+## License
 
-
-### Phase 11 Structured Data completed
-
-- Replaced the previous client-side generic Store JSON-LD with server-rendered, page-scoped structured data.
-- Public pages now emit current CMS-driven Organization/LocalBusiness, WebSite, WebPage, BreadcrumbList, Product and Offer entities where applicable.
-- Product Offer pricing uses the canonical current product price and business currency.
-- Structured data fails closed when the public site URL is missing/invalid or the business identity is unavailable.
-- No stale stock/availability claim is emitted.
-- No duplicate schema source, database model or parallel CMS layer was introduced.
-
-### Phase 10 AEO/GEO completed
-
-- Product pages expose the existing CMS AEO summary, buying intent and key facts as visible, semantic answer content.
-- Product pages expose existing CMS GEO intent and local notes as visible local-information content.
-- Category pages expose existing CMS AEO summary/key facts and GEO content.
-- The homepage exposes a CMS-sourced business information block containing only current business name, tagline, description, service area, hours, address and phone data.
-- No new AEO/GEO database model, duplicate content route, compatibility layer or hardcoded tenant claims was introduced.
-- Structured data remains intentionally deferred to Phase 11.
-
-### Phase 9 SEO foundation completed
-
-- Public homepage now fetches business, featured products and categories on the server so core storefront content exists in the initial HTML instead of depending on client-side data fetching.
-- Public `/products` now server-renders its initial published catalogue while preserving client-side search/filter interactions.
-- Product detail and category detail pages retain server rendering with CMS-driven metadata and canonical URLs.
-- Added Next.js file-based `/robots.txt` with public crawling allowed and private `/admin` and `/portal` paths blocked.
-- Added dynamic `/sitemap.xml` containing the homepage, catalogue/category indexes, and only published product/category URLs from the active business.
-- Sitemap uses record `updatedAt` values when available and paginates through published records rather than using a fixed product list.
-- Removed the remaining hardcoded `bilal-electronics` inquiry fallback; business identity now comes only from the CMS or explicit environment configuration.
-- Removed the fake `Installment Shop Lahore` and localhost metadata fallbacks from production metadata generation.
-- No duplicate SEO route, legacy `/catalog` route, or override metadata layer was introduced.
-
-### Phase 12 Public UX & Conversion completed
-
-- Added responsive public navigation for Home, Products, Categories and installment-plan inquiries on desktop and mobile.
-- Added the canonical public `/inquiry` page using the existing InquiryForm and existing Lead API; no duplicate lead implementation was introduced.
-- Inquiry forms now capture preferred tenure alongside down-payment preference and use mobile-friendly browser autofill/input hints.
-- Category pages now use CMS category media in a responsive header, show the published product count, provide direct product browsing and surface installment-plan CTAs.
-- Homepage featured-product navigation now includes a direct installment-plan CTA.
-- Existing Media references, Business CMS content, Product/Category CMS content and Lead API remain the source of truth.
-
-### Phase 14 Security / Red-Team completed
-- Added same-origin protection for authenticated cookie mutations to prevent cross-site state-changing requests.
-- Production session cookies use __Host- names; development uses valid non-prefixed names so local HTTP development cookies are not silently rejected.
-- Hardened image parsing against malformed/oversized image inputs and fixed replacement ordering so media references cannot be left pointing at a deleted object after a database failure.
-- Reused the existing security/auth/media implementations; no duplicate security or storage layer was introduced.
-
-### Phase 13 Admin Operations & Reporting completed
-
-- Reports hub now surfaces current customer, account, product, receivable, collection and overdue KPIs.
-- Added report views for website traffic, collections, customers, products, due installments and defaults/aging.
-- Added authenticated tenant-scoped CSV exports for operational reports.
-- Added the existing AuditLog view to the admin navigation with search and pagination.
-- Reporting continues to use the existing analytics, financial, Product, Customer, Account, InstallmentPlan and AuditLog sources of truth.
-
-### Phase 15 Automated Testing completed
-- Added backend automated tests for validation/security helpers, payment idempotency/date rules and persistent media configuration/URL handling.
-- Added frontend automated tests for installment calculations and canonical tenure/currency behavior.
-- Added GitHub Actions CI to run both suites on pushes and pull requests to main.
-- The tests exercise existing production helpers instead of copying business logic into test-only implementations.
+Private / Proprietary
