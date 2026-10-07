@@ -57,6 +57,8 @@ interface Business {
     maxInstallments?: number;
     minDownPayment?: number;
     showCustomerPortalLink?: boolean;
+    enableOnlinePayment?: boolean;
+    enableGuestCheckout?: boolean;
   };
   seo?: { metaTitle?: string; metaDescription?: string; metaKeywords?: string[]; ogImage?: MediaReference | null };
 }
