@@ -8,7 +8,11 @@ interface Business {
   businessName: string;
   businessSlug: string;
   settings?: { currencySymbol?: string; currencyCode?: string };
-  seo?: { metaTitle?: string };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: { publicUrl?: string; altText?: string } | null;
+  };
   contact?: { phone?: string; email?: string; address?: string; city?: string; country?: string };
   socialMedia?: { facebook?: string; instagram?: string; twitter?: string; whatsapp?: string };
   content?: { description?: string; serviceArea?: string; hours?: string };
